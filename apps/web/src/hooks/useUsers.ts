@@ -1,0 +1,179 @@
+import { getFromCookies } from "../store/cookies"
+import { useUserStore } from "../store/userStore"
+import { toQueryString } from "../utils/toQuery"
+import { callApi } from "./axios"
+import {
+  AdminListUsersRequest,
+  AdminListUsersResponse,
+  AdminGetUserResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  CheckTokenRequest,
+  CheckTokenResponse,
+  GetMeResponse,
+  LoginRequest,
+  LoginResponse,
+  PublicSearchUsersRequest,
+  PublicSearchUsersResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  UpdateUserActiveRequest,
+  UpdateUserActiveResponse,
+  UpdateAvatarRequest,
+  UpdateAvatarResponse,
+  UpdateUserRequest,
+  UpdateUserResponse,
+  ListPermissionGroupsResponse,
+  ListPermissionsResponse,
+  UpdateUserPermissionsRequest,
+  UpdateUserPermissionsResponse
+} from "./models"
+
+export const useUsers = () => {
+  const refreshToken = getFromCookies("refreshToken")
+  const { accessToken } = useUserStore()
+
+  const login = async (req: LoginRequest) => {
+    return callApi<LoginRequest, LoginResponse>({
+      method: "POST",
+      path: `/v1/users/login`,
+      data: req
+    })
+  }
+
+  const getNewToken = async () => {
+    return callApi<RefreshTokenRequest, RefreshTokenResponse>({
+      method: "POST",
+      path: `/v1/users/refresh-token`,
+      data: { refreshToken }
+    })
+  }
+
+  const checkToken = async () => {
+    return callApi<CheckTokenRequest, CheckTokenResponse>({
+      method: "POST",
+      path: `/v1/users/check-token`,
+      data: { accessToken }
+    })
+  }
+
+  const getMe = async () => {
+    return callApi<never, GetMeResponse>({
+      method: "GET",
+      path: `/v1/users/me`,
+      token: accessToken
+    })
+  }
+
+  const changePassword = async (req: ChangePasswordRequest) => {
+    return callApi<ChangePasswordRequest, ChangePasswordResponse>({
+      method: "PATCH",
+      path: `/v1/users/change-password`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const updateAvatar = async (req: UpdateAvatarRequest) => {
+    return callApi<UpdateAvatarRequest, UpdateAvatarResponse>({
+      method: "PATCH",
+      path: `/v1/users/avatar`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const updateUser = async (req: UpdateUserRequest) => {
+    return callApi<UpdateUserRequest, UpdateUserResponse>({
+      method: "PATCH",
+      path: `/v1/users/update`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const publicSearchUser = async (req: PublicSearchUsersRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<PublicSearchUsersRequest, PublicSearchUsersResponse>({
+      method: "GET",
+      path: `/v1/users/publicsearch?${query}`,
+      token: accessToken
+    })
+  }
+
+  const adminListUsers = async (req: AdminListUsersRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, AdminListUsersResponse>({
+      method: "GET",
+      path: `/v1/users/admin/list?${query}`,
+      token: accessToken
+    })
+  }
+
+  const updateUserActive = async (
+    userId: string,
+    req: UpdateUserActiveRequest
+  ) => {
+    return callApi<UpdateUserActiveRequest, UpdateUserActiveResponse>({
+      method: "PATCH",
+      path: `/v1/users/${userId}/active`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const adminGetUser = async (userId: string) => {
+    return callApi<never, AdminGetUserResponse>({
+      method: "GET",
+      path: `/v1/users/admin/${userId}`,
+      token: accessToken
+    })
+  }
+
+  const listPermissions = async () => {
+    return callApi<never, ListPermissionsResponse>({
+      method: "GET",
+      path: "/v1/users/permissions",
+      token: accessToken
+    })
+  }
+
+  const listPermissionGroups = async () => {
+    return callApi<never, ListPermissionGroupsResponse>({
+      method: "GET",
+      path: "/v1/users/permission-groups",
+      token: accessToken
+    })
+  }
+
+  const updateUserPermissions = async (
+    userId: string,
+    req: UpdateUserPermissionsRequest
+  ) => {
+    return callApi<UpdateUserPermissionsRequest, UpdateUserPermissionsResponse>({
+      method: "PATCH",
+      path: `/v1/users/${userId}/permissions`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  return {
+    login,
+    getNewToken,
+    checkToken,
+    getMe,
+    changePassword,
+    updateAvatar,
+    updateUser,
+    publicSearchUser,
+    adminListUsers,
+    adminGetUser,
+    updateUserActive,
+    listPermissions,
+    listPermissionGroups,
+    updateUserPermissions
+  }
+}

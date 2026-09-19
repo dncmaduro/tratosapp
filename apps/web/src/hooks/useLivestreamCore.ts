@@ -1,0 +1,210 @@
+import { useUserStore } from "../store/userStore"
+import { toQueryString } from "../utils/toQuery"
+import { callApi } from "./axios"
+import {
+  AddExternalSnapshotRequest,
+  AddExternalSnapshotResponse,
+  AddLivestreamSnapshotRequest,
+  AssignOtherSnapshotRequest,
+  AssignOtherSnapshotResponse,
+  CreateLivestreamRangeRequest,
+  DeleteLivestreamSnapshotRequest,
+  FixLivestreamRequest,
+  FixLivestreamResponse,
+  GetLivestreamByDateRangeRequest,
+  GetLivestreamByDateRangeResponse,
+  GetTopProductsLivestreamRequest,
+  GetTopProductsLivestreamResponse,
+  ReportLivestreamRequest,
+  ReportLivestreamResponse,
+  SetMetricsRequest,
+  SyncSnapshotRequest,
+  SyncSnapshotResponse,
+  UpdateLivestreamSnapshotRequest,
+  UpdateSnapshotAltRequest,
+  UpdateSnapshotAltResponse,
+  UpdateTimeDirectRequest,
+  UpdateTimeDirectResponse
+} from "./models"
+
+/**
+ * Hook for livestream core operations (ranges, snapshots, metrics)
+ * Endpoints: /v1/livestreamcore/*
+ */
+export const useLivestreamCore = () => {
+  const { accessToken } = useUserStore()
+
+  const createLivestreamRange = async (req: CreateLivestreamRangeRequest) => {
+    return callApi<CreateLivestreamRangeRequest, never>({
+      method: "POST",
+      path: `/v1/livestreamcore/range`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const addLivestreamSnapshot = async (
+    id: string,
+    req: AddLivestreamSnapshotRequest
+  ) => {
+    return callApi<AddLivestreamSnapshotRequest, never>({
+      method: "POST",
+      path: `/v1/livestreamcore/${id}/snapshots`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const updateLivestreamSnapshot = async (
+    id: string,
+    snapshotId: string,
+    req: UpdateLivestreamSnapshotRequest
+  ) => {
+    return callApi<UpdateLivestreamSnapshotRequest, never>({
+      method: "PUT",
+      path: `/v1/livestreamcore/${id}/snapshots/${snapshotId}`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const setMetrics = async (id: string, req: SetMetricsRequest) => {
+    return callApi<SetMetricsRequest, never>({
+      method: "POST",
+      path: `/v1/livestreamcore/${id}/metrics`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const getLivestreamsByDateRange = async (
+    req: GetLivestreamByDateRangeRequest
+  ) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetLivestreamByDateRangeResponse>({
+      method: "GET",
+      path: `/v1/livestreamcore/by-date-range?${query}`,
+      token: accessToken
+    })
+  }
+
+  const syncSnapshot = async (req: SyncSnapshotRequest) => {
+    return callApi<SyncSnapshotRequest, SyncSnapshotResponse>({
+      method: "POST",
+      path: `/v1/livestreamcore/sync-snapshots`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const reportLivestream = async (
+    livestreamId: string,
+    snapshotId: string,
+    req: ReportLivestreamRequest
+  ) => {
+    return callApi<ReportLivestreamRequest, ReportLivestreamResponse>({
+      method: "PATCH",
+      path: `/v1/livestreamcore/${livestreamId}/snapshots/${snapshotId}/report`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const updateSnapshotAltRequest = async (
+    livestreamId: string,
+    snapshotId: string,
+    req: UpdateSnapshotAltRequest
+  ) => {
+    return callApi<UpdateSnapshotAltRequest, UpdateSnapshotAltResponse>({
+      method: "PATCH",
+      path: `/v1/livestreamcore/${livestreamId}/snapshots/${snapshotId}/alt`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const fixLivestream = async (req: FixLivestreamRequest) => {
+    return callApi<FixLivestreamRequest, FixLivestreamResponse>({
+      method: "PATCH",
+      path: `/v1/livestreamcore/fix-by-date`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const deleteSnapshot = async (req: DeleteLivestreamSnapshotRequest) => {
+    return callApi<never, never>({
+      method: "DELETE",
+      path: `/v1/livestreamcore/${req.livestreamId}/snapshots/${req.snapshotId}`,
+      token: accessToken
+    })
+  }
+
+  const updateTimeDirect = async (
+    livestreamId: string,
+    snapshotId: string,
+    req: UpdateTimeDirectRequest
+  ) => {
+    return callApi<UpdateTimeDirectRequest, UpdateTimeDirectResponse>({
+      method: "PATCH",
+      path: `/v1/livestreamcore/${livestreamId}/snapshots/${snapshotId}/time-direct`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const addExternalSnapshot = async (
+    livestreamId: string,
+    req: AddExternalSnapshotRequest
+  ) => {
+    return callApi<AddExternalSnapshotRequest, AddExternalSnapshotResponse>({
+      method: "POST",
+      path: `/v1/livestreamcore/${livestreamId}/snapshots/external`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const assignOtherSnapshot = async (
+    livestreamId: string,
+    snapshotId: string,
+    req: AssignOtherSnapshotRequest
+  ) => {
+    return callApi<AssignOtherSnapshotRequest, AssignOtherSnapshotResponse>({
+      method: "PATCH",
+      path: `/v1/livestreamcore/${livestreamId}/snapshots/${snapshotId}/assign-other`,
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const getTopProductsLivestream = async (
+    req: GetTopProductsLivestreamRequest
+  ) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetTopProductsLivestreamResponse>({
+      method: "GET",
+      path: `/v1/livestreamcore/products-quantity-by-date-range?${query}`,
+      token: accessToken
+    })
+  }
+
+  return {
+    createLivestreamRange,
+    addLivestreamSnapshot,
+    updateLivestreamSnapshot,
+    setMetrics,
+    getLivestreamsByDateRange,
+    syncSnapshot,
+    reportLivestream,
+    updateSnapshotAltRequest,
+    fixLivestream,
+    deleteSnapshot,
+    updateTimeDirect,
+    addExternalSnapshot,
+    assignOtherSnapshot,
+    getTopProductsLivestream
+  }
+}

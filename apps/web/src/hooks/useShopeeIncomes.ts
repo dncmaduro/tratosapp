@@ -1,0 +1,79 @@
+import { format } from "date-fns"
+import { useUserStore } from "../store/userStore"
+import { toQueryString } from "../utils/toQuery"
+import { callApi } from "./axios"
+import {
+  DeleteShopeeIncomesRequest,
+  DeleteShopeeIncomesResponse,
+  InsertIncomeShopeeRequest,
+  SearchShopeeIncomeRequest,
+  SearchShopeeIncomeResponse
+} from "./models"
+
+export const useShopeeIncomes = () => {
+  const { accessToken } = useUserStore()
+
+  const normalizeOrderDateParam = (value?: string | Date) => {
+    if (!value) return undefined
+    if (typeof value === "string") return value
+    return format(value, "yyyy-MM-dd")
+  }
+
+  const insertIncomeShopee = async (
+    files: File[],
+    req: InsertIncomeShopeeRequest
+  ) => {
+    const formData = new FormData()
+    formData.append("file", files[0])
+
+    Object.entries(req).forEach(([key, value]) => {
+      if (typeof value !== "undefined" && value !== null)
+        formData.append(key, value as string)
+    })
+
+    return callApi<FormData, never>({
+      path: `/v1/shopeeincomes/upload`,
+      data: formData,
+      method: "POST",
+      token: accessToken,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
+  }
+
+  const searchShopeeIncome = async (req: SearchShopeeIncomeRequest) => {
+    const query = toQueryString({
+      ...req,
+      orderStartDate: normalizeOrderDateParam(req.orderStartDate),
+      orderEndDate: normalizeOrderDateParam(req.orderEndDate)
+    })
+
+    return callApi<never, SearchShopeeIncomeResponse>({
+      path: `/v1/shopeeincomes/search?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const deleteShopeeIncomes = async (req: DeleteShopeeIncomesRequest) => {
+    const query = toQueryString({
+      ...req,
+      orderDate: normalizeOrderDateParam(req.orderDate),
+      orderStartDate: normalizeOrderDateParam(req.orderStartDate),
+      orderEndDate: normalizeOrderDateParam(req.orderEndDate)
+    })
+
+    return callApi<never, DeleteShopeeIncomesResponse>({
+      path: `/v1/shopeeincomes?${query}`,
+      method: "DELETE",
+      token: accessToken
+    })
+  }
+
+  return {
+    insertIncomeShopee,
+    searchShopeeIncome,
+    deleteShopeeIncomes
+  }
+}

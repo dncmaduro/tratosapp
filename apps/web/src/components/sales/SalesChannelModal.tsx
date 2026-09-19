@@ -1,0 +1,215 @@
+import { useForm, Controller } from "react-hook-form"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { Button, MultiSelect, Select, Stack, TextInput } from "@mantine/core"
+import { modals } from "@mantine/modals"
+import { CToast } from "../common/CToast"
+import { useSalesChannels } from "../../hooks/useSalesChannels"
+import { useUsers } from "../../hooks/useUsers"
+import {
+  CreateSalesChannelRequest,
+  GetSalesChannelDetailResponse
+} from "../../hooks/models"
+
+interface Props {
+  channel?: GetSalesChannelDetailResponse
+  refetch: () => void
+}
+
+type FormData = CreateSalesChannelRequest
+
+export const SalesChannelModal = ({ channel, refetch }: Props) => {
+  const { createSalesChannel, updateSalesChannel } = useSalesChannels()
+  const { publicSearchUser } = useUsers()
+  const isEdit = !!channel
+
+  // Load users for assignee selection
+  const { data: usersData } = useQuery({
+    queryKey: ["users", "public", "sales-cs"],
+    queryFn: () =>
+      publicSearchUser({ page: 1, limit: 999, permission: "sales.assignee" })
+  })
+
+  const userOptions = [
+    { value: "", label: "Không có" },
+    ...(usersData?.data.data.map((user) => ({
+      value: user._id,
+      label: user.name ?? "Anonymous"
+    })) || [])
+  ]
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors }
+  } = useForm<FormData>({
+    defaultValues: {
+      channelName: channel?.channelName || "",
+      assignedTo: channel?.assignedTo?._id || "",
+      assignedTos:
+        channel?.assignedTos?.map((user) => user._id) ||
+        (channel?.assignedTo?._id ? [channel.assignedTo._id] : []),
+      phoneNumber: channel?.phoneNumber || "",
+      address: channel?.address || "",
+      avatarUrl: channel?.avatarUrl || ""
+    }
+  })
+
+  const assignedTo = watch("assignedTo")
+
+  const { mutate: create, isPending: creating } = useMutation({
+    mutationFn: createSalesChannel,
+    onSuccess: () => {
+      modals.closeAll()
+      CToast.success({ title: "Tạo kênh bán hàng thành công" })
+      refetch()
+    },
+    onError: () => {
+      CToast.error({ title: "Có lỗi xảy ra khi tạo kênh" })
+    }
+  })
+
+  const { mutate: update, isPending: updating } = useMutation({
+    mutationFn: (data: FormData) => updateSalesChannel(channel!._id, data),
+    onSuccess: () => {
+      modals.closeAll()
+      CToast.success({ title: "Cập nhật kênh bán hàng thành công" })
+      refetch()
+    },
+    onError: () => {
+      CToast.error({ title: "Có lỗi xảy ra khi cập nhật kênh" })
+    }
+  })
+
+  const onSubmit = (values: FormData) => {
+    const normalizedAssignedTos = Array.from(
+      new Set(
+        [values.assignedTo, ...(values.assignedTos || [])].filter(
+          (value): value is string => Boolean(value)
+        )
+      )
+    )
+
+    const payload: FormData = {
+      ...values,
+      assignedTo: values.assignedTo || undefined,
+      assignedTos: normalizedAssignedTos
+    }
+
+    if (isEdit) {
+      update(payload)
+    } else {
+      create(payload)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Stack gap="md" p="sm">
+        <TextInput
+          label="Tên kênh bán hàng"
+          placeholder="Nhập tên kênh"
+          required
+          size="md"
+          {...register("channelName", {
+            required: "Tên kênh là bắt buộc"
+          })}
+          error={errors.channelName?.message}
+        />
+
+        <Controller
+          name="assignedTo"
+          control={control}
+          render={({ field }) => (
+            <Select
+              label="Người phụ trách chính"
+              placeholder="Chọn người phụ trách chính"
+              data={userOptions}
+              value={field.value || ""}
+              onChange={(value) => field.onChange(value || "")}
+              searchable
+              clearable
+              size="md"
+            />
+          )}
+        />
+
+        <Controller
+          name="assignedTos"
+          control={control}
+          render={({ field }) => (
+            <MultiSelect
+              label="Danh sách phụ trách"
+              placeholder="Chọn một hoặc nhiều người phụ trách"
+              data={userOptions.filter((option) => option.value)}
+              value={field.value || []}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              name={field.name}
+              ref={field.ref}
+              searchable
+              clearable
+              size="md"
+              description={
+                assignedTo
+                  ? "Người phụ trách chính sẽ tự được thêm vào danh sách này."
+                  : undefined
+              }
+            />
+          )}
+        />
+
+        <Controller
+          name="phoneNumber"
+          control={control}
+          render={({ field }) => (
+            <TextInput
+              label="Số điện thoại"
+              placeholder="Nhập số điện thoại"
+              {...field}
+              size="md"
+              type="tel"
+            />
+          )}
+        />
+
+        <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <TextInput
+              label="Địa chỉ"
+              placeholder="Nhập địa chỉ"
+              {...field}
+              size="md"
+            />
+          )}
+        />
+
+        <Controller
+          name="avatarUrl"
+          control={control}
+          render={({ field }) => (
+            <TextInput
+              label="URL ảnh đại diện"
+              placeholder="Nhập URL ảnh đại diện"
+              {...field}
+              size="md"
+            />
+          )}
+        />
+
+        <Button
+          type="submit"
+          fullWidth
+          size="md"
+          radius="xl"
+          loading={creating || updating}
+        >
+          {isEdit ? "Cập nhật" : "Tạo mới"}
+        </Button>
+      </Stack>
+    </form>
+  )
+}

@@ -1,0 +1,207 @@
+import { useLivestreamChannels } from "../../hooks/useLivestreamChannels"
+import { useMutation } from "@tanstack/react-query"
+import { Stack, Button, Group, Select, TextInput } from "@mantine/core"
+import { useForm, Controller } from "react-hook-form"
+import { modals } from "@mantine/modals"
+import { CToast } from "../common/CToast"
+import {
+  CreateLivestreamChannelRequest,
+  UpdateLivestreamChannelRequest
+} from "../../hooks/models"
+
+interface Props {
+  channel?: {
+    _id: string
+    name: string
+    username: string
+    usernames: string[]
+    link: string
+  }
+  refetch: () => void
+}
+
+interface FormData {
+  name: string
+  usernamesText: string
+  link: string
+  platform: "tiktokshop" | "shopee"
+}
+
+export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
+  const { createLivestreamChannel, updateLivestreamChannel } =
+    useLivestreamChannels()
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<FormData>({
+    defaultValues: {
+      name: channel?.name ?? "",
+      usernamesText: channel?.usernames?.join(", ") ?? "",
+      link: channel?.link ?? "",
+      platform: "tiktokshop"
+    }
+  })
+
+  const { mutate: createChannel, isPending: creating } = useMutation({
+    mutationFn: (req: CreateLivestreamChannelRequest) =>
+      createLivestreamChannel(req),
+    onSuccess: () => {
+      modals.closeAll()
+      CToast.success({ title: "Tạo kênh thành công" })
+      refetch()
+    },
+    onError: () => {
+      CToast.error({ title: "Có lỗi xảy ra khi tạo kênh" })
+    }
+  })
+
+  const { mutate: updateChannel, isPending: updating } = useMutation({
+    mutationFn: ({
+      id,
+      req
+    }: {
+      id: string
+      req: UpdateLivestreamChannelRequest
+    }) => updateLivestreamChannel(id, req),
+    onSuccess: () => {
+      modals.closeAll()
+      CToast.success({ title: "Cập nhật kênh thành công" })
+      refetch()
+    },
+    onError: () => {
+      CToast.error({ title: "Có lỗi xảy ra khi cập nhật kênh" })
+    }
+  })
+
+  const onSubmit = (values: FormData) => {
+    const usernames = values.usernamesText
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+    const legacyUsername = channel?.username || usernames[0] || ""
+    const payload = {
+      name: values.name,
+      link: values.link,
+      usernames,
+      username: legacyUsername
+    }
+    if (channel) {
+      // Update existing channel
+      updateChannel({
+        id: channel._id,
+        req: payload
+      })
+    } else {
+      // Create new channel
+      createChannel({ ...payload, platform: values.platform })
+    }
+  }
+
+  const isPending = creating || updating
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Stack gap={18} w="100%" p={2}>
+        <Controller
+          name="name"
+          control={control}
+          rules={{ required: "Vui lòng nhập tên kênh" }}
+          render={({ field }) => (
+            <TextInput
+              label="Tên kênh"
+              placeholder="Nhập tên kênh livestream"
+              value={field.value}
+              onChange={field.onChange}
+              required
+              disabled={isPending}
+              size="md"
+              error={errors.name?.message}
+            />
+          )}
+        />
+
+        <Controller
+          name="usernamesText"
+          control={control}
+          rules={{ required: "Vui lòng nhập ít nhất một username" }}
+          render={({ field }) => (
+            <TextInput
+              label="Usernames"
+              placeholder="username1, username2"
+              value={field.value}
+              onChange={field.onChange}
+              required
+              disabled={isPending}
+              size="md"
+              error={errors.usernamesText?.message}
+              leftSection="@"
+            />
+          )}
+        />
+
+        <Controller
+          name="link"
+          control={control}
+          rules={{
+            required: "Vui lòng nhập link kênh",
+            pattern: {
+              value: /^https?:\/\/.+/,
+              message: "Link phải bắt đầu bằng http:// hoặc https://"
+            }
+          }}
+          render={({ field }) => (
+            <TextInput
+              label="Link kênh"
+              placeholder="https://..."
+              value={field.value}
+              onChange={field.onChange}
+              required
+              disabled={isPending}
+              size="md"
+              error={errors.link?.message}
+            />
+          )}
+        />
+
+        {!channel && (
+          <Controller
+            name="platform"
+            control={control}
+            rules={{ required: "Vui lòng chọn nền tảng" }}
+            render={({ field }) => (
+              <Select
+                label="Nền tảng"
+                placeholder="Chọn nền tảng livestream"
+                data={[
+                  { value: "tiktokshop", label: "TikTok Shop" },
+                  { value: "shopee", label: "Shopee" }
+                ]}
+                value={field.value}
+                onChange={field.onChange}
+                required
+                disabled={isPending}
+                size="md"
+                error={errors.platform?.message}
+              />
+            )}
+          />
+        )}
+
+        <Group justify="flex-end" mt="md">
+          <Button
+            variant="light"
+            onClick={() => modals.closeAll()}
+            disabled={isPending}
+          >
+            Hủy
+          </Button>
+          <Button type="submit" loading={isPending} disabled={isPending}>
+            {channel ? "Cập nhật" : "Tạo kênh"}
+          </Button>
+        </Group>
+      </Stack>
+    </form>
+  )
+}

@@ -1,0 +1,6385 @@
+/** @interface */
+export interface CreateItemRequest {
+  name: string
+  note?: string
+  variants: string[]
+}
+
+/** @interface */
+export interface CreateStorageItemRequest {
+  code: string
+  name: string
+  quantityPerBox: number
+  receivedQuantity: {
+    quantity: number
+    real: number
+  }
+  deliveredQuantity: {
+    quantity: number
+    real: number
+  }
+  restQuantity: {
+    quantity: number
+    real: number
+  }
+  note?: string
+}
+
+/** @interface */
+export interface ItemResponse {
+  _id: string
+  name: string
+  note?: string
+  variants: string[]
+}
+
+/** @interface */
+export interface SearchStorageItemsRequest {
+  searchText?: string
+  deleted: boolean
+}
+
+/** @interface */
+export interface SearchStorageItemResponse {
+  _id: string
+  name: string
+  quantityPerBox: number
+  receivedQuantity: {
+    quantity: number
+    real: number
+  }
+  deliveredQuantity: {
+    quantity: number
+    real: number
+  }
+  restQuantity: {
+    quantity: number
+    real: number
+  }
+  deletedAt?: string
+  code: string
+  note?: string
+}
+
+/** @interface */
+export interface RestoreStorageItemRequest {
+  id: string
+}
+
+/** @interface */
+export interface CreateProductRequest {
+  name: string
+  items: {
+    _id: string
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface ProductResponse {
+  _id: string
+  name: string
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  deletedAt?: string
+}
+
+/** @interface */
+export interface SearchProductsRequest {
+  searchText?: string
+  deleted?: boolean
+}
+
+/** @interface */
+export interface CreateComboRequest {
+  name: string
+  products: {
+    _id: string
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface ComboResponse {
+  _id: string
+  name: string
+  products: {
+    _id: string
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface CalCombosRequest {
+  products: {
+    _id: string
+    quantity: number
+  }[]
+  quantity: number
+}
+
+/** @interface */
+export interface CalItemsResponse {
+  items: {
+    _id: string
+    name: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+      _id: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface CalItemsRequest {
+  products: {
+    _id: string
+    quantity: number
+    customers: number
+  }[]
+}
+
+/** @interface */
+export interface CalFileRequest {
+  file: Express.Multer.File
+}
+
+/** @interface */
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+/** @interface */
+export interface LoginResponse {
+  accessToken: string
+  refreshToken: string
+}
+
+/** @interface */
+export interface RefreshTokenRequest {
+  refreshToken: string
+}
+
+/** @interface */
+export interface RefreshTokenResponse {
+  accessToken: string
+  refreshToken: string
+}
+
+/** @interface */
+export interface CheckTokenRequest {
+  accessToken: string
+}
+
+/** @interface */
+export interface AskAiRequest {
+  question: string
+  conversationId?: string
+  module?: string
+}
+
+/** @interface */
+export interface AskAiResponse {
+  answer: string
+  conversationId: string
+}
+
+/** @interface */
+export interface AiUsageResponse {
+  date: string
+  count: number
+  limit: number
+  remaining: number
+}
+
+/** @interface */
+export interface ListAiConversationsRequest {
+  limit?: number
+  module?: string
+}
+
+/** @interface */
+export interface AiConversationItem {
+  conversationId: string
+  title: string
+  updatedAt: string
+  expireAt: string
+  lastMessage?: string
+}
+
+/** @interface */
+export interface ListAiConversationsResponse {
+  data: AiConversationItem[]
+}
+
+/** @interface */
+export interface GetAiConversationHistoryRequest {
+  conversationId?: string
+  limit?: number
+  cursor?: number
+  module?: string
+}
+
+/** @interface */
+export interface GetAiConversationHistoryResponse {
+  conversationId: string
+  messages: {
+    role: "user" | "assistant"
+    content: string
+    createdAt: string
+  }[]
+  nextCursor: number | null
+  total: number
+}
+
+/** @interface */
+export interface DeleteAiConversationRequest {
+  conversationId?: string
+  module?: string
+}
+
+/** @interface */
+export interface ClearAiConversationHistoryRequest {
+  conversationId?: string
+  module?: string
+}
+
+/** @interface */
+export interface CreateAiFeedbackRequest {
+  conversationId: string
+  description: string
+  expected?: string
+  actual?: string
+  rating?: number
+}
+
+/** @interface */
+export interface CreateAiFeedbackResponse {
+  feedbackId: string
+  conversationId: string
+  createdAt: string
+}
+
+/** @interface */
+export interface ListAiFeedbackRequest {
+  conversationId?: string
+  limit?: number
+}
+
+/** @interface */
+export interface ListAiFeedbackResponse {
+  data: Array<{
+    feedbackId: string
+    conversationId: string
+    description: string
+    expected?: string
+    actual?: string
+    rating?: number
+    createdAt: string
+  }>
+}
+
+/** @interface */
+export interface CheckTokenResponse {
+  valid: boolean
+}
+
+/** @deprecated */
+/** @interface */
+export interface CreateLogRequest {
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface GetLogsRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface Log {
+  date: string
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+      _id: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetLogsResponse {
+  data: Log[]
+  total: number
+}
+
+/** @interface */
+export interface GetLogsRangeRequest {
+  startDate: string
+  endDate: string
+}
+
+/** @interface */
+export interface GetLogsRangeResponse {
+  startDate: string
+  endDate: string
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetMeResponse {
+  username: string
+  name: string
+  permissions: string[]
+  avatarUrl?: string
+  _id: string
+}
+
+/** @interface */
+export interface GetStorageLogsRequest {
+  page: number
+  limit: number
+  startDate?: string
+  endDate?: string
+  status?: string
+  tag?: string
+  itemId?: string
+  channelId?: string
+}
+
+/** @interface */
+export interface GetStorageLogsResponse {
+  data: {
+    _id: string
+    item: {
+      _id: string
+      quantity: number
+    }
+    items: {
+      _id: string
+      quantity: number
+    }[]
+    note?: string
+    status: string
+    date: Date
+    tag?: string
+    deliveredRequestId?: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface CreateStorageLogRequest {
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  note?: string
+  status: string
+  date: Date
+  tag?: string
+}
+
+/** @interface */
+export interface CreateStorageLogResponse {
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  note?: string
+  status: string
+  date: Date
+  tag?: string
+  _id: string
+}
+
+/** @interface */
+export interface GetDeliveredSummaryRequest {
+  startDate: Date
+  endDate: Date
+}
+
+/** @interface */
+export interface GetDeliveredSummaryResponse {
+  startDate: string
+  endDate: string
+  totalDeliveredQuantity: number
+  days: number
+  averagePerDay: number
+  items: {
+    itemId: string
+    totalDeliveredQuantity: number
+    averagePerDay: number
+    item?: { _id: string; code: string; name: string; quantityPerBox: number }
+  }[]
+}
+
+/** @interface */
+export interface UpdateStorageLogRequest {
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  note?: string
+  status: string
+  date: Date
+  tag?: string
+}
+
+/** @interface */
+export interface UpdateStorageLogResponse {
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  note?: string
+  status: string
+  date: Date
+  tag?: string
+  _id: string
+}
+
+/** @interface */
+export interface GetStorageLogsByMonthRequest {
+  year: number
+  month: number
+  tag?: string
+}
+
+/** @interface */
+export interface GetStorageLogsByMonthResponse {
+  items: {
+    _id: string
+    name: string
+    deliveredQuantity: number
+    receivedQuantity: number
+  }[]
+  byDay: {
+    day: number
+    items: {
+      _id: string
+      name: string
+      deliveredQuantity: number
+      receivedQuantity: number
+    }[]
+  }[]
+}
+
+/** @interface */
+export interface ChangePasswordRequest {
+  oldPassword: string
+  newPassword: string
+}
+
+/** @interface */
+export interface ChangePasswordResponse {
+  message: string
+}
+
+/** @interface */
+export interface UpdateAvatarRequest {
+  avatarUrl: string
+}
+
+/** @interface */
+export interface UpdateAvatarResponse {
+  message: string
+}
+
+/** @interface */
+export interface UpdateUserRequest {
+  name: string
+}
+
+/** @interface */
+export interface UpdateUserResponse {
+  message: string
+}
+
+/** @interface */
+export interface AdminListUsersRequest {
+  searchText?: string
+  permission?: string
+  status?: "all" | "active" | "inactive"
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface AdminListUsersResponse {
+  data: {
+    _id: string
+    username: string
+    name: string
+    avatarUrl?: string
+    active: boolean
+    permissions: string[]
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface UpdateUserActiveRequest {
+  active: boolean
+}
+
+/** @interface */
+export interface UpdateUserActiveResponse {
+  message: string
+  data: {
+    _id: string
+    active: boolean
+  }
+}
+
+/** @interface */
+export interface AdminGetUserResponse {
+  _id: string
+  username: string
+  name: string
+  permissions: string[]
+  avatarUrl?: string
+  active: boolean
+}
+
+/** @interface */
+export interface PermissionResponse {
+  key: string
+  label: string
+  description?: string
+  module?: string
+}
+
+/** @interface */
+export interface PermissionGroupResponse {
+  key: string
+  label: string
+  permissionKeys: string[]
+  kind?: string
+}
+
+/** @interface */
+export interface ListPermissionsResponse {
+  data: PermissionResponse[]
+}
+
+/** @interface */
+export interface ListPermissionGroupsResponse {
+  data: PermissionGroupResponse[]
+}
+
+/** @interface */
+export interface UpdateUserPermissionsRequest {
+  permissions: string[]
+}
+
+/** @interface */
+export interface UpdateUserPermissionsResponse {
+  message: string
+  data: { _id: string; permissions: string[] }
+}
+
+/** @interface */
+export interface CreateDeliveredRequestRequest {
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  channelId?: string
+  note?: string
+  date: Date
+}
+
+/** @interface */
+export interface CreateDeliveredRequestResponse {
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  channelId?: string
+  channel?: {
+    _id: string
+    name: string
+    username: string
+    usernames: string[]
+    link: string
+    platform: string
+  }
+  note?: string
+  accepted?: boolean
+  updatedAt?: Date
+  comments?: {
+    userId: string
+    name: string
+    text: string
+    date: Date
+  }[]
+}
+
+/** @interface */
+export interface CreateDeliveredRequestCommentRequest {
+  requestId: string
+  comment: {
+    userId: string
+    name: string
+    text: string
+    date: Date
+  }
+}
+
+/** @interface */
+export interface CreateDeliveredRequestCommentResponse {
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  channelId?: string
+  channel?: {
+    _id: string
+    name: string
+    username: string
+    usernames: string[]
+    link: string
+    platform: string
+  }
+  note?: string
+  accepted?: boolean
+  updatedAt?: Date
+  comments?: {
+    userId: string
+    name: string
+    text: string
+    date: Date
+  }[]
+}
+
+/** @interface */
+export interface AcceptDeliveredRequestRequest {
+  requestId: string
+}
+
+/** @interface */
+export interface AcceptDeliveredRequestResponse {
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  channelId?: string
+  channel?: {
+    _id: string
+    name: string
+    username: string
+    usernames: string[]
+    link: string
+    platform: string
+  }
+  note?: string
+  accepted?: boolean
+  updatedAt?: Date
+  comments?: {
+    userId: string
+    name: string
+    text: string
+    date: Date
+  }[]
+}
+
+/** @interface */
+export interface SearchDeliveredRequestsRequest {
+  startDate?: string
+  endDate?: string
+  channelId?: string
+  page?: number
+  limit?: number
+}
+
+/** @interface */
+export interface SearchDeliveredRequestsResponse {
+  requests: {
+    _id: string
+    date: Date
+    items: {
+      _id: string
+      quantity: number
+    }[]
+    channelId?: string
+    channel?: {
+      _id: string
+      name: string
+      username: string
+      usernames: string[]
+      link: string
+      platform: string
+    }
+    note?: string
+    accepted?: boolean
+    updatedAt?: Date
+    comments?: {
+      userId: string
+      name: string
+      text: string
+      date: Date
+    }[]
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetDeliveredRequestRequest {
+  requestId: string
+}
+
+/** @interface */
+export interface GetDeliveredRequestResponse {
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+  }[]
+  channelId?: string
+  channel?: {
+    _id: string
+    name: string
+    username: string
+    usernames: string[]
+    link: string
+    platform: string
+  }
+  note?: string
+  accepted?: boolean
+  updatedAt?: Date
+  comments?: {
+    userId: string
+    name: string
+    text: string
+    date: Date
+  }[]
+}
+
+/** @interface */
+export interface Notification {
+  _id: string
+  title: string
+  content: string
+  createdAt: string
+  read: boolean
+  type: string
+  link?: string
+}
+
+/** @interface */
+export interface GetNotificationsRequest {
+  page: number
+}
+
+/** @interface */
+export interface GetNotificationsResponse {
+  notifications: Notification[]
+  hasMore: boolean
+}
+
+/** @interface */
+export interface UndoAcceptDeliveredRequestRequest {
+  requestId: string
+}
+
+/** @interface */
+export interface CreateReadyComboRequest {
+  products: {
+    _id: string
+    quantity: number
+  }[]
+  isReady: boolean
+  note?: string
+}
+
+/** @interface */
+export interface ReadyComboResponse {
+  _id: string
+  products: {
+    _id: string
+    quantity: number
+  }[]
+  isReady: boolean
+  note?: string
+}
+
+/** @interface */
+export interface UpdateReadyComboRequest {
+  products: {
+    _id: string
+    quantity: number
+  }[]
+  isReady: boolean
+  note?: string
+}
+
+/** @interface */
+export interface SearchCombosRequest {
+  searchText?: string
+  isReady?: boolean
+}
+
+/** @interface */
+export interface LandingRequest {
+  page: number
+  pageSize: number
+}
+
+/** @interface */
+export interface LandingResponse {
+  data: {
+    _id: string
+    fullName: string
+    phoneNumber: string
+    company: string
+    quantity: number
+    address: string
+    created_at: string
+  }[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+/** @interface */
+export interface GetOrderLogsRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface OrderLogItem {
+  _id: string
+  quantity: number
+  storageItems: {
+    code: string
+    name: string
+    receivedQuantity: {
+      quantity: number
+      real: number
+    }
+    deliveredQuantity: {
+      quantity: number
+      real: number
+    }
+    restQuantity: {
+      quantity: number
+      real: number
+    }
+    note?: string
+  }[]
+}
+
+/** @interface */
+export interface OrderLogProduct {
+  name: string
+  quantity: number
+}
+
+/** @interface */
+export interface OrderLogOrder {
+  products: OrderLogProduct[]
+  quantity: number
+}
+
+/** @interface */
+export interface OrderLogSession {
+  items: OrderLogItem[]
+  orders: OrderLogOrder[]
+}
+
+/** @interface */
+export interface GetOrderLogsResponse {
+  data: {
+    morning: OrderLogSession
+    afternoon?: OrderLogSession
+    date: string
+    updatedAt: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface CreateLogSessionRequest {
+  date: Date
+  items: OrderLogItem[]
+  orders: OrderLogOrder[]
+  session: "morning" | "afternoon"
+}
+
+/** @interface */
+export interface CreateLogSessionResponse {
+  morning: OrderLogSession
+  afternoon?: OrderLogSession
+  date: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetOrderLogsByRangeRequest {
+  startDate: string
+  endDate: string
+  session: "morning" | "afternoon" | "all"
+}
+
+/** @interface */
+export interface GetOrderLogsByRangeResponse {
+  startDate: string
+  endDate: string
+  items: {
+    _id: string
+    quantity: number
+    storageItems: OrderLogItem["storageItems"]
+  }[]
+  orders: { products: OrderLogProduct[]; quantity: number }[]
+  total: number
+}
+
+/** @deprecated */
+/** @interface */
+export interface InsertIncomeRequest {
+  type: "affiliate" | "ads" | "other"
+  date: Date
+}
+
+/** @deprecated */
+/** @interface */
+export interface InsertIncomeResponse {
+  success: true
+}
+
+/** @interface */
+export interface DeleteIncomeByDateRequest {
+  date: Date
+}
+
+/** @deprecated */
+/** @interface */
+export interface UpdateAffiliateTypeResponse {
+  success: true
+}
+
+/** @interface */
+export interface GetIncomesByDateRangeRequest {
+  startDate: string
+  endDate: string
+  page: number
+  limit: number
+  orderId?: string
+  productCode?: string
+  productSource?: string
+  channelId?: string
+}
+
+/** @interface */
+export interface GetIncomesByDateRangeResponse {
+  incomes: {
+    _id: string
+    orderId: string
+    customer: string
+    province: string
+    shippingProvider: string
+    orderStatus?: string
+    orderSubstatus?: string
+    cancelationOrReturnType?: string
+    orderRefundAmount?: number
+    channel?: {
+      _id: string
+      name: string
+    }
+    date: Date
+    products: {
+      creator?: string
+      code: string
+      name: string
+      source: "affiliate" | "affiliate-ads" | "ads" | "other"
+      quantity: number
+      quotation: number
+      price: number
+      platformDiscount: number
+      sellerDiscount: number
+      priceAfterDiscount: number
+      affiliateAdsPercentage?: number
+      affiliateAdsAmount?: number
+      standardAffPercentage?: number
+      standardAffAmount?: number
+      sourceChecked: boolean
+      content?: string
+      box?: string
+    }[]
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface UpdateIncomesBoxRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GetTotalIncomesByMonthRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetTotalIncomesByMonthResponse {
+  totalIncome: {
+    beforeDiscount: { live: number; shop: number }
+    afterDiscount: { live: number; shop: number }
+  }
+}
+
+/** @interface */
+export interface GetTotalQuantityByMonthRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetTotalQuantityByMonthResponse {
+  totalOrders: {
+    live: number
+    shop: number
+  }
+  totalQuantity: {
+    live: number
+    shop: number
+  }
+}
+
+/** @interface */
+export interface GetKPIPercentageByMonthRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetKPIPercentageByMonthResponse {
+  KPIPercentage: {
+    live: number
+    shop: number
+  }
+}
+
+/** @interface */
+export interface CreateMonthGoalRequest {
+  month: number
+  year: number
+  liveStreamGoal: number
+  shopGoal: number
+  liveAdsPercentageGoal: number
+  shopAdsPercentageGoal: number
+  channel: string
+}
+
+/** @interface */
+export interface CreateMonthGoalResponse {
+  month: number
+  year: number
+  liveStreamGoal: number
+  shopGoal: number
+  liveAdsPercentageGoal: number
+  shopAdsPercentageGoal: number
+  channel: {
+    _id: string
+    name: string
+  }
+}
+
+/** @interface */
+export interface GetGoalsRequest {
+  year?: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetGoalsResponse {
+  monthGoals: {
+    month: number
+    year: number
+    liveStreamGoal: number
+    shopGoal: number
+    channel: {
+      name: string
+      _id: string
+    }
+    liveAdsPercentageGoal: number
+    shopAdsPercentageGoal: number
+    totalIncome: {
+      beforeDiscount: { live: number; shop: number }
+      afterDiscount: { live: number; shop: number }
+    }
+    totalQuantity: { live: number; shop: number }
+    KPIPercentage: {
+      beforeDiscount: { live: number; shop: number }
+      afterDiscount: { live: number; shop: number }
+    }
+    adsPercentage: { live: number; shop: number }
+    adsGoalComparison: { live: number; shop: number }
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetGoalRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetGoalResponse {
+  month: number
+  year: number
+  liveStreamGoal: number
+  shopGoal: number
+  liveAdsPercentageGoal: number
+  shopAdsPercentageGoal: number
+  channel: string
+}
+
+/** @interface */
+export interface UpdateGoalRequest {
+  month: number
+  year: number
+  liveStreamGoal: number
+  shopGoal: number
+  liveAdsPercentageGoal: number
+  shopAdsPercentageGoal: number
+  channel: string
+}
+
+/** @interface */
+export interface UpdateGoalResponse {
+  month: number
+  year: number
+  liveStreamGoal: number
+  shopGoal: number
+  liveAdsPercentageGoal: number
+  shopAdsPercentageGoal: number
+  channel: string
+}
+
+/** @interface */
+export interface DeleteGoalRequest {
+  month: number
+  year: number
+  channelId: string
+}
+
+/** @interface */
+export interface CreatePackingRuleRequest {
+  products: {
+    productCode: string
+    minQuantity: number | null
+    maxQuantity: number | null
+  }[]
+  packingType: string
+}
+
+/** @interface */
+export interface CreatePackingRuleResponse {
+  products: {
+    productCode: string
+    minQuantity: number | null
+    maxQuantity: number | null
+  }[]
+  packingType: string
+}
+
+/** @interface */
+export interface UpdatePackingRuleRequest {
+  products: {
+    productCode: string
+    minQuantity: number | null
+    maxQuantity: number | null
+  }[]
+  packingType: string
+}
+
+/** @interface */
+export interface UpdatePackingRuleResponse {
+  products: {
+    productCode: string
+    minQuantity: number | null
+    maxQuantity: number | null
+  }[]
+  packingType: string
+}
+
+/** @interface */
+export interface GetPackingRuleResponse {
+  products: {
+    productCode: string
+    minQuantity: number | null
+    maxQuantity: number | null
+  }[]
+  packingType: string
+}
+
+/** @interface */
+export interface SearchPackingRulesRequest {
+  searchText?: string
+  packingType?: string
+}
+
+/** @interface */
+export interface SearchPackingRulesResponse {
+  rules: {
+    products: {
+      productCode: string
+      minQuantity: number | null
+      maxQuantity: number | null
+    }[]
+    packingType: string
+  }[]
+}
+
+/** @interface */
+export interface ExportXlsxIncomesRequest {
+  startDate: string
+  endDate: string
+  orderId?: string
+  productCode?: string
+  productSource?: string
+  channel?: string
+}
+
+/** @interface */
+export interface CreateSessionLogRequest {
+  time: Date
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface GetSessionLogsRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface GetSessionLogsResponse {
+  data: {
+    _id: string
+    time: Date
+    items: {
+      _id: string
+      quantity: number
+      storageItems: {
+        code: string
+        name: string
+        receivedQuantity: {
+          quantity: number
+          real: number
+        }
+        deliveredQuantity: {
+          quantity: number
+          real: number
+        }
+        restQuantity: {
+          quantity: number
+          real: number
+        }
+        note?: string
+      }[]
+    }[]
+    orders: {
+      products: {
+        name: string
+        quantity: number
+      }[]
+      quantity: number
+    }[]
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface CreateDailyLogRequest {
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+  channelId: string
+}
+
+/** @interface */
+export interface GetDailyLogsRequest {
+  page: number
+  limit: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetDailyLogsResponse {
+  data: {
+    _id: string
+    date: Date
+    items: {
+      _id: string
+      quantity: number
+      storageItems: {
+        code: string
+        name: string
+        receivedQuantity: {
+          quantity: number
+          real: number
+        }
+        deliveredQuantity: {
+          quantity: number
+          real: number
+        }
+        restQuantity: {
+          quantity: number
+          real: number
+        }
+        note?: string
+      }[]
+    }[]
+    orders: {
+      products: {
+        name: string
+        quantity: number
+      }[]
+      quantity: number
+    }[]
+    channel: {
+      _id: string
+      name: string
+      username: string
+      usernames: string[]
+      link: string
+      platform: string
+    }
+    updatedAt: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetDailyLogByDateRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GetDailyLogByDateResponse {
+  _id: string
+  date: Date
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+  channel: {
+    _id: string
+    name: string
+    username: string
+    usernames: string[]
+    link: string
+    platform: string
+  }
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetSessionLogByIdRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSessionLogByIdResponse {
+  _id: string
+  time: Date
+  items: {
+    _id: string
+    quantity: number
+    storageItems: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    }[]
+  }[]
+  orders: {
+    products: {
+      name: string
+      quantity: number
+    }[]
+    quantity: number
+  }[]
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetUnviewedCountResponse {
+  count: number
+}
+
+/** @interface */
+export interface GetSystemLogsRequest {
+  page: number
+  limit: number
+  startTime?: string
+  endTime?: string
+  userId?: string
+  type?: string
+  action?: string
+  entity?: string
+  entityId?: string
+  result?: "success" | "failed"
+}
+
+/** @interface */
+export interface GetSystemLogsResponse {
+  data: {
+    _id: string
+    type: string
+    action: string
+    userId: string
+    time: Date
+    entity?: string
+    entityId?: string
+    result?: "success" | "failed"
+    meta?: Record<string, any>
+    ip?: string
+    userAgent?: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetInformationSystemLogsRespomse {
+  data: {
+    label: string
+    value: string
+  }[]
+}
+
+/** @interface */
+export interface GetRangeStatsRequest {
+  startDate: string
+  endDate: string
+  channelId: string
+}
+
+/** @interface */
+export interface GetRangeStatsResponse {
+  period: { startDate: Date; endDate: Date; days: number }
+  current: {
+    beforeDiscount: {
+      totalIncome: number
+      liveIncome: number
+      videoIncome: number
+      ownVideoIncome: number
+      otherVideoIncome: number
+      otherIncome: number
+      sources: {
+        ads: number
+        affiliate: number
+        affiliateAds: number
+        other: number
+      }
+    }
+    afterDiscount: {
+      totalIncome: number
+      liveIncome: number
+      videoIncome: number
+      ownVideoIncome: number
+      otherVideoIncome: number
+      otherIncome: number
+      sources: {
+        ads: number
+        affiliate: number
+        affiliateAds: number
+        other: number
+      }
+    }
+    boxes: { box: string; quantity: number }[]
+    shippingProviders: { provider: string; orders: number }[]
+    ads: {
+      totalAdsCost: number
+      liveAdsCost: number
+      shopAdsCost: number
+      hasDailyAdsMetrics: boolean
+      adsSourceMode: "legacy" | "metrics" | "mixed"
+      metricsDaysCount: number
+      percentages: {
+        liveAdsToLiveIncome: number
+        shopAdsToShopIncome: number
+      }
+      metrics: {
+        roiProtect: number
+        refundCancelRate: number
+        fullRefundGmv: number
+        tinRefundAmount: number
+        adsTax: number
+        gmvAds: number
+        affiliateCost: number
+        affiliateRefundAmount: number
+        totalRevenue: number
+        adjustedRevenue: number
+        incomeBeforeDiscount: number
+        incomeAfterDiscount: number
+        actualAdsCost: number
+        totalCost: number
+        costAfterRefund: number
+        ratios: {
+          adsRatioOnBeforeDiscountRevenue: number
+          totalCostRatioOnBeforeDiscountRevenue: number
+          costAfterRefundRatioOnBeforeDiscountRevenue: number
+          affiliateRatioOnBeforeDiscountRevenue: number
+        }
+        recordsCount: number
+      }
+    }
+    discounts: {
+      totalPlatformDiscount: number
+      totalSellerDiscount: number
+      totalDiscount: number
+      avgDiscountPerOrder: number
+      discountPercentage: number
+    }
+    orders: {
+      total: number
+      live: number
+      shop: number
+    }
+    productsQuantity: {
+      [code: string]: number
+    }
+    dailyGoal?: {
+      beforeDiscount: {
+        liveIncomePercentage: number
+        shopIncomePercentage: number
+        incomePercentage: number
+      }
+      afterDiscount: {
+        liveIncomePercentage: number
+        shopIncomePercentage: number
+        incomePercentage: number
+      }
+      goals: {
+        dailyLiveIncomeGoal: number
+        dailyShopIncomeGoal: number
+        dailyTotalIncomeGoal: number
+      }
+    }
+  }
+  changes?: {
+    beforeDiscount: {
+      totalIncomePct: number
+      liveIncomePct: number
+      videoIncomePct: number
+      ownVideoIncomePct: number
+      otherVideoIncomePct: number
+      sources: {
+        adsPct: number
+        affiliatePct: number
+        affiliateAdsPct: number
+        otherPct: number
+      }
+    }
+    afterDiscount: {
+      totalIncomePct: number
+      liveIncomePct: number
+      videoIncomePct: number
+      ownVideoIncomePct: number
+      otherVideoIncomePct: number
+      sources: {
+        adsPct: number
+        affiliatePct: number
+        affiliateAdsPct: number
+        otherPct: number
+      }
+    }
+    ads: {
+      totalAdsCostPct: number
+      liveAdsCostPct: number
+      shopAdsCostPct: number
+      liveAdsToLiveIncomePctDiff: number
+      shopAdsToShopIncomePctDiff: number
+      actualAdsCostPct: number
+      totalCostPct: number
+      costAfterRefundPct: number
+      adsRatioOnBeforeDiscountRevenueDiff: number
+      totalCostRatioOnBeforeDiscountRevenueDiff: number
+      costAfterRefundRatioOnBeforeDiscountRevenueDiff: number
+    }
+    discounts: {
+      totalPlatformDiscountPct: number
+      totalSellerDiscountPct: number
+      totalDiscountPct: number
+      avgDiscountPerOrderPct: number
+      discountPercentageDiff: number
+    }
+    orders?: {
+      totalPct: number
+      livePct: number
+      shopPct: number
+    }
+  }
+}
+
+/** @interface */
+export interface GetTopCreatorsRequest {
+  startDate: string
+  endDate: string
+}
+
+/** @interface */
+export interface TopCreatorItem {
+  creator: string
+  totalIncome: number
+  percentage: number
+}
+
+/** @interface */
+export interface GetTopCreatorsResponse {
+  affiliate: {
+    beforeDiscount: TopCreatorItem[]
+    afterDiscount: TopCreatorItem[]
+  }
+  affiliateAds: {
+    beforeDiscount: TopCreatorItem[]
+    afterDiscount: TopCreatorItem[]
+  }
+}
+
+/** @interface */
+export interface DailyTaskItem {
+  code: string
+  title: string
+  status: "pending" | "done" | "auto" | "expired"
+  type?: "manual" | "http"
+  http?: {
+    endpointKey: string
+    method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
+    url: string
+    runAt?: string
+    successStatus?: number
+    autoCompleteOnSuccess?: boolean
+    maxAttempts?: number
+    attempts?: number
+  }
+  completedAt?: Date
+}
+
+/** @interface */
+export interface GetOwnTasksResponse {
+  data: {
+    date: string
+    tasks: DailyTaskItem[]
+    summary: {
+      total: number
+      done: number
+      auto: number
+      pending: number
+      expired: number
+    }
+  }
+}
+
+/** @interface */
+export interface MarkTaskAsDoneRequest {
+  code: string
+}
+
+/** @interface */
+export interface MarkTaskAsDoneResponse {
+  updated: boolean
+}
+
+/** @interface */
+export interface TaskDefinition {
+  code: string
+  title: string
+  roles: string[]
+  active: boolean
+  order: number
+  autoComplete: boolean
+  type: "manual" | "http"
+  httpConfig?: {
+    endpointKey: string
+    runAt: string
+    successStatus?: number
+    successJsonPath?: string
+    successEquals?: any
+    autoCompleteOnSuccess: boolean
+    maxAttempts: number
+  }
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+/** @interface */
+export interface GetAllTasksDefinitionsRequest {
+  limit?: number
+  page?: number
+}
+
+/** @interface */
+export interface GetAllTasksDefinitionsResponse {
+  data: TaskDefinition[]
+  total: number
+}
+
+/** @interface */
+export interface CreateTaskDefinitionRequest {
+  code: string
+  title: string
+  roles: string[]
+  order?: number
+  autoComplete?: boolean // manual only
+  type?: "manual" | "http"
+  httpConfig?: {
+    endpointKey: string
+    runAt: string
+    successStatus?: number
+    successJsonPath?: string
+    successEquals?: any
+    autoCompleteOnSuccess?: boolean
+    maxAttempts?: number
+  }
+}
+
+/** @interface */
+export interface CreateTaskDefinitionResponse {
+  data: TaskDefinition
+}
+
+/** @interface */
+export interface UpdateTaskDefinitionRequest {
+  title?: string
+  roles?: string[]
+  active?: boolean
+  order?: number
+  autoComplete?: boolean
+  type?: "manual" | "http"
+  httpConfig?: {
+    endpointKey?: string
+    runAt?: string
+    successStatus?: number
+    successJsonPath?: string
+    successEquals?: any
+    autoCompleteOnSuccess?: boolean
+    maxAttempts?: number
+  }
+}
+
+/** @interface */
+export interface UpdateTaskDefinitionResponse {
+  data: TaskDefinition
+}
+
+/** @interface */
+export interface DeleteTaskDefinitionResponse {
+  deleted: boolean
+}
+
+/** @interface */
+export interface APIEndpoint {
+  _id: string
+  key: string
+  active: boolean
+  createdAt: string
+  deleted: boolean
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
+  name: string
+  updatedAt: string
+  url: string
+}
+
+/** @interface */
+export interface GetAllAPIEndpointsResponse {
+  data: APIEndpoint[]
+}
+
+/** @interface */
+export interface GenerateTasksRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GenerateTasksResponse {
+  data: {
+    date: string
+    tasksCreated: number
+  }
+}
+
+/** @interface */
+export interface GetAllUsersTasksRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GetAllUsersTasksResponse {
+  data: {
+    date: string
+    items: {
+      userId: string
+      total: number
+      done: number
+    }[]
+  }
+}
+
+/** @interface */
+export interface GetUserTasksRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GetUserTasksResponse {
+  data: {
+    date: string
+    tasks: DailyTaskItem[]
+    summary: {
+      total: number
+      done: number
+      auto: number
+      pending: number
+      expired: number
+    }
+  }
+}
+
+/** @interface */
+export interface SystemLogsOptionsResponse {
+  data: {
+    label: string
+    value: string
+  }[]
+}
+
+/** @interface */
+export interface HealthLiveResponse {
+  message: string
+}
+
+/** @interface */
+export interface HealthReadyResponse {
+  provinces: {
+    _id: string
+    code: string
+    name: string
+  }[]
+}
+
+// -------------------- DASHBOARD --------------------
+
+/** @interface */
+export interface GetTotalLiveAndShopIncomeByMonthRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetTotalLiveAndShopIncomeByMonthResponse {
+  totalIncome: {
+    beforeDiscount: { live: number; shop: number }
+    afterDiscount: { live: number; shop: number }
+  }
+}
+
+/** @interface */
+export interface GetAdsCostSplitByMonthRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetAdsCostSplitByMonthResponse {
+  totalAdsCost: number
+  liveAdsCost: number
+  shopAdsCost: number
+  hasDailyAdsMetrics: boolean
+  adsSourceMode: "legacy" | "metrics" | "mixed"
+  metricsDaysCount: number
+  actualAdsCost: number
+  totalCost: number
+  costAfterRefund: number
+  kpi: {
+    liveKpi: number
+    shopKpi: number
+    liveKpiPercentage: number
+    shopKpiPercentage: number
+  }
+  percentages: { liveAdsToLiveIncome: number; shopAdsToShopIncome: number }
+  ratios: {
+    adsRatioOnBeforeDiscountRevenue: number
+    totalCostRatioOnBeforeDiscountRevenue: number
+    costAfterRefundRatioOnBeforeDiscountRevenue: number
+    affiliateRatioOnBeforeDiscountRevenue: number
+  }
+  rawMetrics: {
+    roiProtect: number
+    refundCancelRate: number
+    fullRefundGmv: number
+    tinRefundAmount: number
+    adsTax: number
+    gmvAds: number
+    affiliateCost: number
+    affiliateRefundAmount: number
+    totalRevenue: number
+    adjustedRevenue: number
+    incomeBeforeDiscount: number
+    incomeAfterDiscount: number
+    recordsCount: number
+    hasDailyAdsMetrics: boolean
+    adsSourceMode: "legacy" | "metrics" | "mixed"
+    metricsDaysCount: number
+  }
+  totalIncome: { live: number; shop: number }
+}
+
+/** @interface */
+export interface CreateDailyAdsRequest {
+  date: Date
+  currency: "vnd" | "usd"
+  channel: string
+}
+
+/** @interface */
+export interface CreateSimpleDailyAdsRequest {
+  date: Date
+  liveAdsCost: number
+  shopAdsCost: number
+  currency: "vnd" | "usd"
+  channel: string
+}
+
+/** @interface */
+export interface UpsertDailyAdsMetricsRequest {
+  date: Date
+  channelId: string
+  roiProtect: number
+  tinRefundAmount: number
+  gmvAds: number
+  affiliateCost: number
+  totalRevenue: number
+  refundCancelRate: number
+}
+
+/** @interface */
+export interface DailyAdsMetricsResponse {
+  _id: string
+  date: string
+  channel: string
+  roiProtect: number
+  refundCancelRate: number
+  fullRefundGmv: number
+  tinRefundAmount: number
+  adsTax: number
+  gmvAds: number
+  affiliateCost: number
+  affiliateRefundAmount: number
+  totalRevenue: number
+  adjustedRevenue: number
+  incomeBeforeDiscount: number
+  incomeAfterDiscount: number
+  actualAdsCost: number
+  totalCost: number
+  costAfterRefund: number
+  adsRatioOnBeforeDiscountRevenue: number
+  totalCostRatioOnBeforeDiscountRevenue: number
+  costAfterRefundRatioOnBeforeDiscountRevenue: number
+  affiliateRatioOnBeforeDiscountRevenue: number
+  updatedAt: string
+}
+
+/** @interface */
+export interface DeleteDailyAdsMetricsRequest {
+  date: Date
+  channelId: string
+}
+
+/** @interface */
+export interface GetTotalCountIncomeByMonthRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface GetTotalCountIncomeByMonthResponse {
+  totalCount: number
+}
+
+// -------------------- INCOME AND SOURCE --------------------
+
+/** @interface */
+export interface CreateDailyAdsWithSavedAdsCostRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GetPreviousDailyAdsBefore4pmRequest {
+  date: Date
+}
+
+/** @interface */
+export interface GetPreviousDailyAdsBefore4pmResponse {
+  date: string
+  before4pmLiveAdsCost: number
+  before4pmShopAdsCost: number
+  totalBefore4pmCost: number
+}
+
+/** @interface */
+export interface InsertIncomeAndUpdateSourceRequest {
+  /** Optional legacy field; TikTok order dates are now read from the uploaded file. */
+  date?: Date
+  channel: string
+  updateMode?: "full" | "status-only" | "base-only" | "affiliate-only"
+}
+
+/** @interface */
+export interface InsertIncomeAndUpdateSourceResponse {
+  success: true
+}
+
+// -------------------- LIVESTREAM EMPLOYEES --------------------
+
+/** @interface */
+export interface CreateLivestreamEmployeeRequest {
+  name: string
+  active?: boolean
+}
+
+/** @interface */
+export interface UpdateLivestreamEmployeeRequest {
+  name?: string
+  active?: boolean
+}
+
+/** @interface */
+export interface SearchLivestreamEmployeesRequest {
+  page: number
+  limit: number
+  active?: boolean
+}
+
+/** @interface */
+export interface SearchLivestreamEmployeesResponse {
+  data: {
+    _id: string
+    name: string
+    active?: boolean
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetDetailLivestreamEmployeeRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetDetailLivestreamEmployeeResponse {
+  _id: string
+  name: string
+  active?: boolean
+}
+
+/** @interface */
+export interface DeleteLivestreamEmployeeRequest {
+  id: string
+}
+
+// -------------------- LIVESTREAM PERIODS --------------------
+
+/** @interface */
+export interface CreateLivestreamPeriodRequest {
+  startTime: {
+    hour: number
+    minute: number
+  }
+  endTime: {
+    hour: number
+    minute: number
+  }
+  channel: string
+  for: "host" | "assistant"
+}
+
+/** @interface */
+export interface GetAllLivestreamPeriodsResponse {
+  periods: {
+    _id: string
+    startTime: {
+      hour: number
+      minute: number
+    }
+    endTime: {
+      hour: number
+      minute: number
+    }
+    channel: {
+      _id: string
+      name: string
+    }
+    for: "host" | "assistant"
+  }[]
+}
+
+/** @interface */
+export interface GetDetailLivestreamPeriodRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetDetailLivestreamPeriodResponse {
+  _id: string
+  startTime: {
+    hour: number
+    minute: number
+  }
+  endTime: {
+    hour: number
+    minute: number
+  }
+  channel: {
+    _id: string
+    name: string
+  }
+  for: "host" | "assistant"
+}
+
+/** @interface */
+export interface UpdateLivestreamPeriodRequest {
+  startTime?: {
+    hour: number
+    minute: number
+  }
+  endTime?: {
+    hour: number
+    minute: number
+  }
+  channel?: string
+  for?: "host" | "assistant"
+}
+
+/** @interface */
+export interface DeleteLivestreamPeriodRequest {
+  id: string
+}
+
+// -------------------- LIVESTREAM RANGES --------------------
+
+/** @interface */
+export interface CreateLivestreamRangeRequest {
+  startDate: Date
+  endDate: Date
+  channel?: string
+  snapshots?: string[]
+}
+
+/** @interface */
+export interface AddLivestreamSnapshotRequest {
+  period: string
+  assignee: string
+  goal: number
+  income?: number
+}
+
+/** @interface */
+export interface UpdateLivestreamSnapshotRequest {
+  period?: string
+  assignee?: string
+  goal?: number
+  income?: number
+}
+
+/** @interface */
+export interface DeleteLivestreamSnapshotRequest {
+  livestreamId: string
+  snapshotId: string
+}
+
+/** @interface */
+export interface UpdateTimeDirectRequest {
+  startTime: { hour: number; minute: number }
+  endTime: { hour: number; minute: number }
+}
+
+/** @interface */
+export interface UpdateTimeDirectResponse {
+  _id: string
+  date: string
+  snapshots: {
+    _id: string
+    period: {
+      _id?: string
+      startTime: { hour: number; minute: number }
+      endTime: { hour: number; minute: number }
+      channel: {
+        _id: string
+        name: string
+      }
+      for: "host" | "assistant"
+    }
+    assignee?: {
+      _id: string
+      username: string
+      name: string
+    }
+    income?: number
+    adsCost?: number
+    clickRate?: number
+    avgViewingDuration?: number
+    comments?: number
+    ordersNote?: string
+    rating?: string
+    altAssignee?: string
+    altOtherAssignee?: string
+    altNote?: string
+    altRequest?: string
+    snapshotKpi?: number
+    salary?: {
+      salaryPerHour: number
+      bonusPercentage: number
+      total?: number
+    }
+    realIncome?: number
+    orders?: number
+  }[]
+  totalOrders: number
+  totalIncome: number
+  ads: number
+  fixed: boolean
+  dateKpi?: number
+}
+
+/** @interface */
+export interface AddExternalSnapshotRequest {
+  startTime: {
+    hour: number
+    minute: number
+  }
+  endTime: {
+    hour: number
+    minute: number
+  }
+  forRole: "host" | "assistant"
+}
+
+/** @interface */
+export interface AddExternalSnapshotResponse {
+  _id: string
+  date: string
+  snapshots: {
+    _id: string
+    period: {
+      _id?: string
+      startTime: { hour: number; minute: number }
+      endTime: { hour: number; minute: number }
+      channel: {
+        _id: string
+        name: string
+      }
+      for: "host" | "assistant"
+    }
+    assignee?: {
+      _id: string
+      username: string
+      name: string
+    }
+    income?: number
+    adsCost?: number
+    clickRate?: number
+    avgViewingDuration?: number
+    comments?: number
+    ordersNote?: string
+    rating?: string
+    altAssignee?: string
+    altOtherAssignee?: string
+    altNote?: string
+    altRequest?: string
+    snapshotKpi?: number
+    salary?: {
+      salaryPerHour: number
+      bonusPercentage: number
+      total?: number
+    }
+    realIncome?: number
+    orders?: number
+  }[]
+  totalOrders: number
+  totalIncome: number
+  ads: number
+  fixed: boolean
+  dateKpi?: number
+}
+
+/** @interface */
+export interface SetMetricsRequest {
+  totalOrders?: number
+  // totalIncome?: number
+  ads?: number
+}
+
+/** @interface */
+export interface SyncSnapshotRequest {
+  startDate: Date
+  endDate: Date
+  channel: string
+}
+
+/** @interface */
+export interface SyncSnapshotResponse {
+  updated: number
+  message: string
+}
+
+/** @interface */
+export interface GetLivestreamByDateRangeRequest {
+  startDate: string
+  endDate: string
+  channel?: string
+  for?: "host" | "assistant"
+  assignee?: string
+}
+
+/** @interface */
+export interface GetLivestreamByDateRangeResponse {
+  livestreams: {
+    _id: string
+    date: string
+    snapshots: {
+      _id: string
+      period: {
+        _id?: string
+        startTime: { hour: number; minute: number }
+        endTime: { hour: number; minute: number }
+        channel: {
+          _id: string
+          name: string
+        }
+        for: "host" | "assistant"
+      }
+      assignee?: {
+        _id: string
+        username: string
+        name: string
+      }
+      income?: number
+      adsCost?: number
+      clickRate?: number
+      avgViewingDuration?: number
+      comments?: number
+      ordersNote?: string
+      rating?: string
+      altAssignee?: string
+      altOtherAssignee?: string
+      altNote?: string
+      altRequest?: string
+      snapshotKpi?: number
+      salary?: {
+        salaryPerHour: number
+        bonusPercentage: number
+        total?: number
+      }
+      realIncome?: number
+      orders?: number
+    }[]
+    totalOrders: number
+    totalIncome: number
+    ads: number
+    point: number
+    fixed: boolean
+    dateKpi?: number
+  }[]
+}
+
+/** @interface */
+export interface ReportLivestreamRequest {
+  income: number
+  adsCost?: number
+  clickRate: number
+  avgViewingDuration: number
+  comments: number
+  ordersNote: string
+  orders: number
+  rating?: string
+}
+
+/** @interface */
+export interface ReportLivestreamResponse {
+  _id: string
+  date: string
+  snapshots: {
+    _id: string
+    period: {
+      _id?: string
+      startTime: { hour: number; minute: number }
+      endTime: { hour: number; minute: number }
+      channel: {
+        _id: string
+        name: string
+      }
+      for: "host" | "assistant"
+    }
+    assignee?: {
+      _id: string
+      username: string
+      name: string
+    }
+    income?: number
+    adsCost?: number
+    clickRate?: number
+    avgViewingDuration?: number
+    comments?: number
+    ordersNote?: string
+    rating?: string
+    altAssignee?: string
+    altOtherAssignee?: string
+    altNote?: string
+    altRequest?: string
+    snapshotKpi?: number
+    salary?: {
+      salaryPerHour: number
+      bonusPercentage: number
+      total?: number
+    }
+    realIncome?: number
+    orders?: number
+  }[]
+  totalOrders: number
+  totalIncome: number
+  ads: number
+  fixed: boolean
+  dateKpi?: number
+}
+
+/** @interface */
+export interface GetMonthlyTotalsLivestreamRequest {
+  month: number
+  year: number
+}
+
+/** @interface */
+export interface GetMonthlyTotalsLivestreamResponse {
+  totalOrders: number
+  totalIncome: number
+  totalAds: number
+}
+
+/** @interface */
+export interface CalculateLivestreamRealIncomeRequest {
+  date: string
+  channelId: string
+}
+
+/** @interface */
+export interface CalculateLivestreamRealIncomeResponse {
+  success: boolean
+  processedOrders: number
+  updatedSnapshots: number
+  message: string
+}
+
+// -------------------- LIVESTREAM STATS --------------------
+
+/** @interface */
+export interface GetLivestreamStatsRequest {
+  startDate: string
+  endDate: string
+}
+
+/** @interface */
+export interface GetLivestreamStatsResponse {
+  totalIncome: number
+  totalExpenses: number
+  totalOrders: number
+  incomeByHost: { hostId: string; income: number }[]
+}
+
+/** @interface */
+export interface GetAggregatedMetricsRequest {
+  startDate: Date
+  endDate: Date
+  channel: string
+  for: "host" | "assistant"
+  assignee?: string
+}
+
+/** @interface */
+export interface GetAggregatedMetricsResponse {
+  totalIncome: number
+  totalAdsCost: number
+  totalComments: number
+  totalOrders: number
+  kpi: number
+}
+
+/** @interface */
+export interface GetMonthMetricsRequest {
+  month: number
+  year: number
+  channel: string
+  for: "host" | "assistant"
+  assignee?: string
+}
+
+/** @interface */
+export interface GetMonthMetricsResponse {
+  totalIncome: number
+  totalAdsCost: number
+  totalComments: number
+  totalOrders: number
+}
+
+/** @interface */
+export interface GetHostRevenueRankingsRequest {
+  startDate: string
+  endDate: string
+  channel?: string
+}
+
+/** @interface */
+export interface GetHostRevenueRankingsResponse {
+  rankings: {
+    hostId: string
+    hostName: string
+    totalRevenue: number
+    totalAdsCost: number
+    totalOrders: number
+  }[]
+}
+
+/** @interface */
+export interface GetHostRevenueRankingsByMonthRequest {
+  month: number
+  year: number
+  channel?: string
+}
+
+/** @interface */
+export interface GetHostRevenueRankingsByMonthResponse {
+  rankings: {
+    hostId: string
+    hostName: string
+    totalRevenue: number
+    totalAdsCost: number
+    totalOrders: number
+  }[]
+}
+
+/** @interface */
+export interface GetAssistantRevenueRankingsRequest {
+  startDate: string
+  endDate: string
+  channel?: string
+}
+
+/** @interface */
+export interface GetAssistantRevenueRankingsResponse {
+  rankings: {
+    assistantId: string
+    assistantName: string
+    totalRevenue: number
+    totalAdsCost: number
+    totalOrders: number
+  }[]
+}
+
+/** @interface */
+export interface GetAssistantRevenueRankingsByMonthRequest {
+  month: number
+  year: number
+  channel?: string
+}
+
+/** @interface */
+export interface GetAssistantRevenueRankingsByMonthResponse {
+  rankings: {
+    assistantId: string
+    assistantName: string
+    totalRevenue: number
+    totalAdsCost: number
+    totalOrders: number
+  }[]
+}
+
+/** @interface */
+export interface UpdateSnapshotAltRequest {
+  altAssignee?: string
+  altOtherAssignee?: string
+  altNote?: string
+}
+
+/** @interface */
+export interface UpdateSnapshotAltResponse {
+  _id: string
+  date: string
+  snapshots: {
+    _id: string
+    period: {
+      _id?: string
+      startTime: { hour: number; minute: number }
+      endTime: { hour: number; minute: number }
+      channel: {
+        _id: string
+        name: string
+      }
+      for: "host" | "assistant"
+    }
+    assignee?: {
+      _id: string
+      username: string
+      name: string
+    }
+    income?: number
+    adsCost?: number
+    clickRate?: number
+    avgViewingDuration?: number
+    comments?: number
+    ordersNote?: string
+    rating?: string
+    altAssignee?: string
+    altOtherAssignee?: string
+    altNote?: string
+    altRequest?: string
+    snapshotKpi?: number
+    salary?: {
+      salaryPerHour: number
+      bonusPercentage: number
+      total?: number
+    }
+    realIncome?: number
+    orders?: number
+  }[]
+  totalOrders: number
+  totalIncome: number
+  ads: number
+  fixed: boolean
+  dateKpi?: number
+}
+
+/** @interface */
+export interface AssignOtherSnapshotRequest {
+  altOtherAssignee: string
+  altNote: string
+}
+
+/** @interface */
+export interface AssignOtherSnapshotResponse {
+  _id: string
+  date: string
+  snapshots: {
+    _id: string
+    period: {
+      _id?: string
+      startTime: { hour: number; minute: number }
+      endTime: { hour: number; minute: number }
+      channel: {
+        _id: string
+        name: string
+      }
+      for: "host" | "assistant"
+    }
+    assignee?: {
+      _id: string
+      username: string
+      name: string
+    }
+    income?: number
+    adsCost?: number
+    clickRate?: number
+    avgViewingDuration?: number
+    comments?: number
+    ordersNote?: string
+    rating?: string
+    altAssignee?: string
+    altOtherAssignee?: string
+    altNote?: string
+    altRequest?: string
+    snapshotKpi?: number
+    salary?: {
+      salaryPerHour: number
+      bonusPercentage: number
+      total?: number
+    }
+    realIncome?: number
+    orders?: number
+  }[]
+  totalOrders: number
+  totalIncome: number
+  ads: number
+  fixed: boolean
+  dateKpi?: number
+}
+
+/** @interface */
+export interface FixLivestreamRequest {
+  startDate: Date
+  endDate: Date
+  channel: string
+}
+
+/** @interface */
+export interface FixLivestreamResponse {
+  updated: number
+  message: string
+}
+
+/** @interface */
+export interface CreateAltRequestRequest {
+  livestreamId: string
+  snapshotId: string
+  altNote: string
+}
+
+/** @interface */
+export interface CreateAltRequestResponse {
+  createdBy: {
+    _id: string
+    name: string
+    username: string
+  }
+  livestreamId: string
+  snapshotId: string
+  altNote: string
+  status: "pending" | "accepted" | "rejected"
+  createdAt: Date
+  updatedAt: Date
+}
+
+/** @interface */
+export interface UpdateAltRequestsRequest {
+  altNote: string
+}
+
+/** @interface */
+export interface UpdateAltRequestsResponse {
+  createdBy: {
+    _id: string
+    name: string
+    username: string
+  }
+  livestreamId: string
+  snapshotId: string
+  altNote: string
+  status: "pending" | "accepted" | "rejected"
+  createdAt: Date
+  updatedAt: Date
+}
+
+/** @interface */
+export interface GetAltRequestBySnapshotRequest {
+  livestreamId: string
+  snapshotId: string
+}
+
+/** @interface */
+export interface GetAltRequestBySnapshotResponse {
+  _id: string
+  createdBy: {
+    _id: string
+    name: string
+    username: string
+  }
+  livestreamId: string
+  snapshotId: string
+  altNote: string
+  status: "pending" | "accepted" | "rejected"
+  createdAt: Date
+  updatedAt: Date
+}
+
+/** @interface */
+export interface UpdateAltRequestStatusRequest {
+  status: "pending" | "accepted" | "rejected"
+  altAssignee?: string
+}
+
+/** @interface */
+export interface UpdateAltRequestStatusResponse {
+  createdBy: string
+  livestreamId: string
+  snapshotId: string
+  altNote: string
+  status: "pending" | "accepted" | "rejected"
+  createdAt: Date
+  updatedAt: Date
+}
+
+/** @interface */
+export interface SearchAltRequestsRequest {
+  page?: number
+  limit?: number
+  status?: "pending" | "accepted" | "rejected"
+  requestBy?: string
+  channel?: string
+}
+
+/** @interface */
+export interface SearchAltRequestsResponse {
+  data: {
+    _id: string
+    livestreamId: string
+    snapshotId: string
+    altNote: string
+    status: "pending" | "accepted" | "rejected"
+    createdBy: {
+      _id: string
+      name: string
+      username: string
+    }
+    createdAt: Date
+    updatedAt: Date
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface DeleteAltRequestRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetTopProductsLivestreamRequest {
+  startDate: Date
+  endDate: Date
+  channel?: string
+}
+
+/** @interface */
+export interface GetTopProductsLivestreamResponse {
+  productsQuantity: {
+    [code: string]: number
+  }
+}
+
+// -------------------- SHOPEE PRODUCTS --------------------
+
+/** @interface */
+export interface CreateShopeeProductRequest {
+  name: string
+  items: {
+    _id: string
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface UpdateShopeeProductRequest {
+  name: string
+  items: {
+    _id: string
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface DeleteShopeeProductRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetAllShopeeProductsResponse {
+  products: {
+    _id: string
+    name: string
+    items: {
+      _id: string
+      quantity: number
+    }[]
+  }[]
+}
+
+/** @interface */
+export interface GetShopeeProductByIdRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetShopeeProductByIdResponse {
+  _id: string
+  name: string
+  items: {
+    _id: string
+    quantity: number
+  }[]
+}
+
+/** @interface */
+export interface SearchShopeeProductsRequest {
+  searchText?: string
+  page: number
+  limit: number
+  deleted?: boolean
+}
+
+/** @interface */
+export interface SearchShopeeProductsResponse {
+  data: {
+    _id: string
+    name: string
+    items: {
+      _id: string
+      quantity: number
+    }[]
+  }[]
+  total: number
+}
+
+// -------------------- SHOPEE CALCULATION --------------------
+
+/** @interface */
+export interface CalXlsxShopeeRequest {
+  file: File
+}
+
+/** @interface */
+export interface CalXlsxShopeeResponse {
+  items: {
+    _id: string
+    name: string
+    quantity: number
+    storageItem: {
+      code: string
+      name: string
+      receivedQuantity: {
+        quantity: number
+        real: number
+      }
+      deliveredQuantity: {
+        quantity: number
+        real: number
+      }
+      restQuantity: {
+        quantity: number
+        real: number
+      }
+      note?: string
+    } | null
+  }[]
+  orders: {
+    products: { sku: string; name?: string; quantity: number }[]
+    quantity: number
+  }[]
+  total: number
+}
+
+// -------------------- LIVESTREAM GOALS --------------------
+
+/** @interface */
+export interface CreateLivestreamMonthGoalRequest {
+  month: number
+  year: number
+  channel: string
+  goal: number
+}
+
+/** @interface */
+export interface GetLivestreamMonthGoalsRequest {
+  page: number
+  limit: number
+  channel?: string
+}
+
+/** @interface */
+export interface GetLivestreamMonthGoalsResponse {
+  data: {
+    _id: string
+    month: number
+    year: number
+    channel: {
+      _id: string
+      name: string
+    }
+    goal: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface UpdateLivestreamMonthGoalRequest {
+  goal?: number
+}
+
+/** @interface */
+export interface DeleteLivestreamMonthGoalRequest {
+  id: string
+}
+
+// -------------------- LIVESTREAM CHANNELS --------------------
+
+/** @interface */
+export interface LivestreamChannel {
+  _id: string
+  name: string
+  username: string
+  usernames: string[]
+  platform: string
+  link: string
+}
+
+/** @interface */
+export interface CreateLivestreamChannelRequest {
+  name: string
+  username: string
+  usernames: string[]
+  platform: "tiktokshop" | "shopee"
+  link: string
+}
+
+/** @interface */
+export interface SearchLivestreamChannelsRequest {
+  searchText?: string
+  platform?: string
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface SearchLivestreamChannelsResponse {
+  data: LivestreamChannel[]
+  total: number
+}
+
+/** @interface */
+export interface GetLivestreamChannelDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetLivestreamChannelDetailResponse {
+  _id: string
+  name: string
+  username: string
+  usernames: string[]
+  platform: string
+  link: string
+}
+
+/** @interface */
+export interface UpdateLivestreamChannelRequest {
+  name?: string
+  username?: string
+  usernames?: string[]
+  link?: string
+}
+
+/** @interface */
+export interface DeleteLivestreamChannelRequest {
+  id: string
+}
+
+/** @interface */
+export interface CreateLivestreamPerformanceRequest {
+  minIncome: number
+  maxIncome: number
+  salaryPerHour: number
+  bonusPercentage: number
+}
+
+/** @interface */
+export interface CreateLivestreamPerformanceResponse {
+  _id: string
+  minIncome: number
+  maxIncome: number
+  salaryPerHour: number
+  bonusPercentage: number
+}
+
+/** @interface */
+export interface UpdateLivestreamPerformanceRequest {
+  minIncome?: number
+  maxIncome?: number
+  salaryPerHour?: number
+  bonusPercentage?: number
+}
+
+/** @interface */
+export interface UpdateLivestreamPerformanceResponse {
+  _id: string
+  minIncome: number
+  maxIncome: number
+  salaryPerHour: number
+  bonusPercentage: number
+}
+
+/** @interface */
+export interface SearchLivestreamPerformanceRequest {
+  page: number
+  limit: number
+  sortOrder: "asc" | "desc"
+}
+
+/** @interface */
+export interface SearchLivestreamPerformanceResponse {
+  data: {
+    _id: string
+    minIncome: number
+    maxIncome: number
+    salaryPerHour: number
+    bonusPercentage: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface DeleteLivestreamPerformanceRequest {
+  id: string
+}
+
+/** @interface */
+export interface CalculateDailyPerformanceRequest {
+  date: Date
+  baseOnRealIncome?: boolean
+  channelId: string
+}
+
+/** @interface */
+export interface CalculateDailyPerformanceResponse {
+  livestreamId: string
+  date: Date
+  snapshotsUpdated: number
+  snapshotsSkipped: number
+  details: Array<{
+    snapshotId: string
+    income: number
+    salaryPerHour: number
+    bonusPercentage: number
+    total: number
+    status: "updated" | "skipped" | "no_performance_found"
+  }>
+}
+
+/** @interface */
+export interface CalculateLivestreamMonthSalaryRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface CalculateLivestreamMonthSalaryResponse {
+  year: number
+  month: number
+  users: Array<{
+    userId: string
+    userName: string
+    totalSalary: number
+    snapshotsCount: number
+  }>
+  totalSalaryPaid: number
+}
+
+/** @interface */
+export interface ExportMonthlySalaryToXlsxRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface CreateLivestreamSalaryRequest {
+  name: string
+  livestreamPerformances: string[]
+  livestreamEmployees: string[]
+}
+
+/** @interface */
+export interface CreateLivestreamSalaryResponse {
+  name: string
+  livestreamPerformances: {
+    _id: string
+    minIncome: number
+    maxIncome: number
+    salaryPerHour: number
+    bonusPercentage: number
+  }[]
+  livestreamEmployees: {
+    _id: string
+    name: string
+  }[]
+}
+
+/** @interface */
+export interface UpdateLivestreamSalaryRequest {
+  name?: string
+  livestreamPerformances?: string[]
+  livestreamEmployees?: string[]
+}
+
+/** @interface */
+export interface UpdateLivestreamSalaryResponse {
+  name: string
+  livestreamPerformances: {
+    _id: string
+    minIncome: number
+    maxIncome: number
+    salaryPerHour: number
+    bonusPercentage: number
+  }[]
+  livestreamEmployees: {
+    _id: string
+    name: string
+  }[]
+}
+
+/** @interface */
+export interface SearchLivestreamSalaryRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface SearchLivestreamSalaryResponse {
+  data: {
+    name: string
+    livestreamPerformances: {
+      _id: string
+      minIncome: number
+      maxIncome: number
+      salaryPerHour: number
+      bonusPercentage: number
+    }[]
+    livestreamEmployees: {
+      _id: string
+      name: string
+    }[]
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface DeleteLivestreamSalaryRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetLivestreamSalaryDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetLivestreamSalaryDetailResponse {
+  name: string
+  livestreamPerformances: {
+    _id: string
+    minIncome: number
+    maxIncome: number
+    salaryPerHour: number
+    bonusPercentage: number
+  }[]
+  livestreamEmployees: {
+    _id: string
+    name: string
+  }[]
+}
+
+// -------------------- SALES CHANNELS --------------------
+
+/** @interface */
+export interface CreateSalesChannelRequest {
+  channelName: string
+  assignedTo?: string
+  assignedTos?: string[]
+  phoneNumber: string
+  address: string
+  avatarUrl: string
+}
+
+/** @interface */
+export interface CreateSalesChannelResponse {
+  _id: string
+  channelName: string
+  phoneNumber: string
+  address: string
+  avatarUrl: string
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface UpdateSalesChannelRequest {
+  channelName?: string
+  assignedTo?: string
+  assignedTos?: string[]
+  phoneNumber?: string
+  address?: string
+  avatarUrl?: string
+}
+
+/** @interface */
+export interface UpdateSalesChannelResponse {
+  _id: string
+  channelName: string
+  phoneNumber: string
+  address: string
+  avatarUrl: string
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface DeleteSalesChannelRequest {
+  id: string
+}
+
+/** @interface */
+export interface SearchSalesChannelRequest {
+  searchText?: string
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface SearchSalesChannelResponse {
+  data: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+    assignedTo?: {
+      _id: string
+      name: string
+      username: string
+    } | null
+    assignedTos?: {
+      _id: string
+      name: string
+      username: string
+    }[]
+    address: string
+    avatarUrl: string
+    createdAt: string
+    updatedAt: string
+    deletedAt?: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetSalesChannelDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesChannelDetailResponse {
+  _id: string
+  channelName: string
+  phoneNumber: string
+  assignedTo?: {
+    _id: string
+    name: string
+    username: string
+  } | null
+  assignedTos?: {
+    _id: string
+    name: string
+    username: string
+  }[]
+  address: string
+  avatarUrl: string
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface GetMyChannelResponse {
+  channel: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+    assignedTo?: {
+      _id: string
+      name: string
+      username: string
+    } | null
+    assignedTos?: {
+      _id: string
+      name: string
+      username: string
+    }[]
+    address: string
+    avatarUrl: string
+    createdAt: string
+    updatedAt: string
+    deletedAt?: string
+  }
+}
+
+// -------------------- SALES PRICE ITEMS --------------------
+
+/** @interface */
+export interface CreateSalesPriceItemRequest {
+  itemId: string
+  price: number
+}
+
+/** @interface */
+export interface CreateSalesPriceItemResponse {
+  _id: string
+  itemId: string
+  price: number
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface UpdateSalesPriceItemRequest {
+  price?: number
+}
+
+/** @interface */
+export interface UpdateSalesPriceItemResponse {
+  _id: string
+  itemId: string
+  price: number
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface GetSalesPriceItemsRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface GetSalesPriceItemsResponse {
+  data: {
+    _id: string
+    itemId: string
+    price: number
+    createdAt: string
+    updatedAt: string
+    deletedAt?: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetSalesPriceItemDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesPriceItemDetailResponse {
+  _id: string
+  itemId: string
+  price: number
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface DeleteSalesPriceItemRequest {
+  id: string
+}
+
+// -------------------- SALES FUNNEL --------------------
+
+/** @interface */
+export interface CreateLeadRequest {
+  name: string
+  channel: string
+  funnelSource: "ads" | "seeding" | "referral"
+}
+
+/** @interface */
+export interface CreateLeadResponse {
+  _id: string
+  name: string
+  province?: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber?: string
+  secondaryPhoneNumbers?: string[]
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface MoveToContactedRequest {
+  province: string
+  phoneNumber: string
+  address?: string
+}
+
+/** @interface */
+export interface MoveToContactedResponse {
+  _id: string
+  name: string
+  province: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber: string
+  secondaryPhoneNumbers?: string[]
+  address?: string
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface UpdateStageRequest {
+  stage: "lead" | "contacted" | "customer" | "closed"
+}
+
+/** @interface */
+export interface UpdateFunnelInfoRequest {
+  name?: string
+  province?: string
+  phoneNumber?: string
+  secondaryPhoneNumbers?: string[]
+  address?: string
+  channel?: string
+  hasBuyed?: boolean
+  funnelSource?: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+}
+
+/** @interface */
+export interface UpdateFunnelInfoResponse {
+  _id: string
+  name: string
+  province: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber: string
+  secondaryPhoneNumbers?: string[]
+  address?: string
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface GetFunnelByIdRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetFunnelByIdResponse {
+  _id: string
+  name: string
+  province: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber: string
+  secondaryPhoneNumbers?: string[]
+  address?: string
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    username: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  totalRevenue?: number
+  monthlyRevenue?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface SearchFunnelRequest {
+  stage?: "lead" | "contacted" | "customer" | "closed"
+  channel?: string
+  province?: string
+  user?: string
+  rank?: "gold" | "silver" | "bronze"
+  searchText?: string
+  noActivityDays?: number
+  funnelSource?: "ads" | "seeding" | "referral"
+  deleted?: boolean
+  sortBy?: "totalIncome" | "lastTimeBuyed"
+  sortOrder?: "asc" | "desc"
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface ExportFunnelsRequest
+  extends Omit<SearchFunnelRequest, "page" | "limit"> {}
+
+/** @interface */
+export interface SearchFunnelResponse {
+  data: {
+    _id: string
+    name: string
+    province: {
+      _id: string
+      code: string
+      name: string
+      createdAt: string
+      updatedAt: string
+    }
+    phoneNumber: string
+    secondaryPhoneNumbers?: string[]
+    psid: string
+    channel: {
+      _id: string
+      channelName: string
+    }
+    user: {
+      _id: string
+      name: string
+    }
+    hasBuyed: boolean
+    cost?: number
+    stage: "lead" | "contacted" | "customer" | "closed"
+    totalIncome: number
+    rank: "gold" | "silver" | "bronze"
+    funnelSource: "ads" | "seeding" | "referral"
+    fromSystem?: boolean
+    lastTimeBuyed?: string
+    createdAt: string
+    updatedAt: string
+    deletedAt?: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetSalesFunnelByPsidRequest {
+  psid: string
+}
+
+/** @interface */
+export interface GetSalesFunnelByPsidResponse {
+  _id: string
+  name: string
+  province: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber: string
+  secondaryPhoneNumbers?: string[]
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  totalIncome: number
+  rank: "gold" | "silver" | "bronze"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface UpdateFunnelCostRequest {
+  cost: number
+}
+
+/** @interface */
+export interface UpdateFunnelCostResponse {
+  _id: string
+  name: string
+  facebook: string
+  province: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber: string
+  secondaryPhoneNumbers?: string[]
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  totalIncome: number
+  rank: "gold" | "silver" | "bronze"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface UpdateFunnelResponsibleUserRequest {
+  userId: string
+}
+
+/** @interface */
+export interface UpdateFunnelResponsibleUserResponse {
+  _id: string
+  name: string
+  facebook: string
+  province: {
+    _id: string
+    code: string
+    name: string
+    createdAt: string
+    updatedAt: string
+  }
+  phoneNumber: string
+  psid: string
+  channel: {
+    _id: string
+    channelName: string
+  }
+  user: {
+    _id: string
+    name: string
+  }
+  hasBuyed: boolean
+  cost?: number
+  stage: "lead" | "contacted" | "customer" | "closed"
+  totalIncome: number
+  rank: "gold" | "silver" | "bronze"
+  funnelSource: "ads" | "seeding" | "referral"
+  fromSystem?: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface CheckPermissionOnFunnelRequest {
+  id: string
+}
+
+/** @interface */
+export interface CheckPermissionOnFunnelResponse {
+  hasPermission: boolean
+  isAdmin: boolean
+  isResponsible: boolean
+}
+
+/** @interface */
+export interface GetFunnelByUserRequest {
+  limit: number
+}
+
+/** @interface */
+export interface GetFunnelByUserResponse {
+  data: {
+    _id: string
+    name: string
+    province: {
+      _id: string
+      code: string
+      name: string
+      createdAt: string
+      updatedAt: string
+    }
+    phoneNumber: string
+    secondaryPhoneNumbers?: string[]
+    address?: string
+    psid: string
+    channel: {
+      _id: string
+      channelName: string
+    }
+    user: {
+      _id: string
+      name: string
+    }
+    hasBuyed: boolean
+    cost?: number
+    stage: "lead" | "contacted" | "customer" | "closed"
+    funnelSource: "ads" | "seeding" | "referral"
+    fromSystem?: boolean
+    createdAt: string
+    updatedAt: string
+    deletedAt?: string
+  }[]
+}
+
+export interface DeleteFunnelRequest {
+  id: string
+}
+
+export interface RestoreFunnelRequest {
+  id: string
+}
+
+// -------------------- SALES ORDERS --------------------
+
+/** @interface */
+export interface CreateSalesOrderRequest {
+  salesFunnelId: string
+  items: { code: string; quantity: number; note?: string }[]
+  storage: "position_HaNam" | "position_MKT"
+  date: Date
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  deposit?: number
+}
+
+/** @interface */
+export interface CreateSalesOrderResponse {
+  _id: string
+  salesFunnelId: string
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    area?: number
+    mass?: number
+    specification?: string
+    size?: string
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  tax?: number
+  shippingCost?: number
+  deposit?: number
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  status: "draft" | "confirmed" | "official"
+  phoneNumber: string
+  address: string
+  province: {
+    id: string
+    name: string
+  }
+  receivedDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface UpdateSalesOrderItemsRequest {
+  items?: {
+    code: string
+    quantity: number
+    note?: string
+  }[]
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  deposit?: number
+  date?: Date
+}
+
+/** @interface */
+export interface UpdateSalesOrderItemsResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    province: {
+      _id: string
+      code: string
+      name: string
+      createdAt: string
+      updatedAt: string
+    }
+    phoneNumber: string
+    secondaryPhoneNumbers?: string[]
+    address?: string
+    psid: string
+    channel: {
+      _id: string
+      channelName: string
+    }
+    user: {
+      _id: string
+      name: string
+    }
+    hasBuyed: boolean
+    cost?: number
+    stage: "lead" | "contacted" | "customer" | "closed"
+    funnelSource: "ads" | "seeding" | "referral"
+    createdAt: string
+    updatedAt: string
+  }
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    area?: number
+    mass?: number
+    specification?: string
+    size?: string
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  tax?: number
+  shippingCost?: number
+  deposit?: number
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  status: "draft" | "confirmed" | "official"
+  phoneNumber: string
+  address: string
+  province: {
+    id: string
+    name: string
+  }
+  receivedDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface UpdateSalesOrderDateRequest {
+  date: Date
+}
+
+/** @interface */
+export interface UpdateSalesOrderDateResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    province: {
+      _id: string
+      code: string
+      name: string
+      createdAt: string
+      updatedAt: string
+    }
+    phoneNumber: string
+    secondaryPhoneNumbers?: string[]
+    address?: string
+    psid: string
+    channel: {
+      _id: string
+      channelName: string
+    }
+    user: {
+      _id: string
+      name: string
+    }
+    hasBuyed: boolean
+    cost?: number
+    stage: "lead" | "contacted" | "customer" | "closed"
+    funnelSource: "ads" | "seeding" | "referral"
+    createdAt: string
+    updatedAt: string
+  }
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    area?: number
+    mass?: number
+    specification?: string
+    size?: string
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  tax?: number
+  shippingCost?: number
+  deposit?: number
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  status: "draft" | "confirmed" | "official"
+  phoneNumber: string
+  address: string
+  province: {
+    id: string
+    name: string
+  }
+  receivedDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface UpdateShippingInfoRequest {
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  tax?: number
+  shippingCost?: number
+  receivedDate?: Date
+}
+
+/** @interface */
+export interface UpdateShippingInfoResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    province: {
+      _id: string
+      code: string
+      name: string
+      createdAt: string
+      updatedAt: string
+    }
+    phoneNumber: string
+    secondaryPhoneNumbers?: string[]
+    address?: string
+    psid: string
+    channel: {
+      _id: string
+      channelName: string
+    }
+    user: {
+      _id: string
+      name: string
+    }
+    hasBuyed: boolean
+    cost?: number
+    stage: "lead" | "contacted" | "customer" | "closed"
+    funnelSource: "ads" | "seeding" | "referral"
+    createdAt: string
+    updatedAt: string
+  }
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    area?: number
+    mass?: number
+    specification?: string
+    size?: string
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  tax?: number
+  shippingCost?: number
+  deposit?: number
+  discount?: number
+  orderDiscountType?: "percent" | "value" | null
+  status: "draft" | "confirmed" | "official"
+  phoneNumber: string
+  address: string
+  province: {
+    id: string
+    name: string
+  }
+  receivedDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetSalesOrderByIdRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesOrderByIdResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+    secondaryPhoneNumbers?: string[]
+    psid: string
+    channel: {
+      _id: string
+      channelName: string
+    }
+    user: {
+      _id: string
+      name: string
+    }
+    hasBuyed: boolean
+    cost?: number
+    stage: "lead" | "contacted" | "customer" | "closed"
+    funnelSource: "ads" | "seeding" | "referral"
+    createdAt: string
+    updatedAt: string
+  }
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    area?: number
+    mass?: number
+    specification?: string
+    size?: string
+    source?: "inside" | "outside"
+    factory?:
+      | "candy"
+      | "manufacturing"
+      | "position_MongCai"
+      | "jelly"
+      | "import"
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  deposit?: number
+  tax?: number
+  shippingCost?: number
+  status: "draft" | "confirmed" | "official"|"cancelled"
+  cancelReason: string
+  phoneNumber: string
+  address: string
+  province: {
+    id: string
+    name: string
+  }
+  receivedDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface DeleteSalesOrderRequest {
+  id: string
+}
+
+/** @interface */
+export interface SearchSalesOrderRequest {
+  salesFunnelId?: string
+  returning?: boolean
+  startDate?: string
+  endDate?: string
+  userId?: string
+  searchText?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  status?: "draft" | "confirmed" | "official"
+  rank?: "gold" | "silver" | "bronze"
+  channelId?: string
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface ExportXlsxSalesOrderRequest {
+  salesFunnelId?: string
+  userId?: string
+  channelId?: string
+  returning?: boolean
+  startDate?: string
+  endDate?: string
+  searchText?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  status?: "draft" | "confirmed" | "official"
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface ExportXlsxSalesOrderForAccountingRequest {
+  salesFunnelId?: string
+  userId?: string
+  channelId?: string
+  returning?: boolean
+  startDate?: string
+  endDate?: string
+  searchText?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  status?: "draft" | "confirmed" | "official"
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface ExportXlsxSalesOrderByIdsRequest {
+  orderIds: string[]
+}
+
+/** @interface */
+export interface SearchSalesOrderResponse {
+  data: {
+    _id: string
+    salesFunnelId: {
+      _id: string
+      name: string
+      phoneNumber: string
+      secondaryPhoneNumbers?: string[]
+      psid: string
+      channel: {
+        _id: string
+        channelName: string
+      }
+      user: {
+        _id: string
+        name: string
+      }
+      hasBuyed: boolean
+      cost?: number
+      stage: "lead" | "contacted" | "customer" | "closed"
+      funnelSource: "ads" | "seeding" | "referral"
+      createdAt: string
+      updatedAt: string
+    }
+    items: {
+      code: string
+      name: string
+      price: number
+      quantity: number
+      area?: number
+      mass?: number
+      specification?: string
+      size?: string
+      source?: "inside" | "outside"
+      factory?:
+        | "candy"
+        | "manufacturing"
+        | "position_MongCai"
+        | "jelly"
+        | "import"
+      note?: string
+    }[]
+    returning: boolean
+    shippingCode?: string
+    shippingType?: "shipping_vtp" | "shipping_cargo"
+    storage: "position_HaNam" | "position_MKT"
+    cost?: number
+    date: string
+    total: number
+    orderDiscount?: number
+    orderDiscountType?: "percent" | "value" | null
+    otherDiscount?: number
+    deposit?: number
+    status: "draft" | "confirmed" | "official"| "cancelled"
+    phoneNumber: string
+    address: string
+    province: {
+      id: string
+      name: string
+    }
+    receivedDate?: string
+    createdAt: string
+    updatedAt: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetProvincesResponse {
+  provinces: {
+    _id: string
+    name: string
+    code: string
+    createdAt: string
+    updatedAt: string
+  }[]
+}
+
+/** @interface */
+export interface PublicSearchUsersRequest {
+  searchText?: string
+  page: number
+  limit: number
+  permission?: string
+  status?: "all" | "active" | "inactive"
+}
+
+/** @interface */
+export interface PublicSearchUsersResponse {
+  data: {
+    _id: string
+    name: string
+    permissions?: string[]
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface UpdateSalesOrderTaxShippingRequest {
+  tax: number
+  shippingCost: number
+}
+
+/** @interface */
+export interface UpdateSalesOrderTaxShippingResponse {
+  _id: string
+  salesFunnelId: string
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    massPerBox?: number
+    areaPerBox?: number
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  deposit?: number
+  tax: number
+  shippingCost: number
+  status: "draft" | "confirmed" | "official"
+  phoneNumber: string
+  address: string
+  province: {
+    id: string
+    name: string
+  }
+  receivedDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface TransitionSalesOrderStatusRequest {
+  status: "draft" | "confirmed" | "official"|"cancelled"
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  tax?: number
+  shippingCost?: number
+  receivedDate?: string
+  inventoryHandling?: "export_available_items" | "skip_inventory_export"
+  cancelReason?:string
+}
+
+/** @interface */
+export interface TransitionSalesOrderStatusResponse {
+  _id: string
+  salesFunnelId: string
+  items: {
+    code: string
+    name: string
+    price: number
+    quantity: number
+    note?: string
+  }[]
+  returning: boolean
+  shippingCode?: string
+  shippingType?: "shipping_vtp" | "shipping_cargo"
+  storage: "position_HaNam" | "position_MKT"
+  cost?: number
+  date: string
+  total: number
+  orderDiscount?: number
+  orderDiscountType?: "percent" | "value" | null
+  otherDiscount?: number
+  deposit?: number
+  cancelReason?:string
+  tax: number
+  shippingCost: number
+  receivedDate?: string
+  status: "draft" | "confirmed" | "official"|"cancelled"
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetOrdersByFunnelRequest {
+  page: number
+  limit: number
+  startDate?: string
+  endDate?: string
+}
+
+/** @interface */
+export interface GetOrdersByFunnelResponse {
+  data: {
+    _id: string
+    salesFunnelId: string
+    items: {
+      code: string
+      name: string
+      price: number
+      quantity: number
+      note?: string
+    }[]
+    returning: boolean
+    shippingCode?: string
+    shippingType?: "shipping_vtp" | "shipping_cargo"
+    storage: "position_HaNam" | "position_MKT"
+    cost?: number
+    date: string
+    total: number
+    orderDiscount?: number
+    orderDiscountType?: "percent" | "value" | null
+    otherDiscount?: number
+    deposit?: number
+    tax?: number
+    shippingCost?: number
+    status: "draft" | "confirmed" | "official"
+    phoneNumber: string
+    address: string
+    province: {
+      id: string
+      name: string
+    }
+    receivedDate?: string
+    createdAt: string
+    updatedAt: string
+  }[]
+  total: number
+  daysSinceLastPurchase: number | null
+  totalRevenue: number
+  topProducts: {
+    code: string
+    name: string
+    quantity: number
+  }[]
+}
+
+// -------------------- META SERVICES --------------------
+/** @interface */
+export interface ListConversationsRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface ListConversationsResponse {
+  items: {
+    conversationId: string
+    updated_time: string
+    link?: string
+    user: {
+      psid: string
+      name?: string
+      first_name?: string
+      last_name?: string
+      profile_pic?: string
+    }
+  }
+  nextPage: number | null
+}
+
+/** @interface */
+export interface ListConversationMessagesRequest {
+  after: string | null
+  before: string | null
+}
+
+/** @interface */
+export interface ListConversationMessagesResponse {
+  items: {
+    id: string
+    text?: string
+    created_time: string
+    from: {
+      id: string
+      name?: string
+      isPage: boolean
+    }
+  }[]
+  nextCursor: string
+  prevCursor: string
+}
+
+/** @interface */
+export interface SendMessageRequest {
+  text: string
+}
+
+/** @interface */
+export interface GetPsidByConversationIdResponse {
+  psid: string
+}
+
+/** @interface */
+export interface GetProfileByPsidRequest {
+  psid: string
+}
+
+/** @interface */
+export interface GetProfileByPsidResponse {
+  first_name: string
+  last_name: string
+  profile_pic: string
+}
+
+/** @interface */
+export interface GetConversationIdByPsidResponse {
+  conversationId: string
+}
+
+// -------------------- SALES ITEMS --------------------
+
+/** @interface */
+export type SalesItemFactory =
+  | "candy"
+  | "manufacturing"
+  | "position_MongCai"
+  | "jelly"
+  | "import"
+
+/** @interface */
+export type SalesItemSource = "inside" | "outside"
+
+/** @interface */
+export interface SalesItemName {
+  vn: string
+  cn: string
+}
+
+/** @interface */
+export interface SalesItem {
+  _id: string
+  code: string
+  name: SalesItemName
+  factory?: SalesItemFactory
+  price: number
+  source?: SalesItemSource
+  size?: string
+  area?: number
+  specification?: string
+  mass?: number
+  inventoryQuantity?: number
+  previousPeriodQuantity?: number
+  lastImportedQuantity?: number
+  currentPeriodExportedQuantity?: number
+  inventoryUpdatedAt?: string
+  lastImportedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface SearchSalesItemsRequest {
+  searchText?: string
+  factory?: SalesItemFactory
+  source?: SalesItemSource
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface SearchSalesItemsResponse {
+  data: SalesItem[]
+  total: number
+}
+
+/** @interface */
+export interface UploadSalesInventoryResponse {
+  success: true
+  imported: number
+  skipped: number
+  uploadBatchId: string
+  warnings?: string[]
+  totalWarnings?: number
+}
+
+/** @interface */
+export interface GetDailySalesInventoryReportResponse {
+  date: string
+  data: {
+    code: string
+    name: string
+    openingQuantity: number
+    importedQuantity: number
+    exportedQuantity: number
+    closingQuantity: number
+  }[]
+}
+
+/** @interface */
+export interface GetDailySalesInventoryReportHistoryResponse {
+  data: {
+    date: string
+    importedQuantity: number
+    exportedQuantity: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetSalesItemsFactoriesResponse {
+  data: {
+    value: SalesItemFactory
+    label: string
+  }[]
+}
+
+/** @interface */
+export interface GetSalesItemsSourcesResponse {
+  data: {
+    value: SalesItemSource
+    label: string
+  }[]
+}
+
+/** @interface */
+export interface CreateSalesItemRequest {
+  code: string
+  name: SalesItemName
+  size?: string
+  area?: number
+  specification?: string
+  mass?: number
+  factory?: SalesItemFactory
+  price: number
+  source?: SalesItemSource
+}
+
+/** @interface */
+export interface CreateSalesItemResponse extends SalesItem {}
+
+/** @interface */
+export interface UpdateSalesItemRequest {
+  code?: string
+  name?: SalesItemName
+  size?: string
+  area?: number
+  specification?: string
+  mass?: number
+  factory?: SalesItemFactory
+  price?: number
+  source?: SalesItemSource
+}
+
+/** @interface */
+export interface UpdateSalesItemResponse extends SalesItem {}
+
+/** @interface */
+export interface DeleteSalesItemRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesItemDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesItemDetailResponse extends SalesItem {}
+
+/** @interface */
+export interface ExportXlsxSalesItemsRequest {
+  searchText?: string
+  factory?: SalesItemFactory
+  source?: SalesItemSource
+}
+
+/** @interface */
+export interface GetSalesItemsQuantityByRangeRequest {
+  startDate?: Date
+  endDate?: Date
+}
+
+/** @interface */
+export interface GetSalesItemsQuantityByRangeResponse {
+  code: string
+  totalQuantity: number
+  orderCount: number
+}
+
+/** @interface */
+export interface GetSalesItemsTopCustomersByRangeRequest {
+  startDate?: Date
+  endDate?: Date
+  limit?: number
+}
+
+/** @interface */
+export interface GetSalesItemsTopCustomersByRangeResponse {
+  code: string
+  topCustomers: Array<{
+    funnel: {
+      _id: string
+      name: string
+      province: {
+        _id: string
+        code: string
+        name: string
+        createdAt: string
+        updatedAt: string
+      }
+      phoneNumber: string
+      secondaryPhoneNumbers?: string[]
+      psid: string
+      channel: {
+        _id: string
+        channelName: string
+      }
+      user: {
+        _id: string
+        name: string
+      }
+      hasBuyed: boolean
+      cost?: number
+      stage: "lead" | "contacted" | "customer" | "closed"
+      createdAt: string
+      updatedAt: string
+    }
+    totalQuantity: number
+    orderCount: number
+  }>
+}
+
+// -------------------- SALES DASHBOARD --------------------
+
+/** @interface */
+export interface GetSalesRevenueRequest {
+  startDate: Date
+  endDate: Date
+  channel?: string
+}
+
+/** @interface */
+export interface GetSalesRevenueResponse {
+  totalRevenue: number
+  totalRevenueBeforeDiscount: number
+  totalAdsCost: number
+  totalOrders: number
+  totalQuantity: number
+  totalTax: number
+  totalShippingCost: number
+  revenueFromNewCustomers: number
+  revenueFromReturningCustomers: number
+  newLeads: number
+  topItemsByRevenue: {
+    code: string
+    name: string
+    revenue: number
+  }[]
+  topItemsByQuantity: {
+    code: string
+    name: string
+    quantity: number
+  }[]
+  otherItemsRevenue: number
+  revenueByChannel: {
+    channelId: string
+    channelName: string
+    revenue: number
+    orderCount: number
+  }[]
+  revenueByUser: {
+    userId: string
+    userName: string
+    revenue: number
+    orderCount: number
+    ordersByCustomerType: {
+      new: number
+      returning: number
+    }
+    revenueByCustomerType: {
+      new: number
+      returning: number
+    }
+  }[]
+}
+
+/** @interface */
+export interface GetProvinceSalesStatsRequest {
+  date?: Date
+  startDate?: Date
+  endDate?: Date
+  channel?: string
+}
+
+/** @interface */
+export interface GetProvinceSalesStatsResponse {
+  totalRevenue: number
+  totalOrders: number
+  provinces: {
+    provinceName: string
+    revenue: number
+    orderCount: number
+  }[]
+}
+
+/** @interface */
+export interface GetMonthlyMetricsRequest {
+  month: number
+  year: number
+  channel?: string
+}
+
+/** @interface */
+export interface GetMonthlyMetricsResponse {
+  cac: number
+  crr: number
+  churnRate: number
+  conversionRate: number
+  avgDealSize: number
+  salesCycleLength: number
+  stageTransitions: {
+    lead: number
+    contacted: number
+    customer: number
+    closed: number
+  }
+  monthlyGoal: number
+  goalCompletionPercentage: number
+}
+
+export interface GetMonthlyTopCustomersRequest {
+  year: number
+  month: number
+  page: number
+  limit: number
+  channel?: string
+}
+
+export interface GetMonthlyTopCustomersResponse {
+  data: {
+    funnelId: string
+    customerName: string
+    customerPhone: string
+    revenue: number
+    orderCount: number
+  }[]
+  total: number
+}
+
+// -------------------- SALES CUSTOMER RANKS --------------------
+
+/** @interface */
+export interface CreateSalesCustomerRankRequest {
+  rank: "gold" | "silver" | "bronze"
+  minIncome: number
+}
+
+/** @interface */
+export interface CreateSalesCustomerRankResponse {
+  _id: string
+  rank: "gold" | "silver" | "bronze"
+  minIncome: number
+}
+
+/** @interface */
+export interface UpdateSalesCustomerRankRequest {
+  rank?: "gold" | "silver" | "bronze"
+  minIncome?: number
+}
+
+/** @interface */
+export interface UpdateSalesCustomerRankResponse {
+  _id: string
+  rank: "gold" | "silver" | "bronze"
+  minIncome: number
+}
+
+/** @interface */
+export interface DeleteSalesCustomerRankRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesCustomerRankRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesCustomerRankResponse {
+  _id: string
+  rank: "gold" | "silver" | "bronze"
+  minIncome: number
+}
+
+/** @interface */
+export interface GetSalesCustomerRanksRequest {
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface GetSalesCustomerRanksResponse {
+  _id: string
+  rank: "gold" | "silver" | "bronze"
+  minIncome: number
+}
+
+// -------------------- SALES ACTIVITIES --------------------
+
+/** @interface */
+export interface CreateSalesActivityRequest {
+  time: Date
+  type: "call" | "message" | "other"
+  note?: string
+  salesFunnelId: string
+}
+
+/** @interface */
+export interface CreateSalesActivityResponse {
+  _id: string
+  time: Date
+  type: "call" | "message" | "other"
+  note?: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface UpdateSalesActivityRequest {
+  time?: Date
+  type?: "call" | "message" | "other"
+  note?: string
+}
+
+/** @interface */
+export interface UpdateSalesActivityResponse {
+  _id: string
+  time: Date
+  type: "call" | "message" | "other"
+  note?: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface DeleteSalesActivityRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesActivityRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesActivityResponse {
+  _id: string
+  time: Date
+  type: "call" | "message" | "other"
+  note?: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetSalesActivitiesRequest {
+  salesFunnelId?: string
+  page: number
+  limit: number
+  type?: "call" | "message" | "other"
+}
+
+/** @interface */
+export interface GetSalesActivitiesResponse {
+  data: {
+    _id: string
+    time: Date
+    type: "call" | "message" | "other"
+    note?: string
+    salesFunnelId: {
+      _id: string
+      name: string
+      phoneNumber: string
+    }
+    createdAt: string
+    updatedAt: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetLatestActivityBySalesFunnelIdRequest {
+  salesFunnelId: string
+}
+
+/** @interface */
+export interface GetLatestActivityBySalesFunnelIdResponse {
+  _id: string
+  time: Date
+  type: "call" | "message" | "other"
+  note?: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+// -------------------- SALES TASKS --------------------
+
+/** @interface */
+export interface CreateSalesTaskRequest {
+  salesFunnelId: string
+  type: "call" | "message" | "other"
+  note?: string
+  deadline: Date
+}
+
+/** @interface */
+export interface CreateSalesTaskResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  type: "call" | "message" | "other"
+  assigneeId: {
+    id: string
+    name: string
+    username: string
+  }
+  note?: string
+  completed: boolean
+  completedAt?: Date
+  activityId?: string
+  deadline: Date
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface UpdateSalesTaskRequest {
+  type?: "call" | "message" | "other"
+  note?: string
+  deadline?: Date
+}
+
+/** @interface */
+export interface UpdateSalesTaskResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  type: "call" | "message" | "other"
+  assigneeId: {
+    id: string
+    name: string
+    username: string
+  }
+  note?: string
+  completed: boolean
+  completedAt?: Date
+  activityId?: string
+  deadline: Date
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface DeleteSalesTaskRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesTaskRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesTaskResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  type: "call" | "message" | "other"
+  assigneeId: {
+    id: string
+    name: string
+    username: string
+  }
+  note?: string
+  completed: boolean
+  completedAt?: Date
+  activityId?: string
+  deadline: Date
+  createdAt: string
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetSalesTasksRequest {
+  salesFunnelId?: string
+  assigneeId?: string
+  completed?: boolean
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface GetSalesTasksResponse {
+  data: {
+    _id: string
+    salesFunnelId: {
+      _id: string
+      name: string
+      phoneNumber: string
+    }
+    type: "call" | "message" | "other"
+    assigneeId: {
+      id: string
+      name: string
+      username: string
+    }
+    note?: string
+    completed: boolean
+    completedAt?: Date
+    activityId?: string
+    deadline: Date
+    createdAt: string
+    updatedAt: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface CompleteTaskRequest {
+  id: string
+}
+
+/** @interface */
+export interface CompleteTaskResponse {
+  _id: string
+  salesFunnelId: {
+    _id: string
+    name: string
+    phoneNumber: string
+  }
+  type: "call" | "message" | "other"
+  assigneeId: {
+    id: string
+    name: string
+    username: string
+  }
+  note?: string
+  completed: boolean
+  completedAt?: Date
+  activityId?: string
+  deadline: Date
+  createdAt: string
+  updatedAt: string
+}
+
+// -------------------- SALES DAILY REPORTS --------------------
+
+/** @interface */
+export interface GetRevenueForDateRequest {
+  date: Date
+  channelId: string
+}
+
+/** @interface */
+export interface GetRevenueForDateResponse {
+  revenue: number
+  newFunnelRevenue: {
+    ads: number
+    other: number
+  }
+  returningFunnelRevenue: number
+  newOrder: number
+  returningOrder: number
+  accumulatedRevenue: number
+  accumulatedNewFunnelRevenue: {
+    ads: number
+    other: number
+  }
+}
+
+/** @interface */
+export interface CreateSalesDailyReportRequest {
+  date: Date
+  channel: string
+  dateKpi: number
+}
+
+/** @interface */
+export interface CreateSalesDailyReportResponse {
+  _id: string
+  date: string
+  channel: string
+  dateKpi: number
+  revenue: number
+  newFunnelRevenue: {
+    ads: number
+    other: number
+  }
+  returningFunnelRevenue: number
+  newOrder: number
+  returningOrder: number
+  accumulatedRevenue: number
+  accumulatedNewFunnelRevenue: {
+    ads: number
+    other: number
+  }
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface DeleteSalesDailyReportRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesDailyReportsByMonthRequest {
+  month: number
+  year: number
+  channelId: string
+  deleted?: boolean
+}
+
+/** @interface */
+export interface GetSalesDailyReportsByMonthResponse {
+  data: {
+    _id: string
+    date: string
+    channel:
+      | string
+      | {
+          _id: string
+          channelName: string
+          phoneNumber?: string
+        }
+    dateKpi: number
+    revenue: number
+    newFunnelRevenue: {
+      ads: number
+      other: number
+    }
+    returningFunnelRevenue: number
+    newOrder: number
+    returningOrder: number
+    accumulatedRevenue: number
+    accumulatedNewFunnelRevenue: {
+      ads: number
+      other: number
+    }
+    createdAt: string
+    updatedAt: string
+    deletedAt?: string
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetSalesDailyReportDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetSalesDailyReportDetailResponse {
+  _id: string
+  date: string
+  channel: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+  }
+  dateKpi: number
+  revenue: number
+  newFunnelRevenue: {
+    ads: number
+    other: number
+  }
+  returningFunnelRevenue: number
+  newOrder: number
+  returningOrder: number
+  accumulatedRevenue: number
+  accumulatedNewFunnelRevenue: {
+    ads: number
+    other: number
+  }
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string
+}
+
+/** @interface */
+export interface UpsertSalesDailyAdsRequest {
+  date: Date
+  adsCost: number
+  newLeads: number
+}
+
+/** @interface */
+export interface SalesDailyAdsItem {
+  date: string
+  adsCost: number
+  newLeads: number
+}
+
+/** @interface */
+export interface GetSalesDailyAdsByMonthRequest {
+  month: number
+  year: number
+}
+
+/** @interface */
+export interface GetSalesDailyAdsByMonthResponse {
+  data: SalesDailyAdsItem[]
+  total: number
+}
+
+/** @interface */
+export interface GetSalesMonthKpiRequest {
+  date: Date
+  channelId: string
+}
+
+/** @interface */
+export interface GetSalesMonthKpiResponse {
+  _id: string
+  month: number
+  year: number
+  channel: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+  }
+  kpi: number
+}
+
+/** @interface */
+export interface GetAccumulatedRevenueForMonthRequest {
+  month: number
+  year: number
+  channelId: string
+}
+
+/** @interface */
+export interface GetAccumulatedRevenueForMonthResponse {
+  accumulatedRevenue: number
+}
+
+/** @interface */
+export interface CreateSalesMonthKpiRequest {
+  month: number
+  year: number
+  channel: string
+  kpi: number
+}
+
+/** @interface */
+export interface CreateSalesMonthKpiResponse {
+  _id: string
+  month: number
+  year: number
+  channel: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+  }
+  kpi: number
+}
+
+/** @interface */
+export interface UpdateSalesMonthKpiRequest {
+  month: number
+  year: number
+  channel: string
+  kpi: number
+}
+
+/** @interface */
+export interface UpdateSalesMonthKpiResponse {
+  _id: string
+  month: number
+  year: number
+  channel: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+  }
+  kpi: number
+}
+
+/** @interface */
+export interface GetMonthKpisRequest {
+  page: number
+  limit: number
+  channelId?: string
+  month?: number
+  year?: number
+}
+
+/** @interface */
+export interface GetMonthKpisResponse {
+  data: {
+    _id: string
+    month: number
+    year: number
+    channel: {
+      _id: string
+      channelName: string
+      phoneNumber: string
+    }
+    kpi: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface GetMonthKpiDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetMonthKpiDetailResponse {
+  _id: string
+  month: number
+  year: number
+  channel: {
+    _id: string
+    channelName: string
+    phoneNumber: string
+  }
+  kpi: number
+}
+
+/** @interface */
+export interface ShopeeMonthKpiRecord {
+  _id: string
+  month: number
+  year: number
+  channel: string | LivestreamChannel
+  revenueKpi: number
+  adsCostKpi: number
+  roasKpi: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+/** @interface */
+export interface CreateShopeeMonthKpiRequest {
+  month: number
+  year: number
+  channel: string
+  revenueKpi: number
+  adsCostKpi: number
+  roasKpi: number
+}
+
+/** @interface */
+export interface CreateShopeeMonthKpiResponse extends ShopeeMonthKpiRecord {}
+
+/** @interface */
+export interface GetShopeeMonthKpisRequest {
+  page: number
+  limit: number
+  month?: number
+  year?: number
+  channel?: string
+}
+
+/** @interface */
+export interface GetShopeeMonthKpisResponse {
+  data: ShopeeMonthKpiRecord[]
+  total: number
+}
+
+/** @interface */
+export interface GetShopeeMonthKpiDetailRequest {
+  id: string
+}
+
+/** @interface */
+export interface GetShopeeMonthKpiDetailResponse extends ShopeeMonthKpiRecord {}
+
+/** @interface */
+export interface UpdateShopeeMonthKpiRequest {
+  month?: number
+  year?: number
+  channel?: string
+  revenueKpi?: number
+  adsCostKpi?: number
+  roasKpi?: number
+}
+
+/** @interface */
+export interface UpdateShopeeMonthKpiResponse extends ShopeeMonthKpiRecord {}
+
+/** @interface */
+export interface DeleteShopeeMonthKpiRequest {
+  id: string
+}
+
+/** @interface */
+export type ShopeePerformanceTimeMode = "month" | "range"
+
+/** @interface */
+export type ShopeeRangePreset =
+  | "last-7-days"
+  | "last-14-days"
+  | "last-30-days"
+  | "this-month"
+  | "last-month"
+
+/** @interface */
+export interface MonthlySummaryResponse {
+  scope: {
+    type: "monthly"
+    channel: string
+    month: number
+    year: number
+  }
+  summary: {
+    currentRevenue: number
+    revenueTarget: number
+    liveRevenue: number
+    adsCost: number
+    adsCostTarget: number
+    roas: number
+    roasTarget: number
+    totalOrders: number
+    expectedProgressPercent: number
+    actualRevenueProgressPercent: number
+    actualAdsCostProgressPercent: number
+    actualRoasProgressPercent: number
+  }
+  meta: {
+    lastSyncedAt: string | null
+    timezone: string
+    currency: "VND"
+  }
+}
+
+/** @interface */
+export type MonthlyKpiItem = {
+  key: "revenue" | "adsCost" | "roas"
+  label: string
+  actual: number
+  target: number
+  expectedProgressPercent: number
+  actualProgressPercent: number
+  deltaPercent: number
+  speedMultiplier: number
+  status: "ahead" | "behind" | "on_track" | "no_target"
+}
+
+/** @interface */
+export type MonthlyKpisResponse = {
+  scope: {
+    type: "monthly"
+    channel: string
+    month: number
+    year: number
+  }
+  kpis: MonthlyKpiItem[]
+  meta: {
+    lastSyncedAt: string | null
+    timezone: string
+    currency: "VND"
+  }
+}
+
+/** @interface */
+export type RangeSummaryResponse = {
+  scope: {
+    type: "range"
+    channel: string
+    orderFrom: string
+    orderTo: string
+    days: number
+  }
+  summary: {
+    grossRevenue: number
+    netRevenue: number
+    liveRevenue: number
+    adsCost: number
+    totalOrders: number
+    roas: number
+    aov: number
+    revenuePerDay: number
+    ordersPerDay: number
+    adsCostPerDay: number
+  }
+  meta: {
+    lastSyncedAt: string | null
+    timezone: string
+    currency: "VND"
+    isPartialToday: boolean
+  }
+}
+
+/** @interface */
+export type RangeTimeseriesPoint = {
+  orderDate: string
+  revenue: number
+  liveRevenue: number
+  adsCost: number
+  orders: number
+  roas: number
+  aov: number
+}
+
+/** @interface */
+export type RangeTimeseriesResponse = {
+  scope: {
+    type: "range"
+    channel: string
+    orderFrom: string
+    orderTo: string
+    days: number
+  }
+  series: RangeTimeseriesPoint[]
+  meta: {
+    lastSyncedAt: string | null
+    timezone: string
+    currency: "VND"
+    isPartialToday: boolean
+  }
+}
+
+/** @interface */
+export type OrdersListResponse = {
+  scope: {
+    type: "monthly" | "range"
+    channel: string
+    month?: number
+    year?: number
+    orderFrom?: string
+    orderTo?: string
+  }
+  pagination: {
+    page: number
+    pageSize: number
+    totalItems: number
+    totalPages: number
+  }
+  items: Array<{
+    orderDate: string
+    orderCode: string
+    customerName: string | null
+    shop: string | null
+    productName: string
+    revenue: number
+    productCount: number
+  }>
+  meta: {
+    lastSyncedAt: string | null
+    timezone: string
+    currency: "VND"
+  }
+}
+
+/** @interface */
+export interface MonthlySummaryQueryRequest {
+  channel?: string
+  month: number
+  year: number
+}
+
+/** @interface */
+export interface MonthlyKpisQueryRequest {
+  channel?: string
+  month: number
+  year: number
+}
+
+/** @interface */
+export interface RangeSummaryQueryRequest {
+  channel?: string
+  orderFrom: string
+  orderTo: string
+}
+
+/** @interface */
+export interface RangeTimeseriesQueryRequest {
+  channel?: string
+  orderFrom: string
+  orderTo: string
+}
+
+/** @interface */
+export interface OrdersQueryRequest {
+  channel?: string
+  month?: number
+  year?: number
+  orderFrom?: string
+  orderTo?: string
+  page?: number
+  pageSize?: number
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewRequest {
+  month: number
+  year: number
+  channelId?: string
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewScope {
+  type: "all" | "channel"
+  month: number
+  year: number
+  channelId: string | null
+  expectedProgressPercentage: number
+  elapsedDays: number
+  totalDays: number
+  currentDate: string
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewChannel {
+  _id: string
+  name: string
+  username: string
+  platform: string
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewTargets {
+  revenueKpi: number
+  adsCostKpi: number
+  roasKpi: number
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewActuals {
+  revenue: number
+  liveRevenue: number
+  adsCost: number
+  roas: number
+  totalOrders: number
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewMetricProgress {
+  target: number
+  actual: number
+  achievedPercentage: number
+  expectedPercentage: number
+  gapPercentage: number
+  paceRatio: number
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewProgress {
+  revenue: ShopeeDashboardOverviewMetricProgress
+  adsCost: ShopeeDashboardOverviewMetricProgress
+  roas: ShopeeDashboardOverviewMetricProgress
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewResponse {
+  scope: ShopeeDashboardOverviewScope
+  channel: ShopeeDashboardOverviewChannel | null
+  targets: ShopeeDashboardOverviewTargets
+  actuals: ShopeeDashboardOverviewActuals
+  progress: ShopeeDashboardOverviewProgress
+}
+
+/** @interface */
+export type ShopeeDashboardValueFormat =
+  | "currency"
+  | "decimal"
+  | "integer"
+  | "percentage"
+
+/** @interface */
+export type ShopeeDashboardMetricKey = "revenue" | "adsCost" | "roas"
+
+/** @interface */
+export type ShopeeDashboardPaceStatus =
+  | "on-track"
+  | "ahead"
+  | "behind"
+  | "unknown"
+
+/** @interface */
+export type ShopeeDashboardRevenueAdjustmentMode = "additive" | "override"
+
+/** @interface */
+export interface ShopeeDashboardRevenueAdjustment {
+  mode: ShopeeDashboardRevenueAdjustmentMode
+  manualRevenue: number
+}
+
+/** @interface */
+export interface ShopeeChannelOption {
+  value: string
+  label: string
+}
+
+/** @interface */
+export interface ShopeeDashboardSummaryItem {
+  key:
+    | "revenue"
+    | "liveRevenue"
+    | "adsCost"
+    | "roas"
+    | "totalOrders"
+    | "adsRevenueRatio"
+    | "avgRevenuePerDayVsKpi"
+  label: string
+  value: number
+  description: string
+  format: ShopeeDashboardValueFormat
+  originalValue?: number
+  isAdjusted?: boolean
+}
+
+/** @interface */
+export interface ShopeeDashboardMetricViewModel {
+  key: ShopeeDashboardMetricKey
+  label: string
+  format: Extract<ShopeeDashboardValueFormat, "currency" | "decimal">
+  target: number
+  actual: number
+  originalActual?: number
+  achievedPercentage: number
+  expectedPercentage: number
+  gapPercentage: number
+  paceRatio: number
+  paceStatus: ShopeeDashboardPaceStatus
+  isAdjusted?: boolean
+}
+
+/** @interface */
+export interface ShopeeDashboardAdjustmentViewModel {
+  mode: ShopeeDashboardRevenueAdjustmentMode
+  manualRevenue: number
+  originalRevenue: number
+  adjustedRevenue: number
+  originalRoas: number
+  adjustedRoas: number
+  isAdjusted: boolean
+  note?: string
+}
+
+/** @interface */
+export interface ShopeeDashboardOverviewViewModel {
+  scope: ShopeeDashboardOverviewResponse["scope"]
+  channel: ShopeeDashboardOverviewResponse["channel"]
+  scopeLabel: string
+  scopeDescription: string
+  summaryItems: ShopeeDashboardSummaryItem[]
+  metrics: ShopeeDashboardMetricViewModel[]
+  expectedProgressPercentage: number
+  elapsedDays: number
+  totalDays: number
+  currentDateLabel: string
+  originalRevenue: number
+  adjustedRevenue: number
+  originalRoas: number
+  adjustedRoas: number
+  revenueAdjustment: ShopeeDashboardAdjustmentViewModel
+  isEmpty: boolean
+}
+
+/** @interface */
+export interface InsertIncomeShopeeRequest {
+  channel: string
+}
+
+/** @interface */
+export interface SearchShopeeIncomeRequest {
+  orderStartDate?: string
+  orderEndDate?: string
+  channelId?: string
+  productCode?: string
+  page: number
+  limit: number
+}
+
+/** @interface */
+export interface SearchShopeeIncomeResponse {
+  data: {
+    _id: string
+    orderDate: string
+    customer: string
+    creator: string
+    channel: {
+      _id: string
+      name: string
+      username: string
+      usernames: string[]
+      link: string
+      platform: string
+    }
+    orderId: string
+    products: {
+      code: string
+      name: string
+      quantity: number
+      price: number
+    }[]
+    source: string
+    total: number
+    affPercentage: number
+  }[]
+  total: number
+}
+
+/** @interface */
+export interface DeleteShopeeIncomesRequest {
+  channelId: string
+  orderId?: string
+  orderDate?: string
+  orderStartDate?: string
+  orderEndDate?: string
+}
+
+/** @interface */
+export interface DeleteShopeeIncomesResponse {
+  deletedCount: number
+}
+
+/** @interface */
+export interface ShopeeDashboardOrderProductViewModel {
+  code: string
+  name: string
+  quantity: number
+  price: number
+}
+
+/** @interface */
+export interface ShopeeDashboardOrderViewModel {
+  _id: string
+  orderDate: string
+  orderId: string
+  customer: string
+  creator: string
+  source: string
+  total: number
+  channelId: string
+  channelName: string
+  products: ShopeeDashboardOrderProductViewModel[]
+  totalProducts: number
+  totalQuantity: number
+  productSummary: string
+}
+
+/** @interface */
+export interface ShopeeDashboardOrdersViewModel {
+  data: ShopeeDashboardOrderViewModel[]
+  total: number
+}
+
+/** @interface */
+export interface ShopeeDailyAdsRecord {
+  _id: string
+  date: string
+  channel: string | { _id: string; name?: string }
+  adsCost: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+/** @interface */
+export interface SearchShopeeDailyAdsRequest {
+  page?: number
+  limit?: number
+  channel?: string
+  date?: string
+  startDate?: string
+  endDate?: string
+}
+
+/** @interface */
+export interface SearchShopeeDailyAdsResponse {
+  data: ShopeeDailyAdsRecord[]
+  total: number
+}
+
+/** @interface */
+export interface CreateShopeeDailyAdsRequest {
+  date: Date
+  channel: string
+  adsCost: number
+}
+
+/** @interface */
+export interface UpdateShopeeDailyAdsRequest {
+  date?: Date
+  channel?: string
+  adsCost?: number
+}
+
+/** @interface */
+export interface DeleteShopeeDailyAdsRequest {
+  channel: string
+  date: string
+}
+
+/** @interface */
+export interface DeleteShopeeDailyAdsResponse {
+  deletedId: string
+}
+
+/** @interface */
+export interface ShopeeDailyLiveRevenueRecord {
+  _id: string
+  date: string
+  channel: string | { _id: string; name?: string }
+  liveRevenue: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+/** @interface */
+export interface SearchShopeeDailyLiveRevenuesRequest {
+  page?: number
+  limit?: number
+  channel?: string
+  date?: string
+  startDate?: string
+  endDate?: string
+}
+
+/** @interface */
+export interface SearchShopeeDailyLiveRevenuesResponse {
+  data: ShopeeDailyLiveRevenueRecord[]
+  total: number
+}
+
+/** @interface */
+export interface CreateShopeeDailyLiveRevenueRequest {
+  date: Date
+  channel: string
+  liveRevenue: number
+}
+
+/** @interface */
+export interface UpdateShopeeDailyLiveRevenueRequest {
+  date?: Date
+  channel?: string
+  liveRevenue?: number
+}
+
+/** @interface */
+export interface DeleteShopeeDailyLiveRevenueRequest {
+  channel: string
+  date: string
+}
+
+/** @interface */
+export interface DeleteShopeeDailyLiveRevenueResponse {
+  deletedId: string
+}

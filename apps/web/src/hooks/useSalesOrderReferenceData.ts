@@ -1,0 +1,70 @@
+import { useQuery } from "@tanstack/react-query"
+import { useSalesChannels } from "./useSalesChannels"
+import { useSalesFunnel } from "./useSalesFunnel"
+import { useUsers } from "./useUsers"
+
+type UseSalesOrderReferenceDataParams = {
+  enabled?: boolean
+}
+
+export const useSalesOrderReferenceData = ({
+  enabled = true
+}: UseSalesOrderReferenceDataParams = {}) => {
+  const { searchFunnel } = useSalesFunnel()
+  const { searchSalesChannels, getMyChannel } = useSalesChannels()
+  const { getMe } = useUsers()
+
+  const { data: meData } = useQuery({
+    queryKey: ["getMe"],
+    queryFn: getMe,
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false
+  })
+
+  const me = meData?.data
+
+  const permissions = me?.permissions ?? []
+  const canSeeAllFunnels = permissions.includes("sales.funnels.read.all")
+  const isSalesCs = !canSeeAllFunnels
+  const isAccountingEmp = permissions.includes("api.salesorders.export-orders-to-excel-for-accounting")
+
+  const { data: channelsData } = useQuery({
+    queryKey: ["salesChannels", "all"],
+    queryFn: () => searchSalesChannels({ page: 1, limit: 999 }),
+    enabled,
+    staleTime: 100000,
+    refetchOnWindowFocus: false
+  })
+
+  const { data: myChannelData } = useQuery({
+    queryKey: ["getMyChannel"],
+    queryFn: getMyChannel,
+    select: (data) => data.data,
+    enabled: enabled && !!me,
+    staleTime: 100000,
+    refetchOnWindowFocus: false
+  })
+
+  const { data: funnelData } = useQuery({
+    queryKey: ["salesFunnel", "all"],
+    queryFn: () =>
+      searchFunnel({
+        page: 1,
+        limit: 999
+      }),
+    enabled: enabled && !!me,
+    staleTime: 100000,
+    refetchOnWindowFocus: false
+  })
+
+  return {
+    me,
+    channelsData,
+    myChannelData,
+    funnelData,
+    canSeeAllFunnels,
+    isSalesCs,
+    isAccountingEmp
+  }
+}

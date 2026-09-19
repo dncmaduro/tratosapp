@@ -1,0 +1,68 @@
+import { useMediaQuery } from "@mantine/hooks"
+import {
+  getVisibleNavigationItems,
+  type NavigationItem
+} from "../../constants/navs"
+import { NavButton } from "./NavButton"
+import { IconChevronLeft, IconMenu2 } from "@tabler/icons-react"
+import type { GetMeResponse } from "../../hooks/models"
+
+type SidebarProps = {
+  meData: GetMeResponse | undefined
+  collapsed: boolean
+  setCollapsed: (c: (prev: boolean) => boolean) => void
+  navs?: NavigationItem[]
+}
+
+export const Sidebar = ({
+  meData,
+  collapsed,
+  setCollapsed,
+  navs
+}: SidebarProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)")
+  const visibleNavs =
+    navs && meData
+      ? getVisibleNavigationItems(navs, meData.permissions)
+      : []
+
+  return (
+    <nav
+      className={[
+        "sticky top-0 z-[201] h-screen border-r border-gray-200 bg-white",
+        "flex flex-col shadow-[2px_0_18px_0_rgba(120,120,150,0.06)]",
+        "transition-[width] duration-200 ease-out",
+        collapsed ? "w-16" : "min-w-[240px]"
+      ].join(" ")}
+    >
+      <button
+        onClick={() => setCollapsed((c) => !c)}
+        className={[
+          "m-3 mb-2 rounded-lg bg-gray-100 p-1.5 hover:bg-gray-200",
+          "transition-colors",
+          collapsed ? "self-center" : "self-end"
+        ].join(" ")}
+        aria-label={collapsed ? "Mở menu" : "Thu gọn menu"}
+      >
+        {collapsed ? (
+          <IconMenu2 size={isMobile ? 14 : 22} />
+        ) : (
+          <IconChevronLeft size={isMobile ? 14 : 22} />
+        )}
+      </button>
+
+      <div className="flex flex-1 flex-col gap-3 px-2">
+        {visibleNavs.map((n) => (
+          <NavButton
+            key={n.to}
+            to={n.to}
+            label={n.label}
+            iconName={n.icon}
+            beta={n.beta}
+            collapsed={collapsed}
+          />
+        ))}
+      </div>
+    </nav>
+  )
+}

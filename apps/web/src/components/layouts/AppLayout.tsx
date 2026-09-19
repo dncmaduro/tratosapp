@@ -1,0 +1,166 @@
+import { Badge, Box, Container, Group, rem } from "@mantine/core"
+import pkg from "../../../package.json"
+import { useNavigate } from "@tanstack/react-router"
+import { ReactNode, useEffect, useRef } from "react"
+import { useUserStore } from "../../store/userStore"
+import { UserMenu } from "./UserMenu"
+import { useUsers } from "../../hooks/useUsers"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { saveToCookies } from "../../store/cookies"
+import { CToast } from "../common/CToast"
+import { Sidebar } from "./Sidebar"
+import { useUIStore } from "../../store/uiStore"
+import { NAVS } from "../../constants/navs.ts"
+
+export const AppLayout = ({
+  children,
+  navs
+}: {
+  children: ReactNode
+  navs?: typeof NAVS
+}) => {
+  const { accessToken, setUser, clearUser } = useUserStore()
+  const { checkToken, getNewToken, getMe } = useUsers()
+  const navigate = useNavigate()
+  const refreshAttemptedRef = useRef(false)
+  const collapsed = useUIStore((s) => s.sidebarCollapsed)
+  const setCollapsed = useUIStore((s) => s.setSidebarCollapsed)
+
+  const { mutate: getToken, isPending: isRefreshing } = useMutation({
+    mutationKey: ["getNewToken"],
+    mutationFn: getNewToken,
+    onSuccess: (response) => {
+      setUser(response.data.accessToken)
+      saveToCookies("refreshToken", response.data.refreshToken)
+    },
+    onError: () => {
+      navigate({ to: "/" })
+      clearUser()
+      saveToCookies("refreshToken", "")
+      CToast.error({
+        title: "Vui lòng đăng nhập lại!"
+      })
+    }
+  })
+
+  const { data: meData } = useQuery({
+    queryKey: ["getMe"],
+    queryFn: getMe,
+    enabled: !!accessToken,
+    select: (data) => data.data
+  })
+
+  const { data: isTokenValid } = useQuery({
+    queryKey: ["validateToken", accessToken],
+    queryFn: checkToken,
+    enabled: !!accessToken,
+    select: (data) => data.data.valid,
+    refetchInterval: 1000 * 30 // 30s
+  })
+
+  useEffect(() => {
+    if (isTokenValid === true) {
+      refreshAttemptedRef.current = false
+      return
+    }
+
+    if (
+      isTokenValid === false &&
+      !isRefreshing &&
+      !refreshAttemptedRef.current
+    ) {
+      refreshAttemptedRef.current = true
+      getToken()
+    }
+  }, [getToken, isRefreshing, isTokenValid])
+
+  useEffect(() => {
+    if (!accessToken) {
+      navigate({ to: "/" })
+    }
+  }, [accessToken])
+
+  const resolvedNavs = navs ?? NAVS
+
+  return (
+    <div style={{ display: "flex", minHeight: "100vh", background: "#f8fafc" }}>
+      <Sidebar
+        meData={meData}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        navs={resolvedNavs}
+      />
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh"
+        }}
+      >
+        <header
+          style={{
+            boxShadow:
+              "0 2px 18px 0 rgba(120,120,150,0.06), 0 1.5px 0px 0 #ececec",
+            background: "#fff",
+            zIndex: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: rem(64),
+            position: "sticky",
+            top: 0
+          }}
+        >
+          <Group gap={8} style={{ marginLeft: rem(16) }}>
+            <Badge
+              ml={0}
+              variant="gradient"
+              gradient={{ from: "indigo", to: "violet", deg: 112 }}
+              radius="xl"
+              size="md"
+              fw={700}
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                letterSpacing: 0.2
+              }}
+            >
+              {import.meta.env.VITE_ENV === "development"
+                ? "DEVELOPMENT"
+                : `v${pkg.version}`}
+            </Badge>
+            <Badge
+              ml={0}
+              variant="gradient"
+              gradient={{ from: "red", to: "orange", deg: 112 }}
+              radius="xl"
+              size="md"
+              fw={700}
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                letterSpacing: 0.2
+              }}
+              hidden={import.meta.env.VITE_ENV !== "testing"}
+            >
+              TESTING
+            </Badge>
+          </Group>
+          <Group gap={8} style={{ marginRight: rem(16) }}>
+            <UserMenu />
+          </Group>
+        </header>
+        <main
+          style={{
+            flex: 1,
+            background: "none",
+            minHeight: "calc(100vh - 64px)"
+          }}
+        >
+          <Container size="1600">
+            <Box w="100%" maw={1600} mx="auto">{children}</Box>
+          </Container>
+        </main>
+      </div>
+    </div>
+  )
+}

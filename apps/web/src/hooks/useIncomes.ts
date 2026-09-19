@@ -1,0 +1,260 @@
+import { useUserStore } from "../store/userStore"
+import { toQueryString } from "../utils/toQuery"
+import { callApi } from "./axios"
+import {
+  DeleteIncomeByDateRequest,
+  GetIncomesByDateRangeRequest,
+  GetIncomesByDateRangeResponse,
+  InsertIncomeRequest,
+  InsertIncomeResponse,
+  GetTotalIncomesByMonthRequest,
+  GetTotalIncomesByMonthResponse,
+  UpdateAffiliateTypeResponse,
+  UpdateIncomesBoxRequest,
+  GetTotalQuantityByMonthResponse,
+  GetKPIPercentageByMonthRequest,
+  GetKPIPercentageByMonthResponse,
+  ExportXlsxIncomesRequest,
+  GetRangeStatsRequest,
+  GetRangeStatsResponse,
+  GetTopCreatorsRequest,
+  GetTopCreatorsResponse,
+  GetAdsCostSplitByMonthRequest,
+  GetTotalLiveAndShopIncomeByMonthRequest,
+  GetTotalLiveAndShopIncomeByMonthResponse,
+  GetAdsCostSplitByMonthResponse,
+  InsertIncomeAndUpdateSourceRequest,
+  InsertIncomeAndUpdateSourceResponse,
+  GetTotalCountIncomeByMonthRequest,
+  GetTotalCountIncomeByMonthResponse
+} from "./models"
+
+type IncomeImportMode =
+  | "full"
+  | "status-only"
+  | "base-only"
+  | "affiliate-only"
+
+type IncomeImportRequest = Omit<
+  InsertIncomeAndUpdateSourceRequest,
+  "updateMode"
+> & {
+  updateMode?: IncomeImportMode
+  chunkIndex?: number
+  chunkCount?: number
+}
+
+export const useIncomes = () => {
+  const { accessToken } = useUserStore()
+
+  /** @deprecated */
+  const insertIncome = async (file: File, req: InsertIncomeRequest) => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    Object.entries(req).forEach(([key, value]) => {
+      if (typeof value !== "undefined" && value !== null)
+        formData.append(key, value as string)
+    })
+
+    return callApi<FormData, InsertIncomeResponse>({
+      path: `/v1/incomes`,
+      data: formData,
+      method: "POST",
+      token: accessToken,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
+  }
+
+  const deleteIncomeByDate = async (req: DeleteIncomeByDateRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, never>({
+      path: `/v1/incomes?${query}`,
+      method: "DELETE",
+      token: accessToken
+    })
+  }
+
+  /** @deprecated */
+  const updateAffiliateType = async (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    return callApi<FormData, UpdateAffiliateTypeResponse>({
+      path: `/v1/incomes/update-affiliate`,
+      data: formData,
+      method: "POST",
+      token: accessToken,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
+  }
+
+  const getIncomesByDateRange = async (req: GetIncomesByDateRangeRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetIncomesByDateRangeResponse>({
+      path: `/v1/incomes?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const updateIncomesBox = async (req: UpdateIncomesBoxRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<UpdateIncomesBoxRequest, never>({
+      path: `/v1/incomes/update-box?${query}`,
+      method: "PATCH",
+      token: accessToken
+    })
+  }
+
+  const getTotalIncomesByMonth = async (req: GetTotalIncomesByMonthRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetTotalIncomesByMonthResponse>({
+      path: `/v1/incomes/income-split-by-month?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const getTotalQuantityByMonth = async (
+    req: GetTotalIncomesByMonthRequest
+  ) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetTotalQuantityByMonthResponse>({
+      path: `/v1/incomes/quantity-split-by-month?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const getKPIPercentageByMonth = async (
+    req: GetKPIPercentageByMonthRequest
+  ) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetKPIPercentageByMonthResponse>({
+      path: `/v1/incomes/kpi-percentage-split-by-month?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const getRangeStats = async (req: GetRangeStatsRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetRangeStatsResponse>({
+      path: `/v1/incomes/range-stats?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const getTopCreators = async (req: GetTopCreatorsRequest) => {
+    const query = toQueryString(req)
+    return callApi<never, GetTopCreatorsResponse>({
+      path: `/v1/incomes/top-creators?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const exportXlsxIncomes = async (req: ExportXlsxIncomesRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, Blob>({
+      path: `/v1/incomes/export-xlsx?${query}`,
+      method: "GET",
+      token: accessToken,
+      headers: {
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    })
+  }
+
+  const getLiveShopIncomeByMonth = async (
+    req: GetTotalLiveAndShopIncomeByMonthRequest
+  ) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetTotalLiveAndShopIncomeByMonthResponse>({
+      path: `/v1/incomes/monthly-live-shop-income?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const getAdsCostSplitByMonth = async (req: GetAdsCostSplitByMonthRequest) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetAdsCostSplitByMonthResponse>({
+      path: `/v1/incomes/monthly-ads-cost-split?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  const insertIncomeAndUpdateSource = async (
+    files: File[],
+    req: IncomeImportRequest
+  ) => {
+    const formData = new FormData()
+    files.forEach((file) => formData.append("files", file))
+
+    Object.entries(req).forEach(([key, value]) => {
+      if (typeof value !== "undefined" && value !== null)
+        formData.append(key, value as string)
+    })
+
+    return callApi<FormData, InsertIncomeAndUpdateSourceResponse>({
+      path: `/v1/incomes/insert-and-update-source`,
+      data: formData,
+      method: "POST",
+      token: accessToken,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    })
+  }
+
+  const getTotalCountIncomeByMonth = async (
+    req: GetTotalCountIncomeByMonthRequest
+  ) => {
+    const query = toQueryString(req)
+
+    return callApi<never, GetTotalCountIncomeByMonthResponse>({
+      path: `/v1/incomes/total-orders-by-month?${query}`,
+      method: "GET",
+      token: accessToken
+    })
+  }
+
+  return {
+    /** @deprecated */
+    insertIncome,
+    deleteIncomeByDate,
+    /** @deprecated */
+    updateAffiliateType,
+    getIncomesByDateRange,
+    updateIncomesBox,
+    getTotalIncomesByMonth,
+    getTotalQuantityByMonth,
+    getKPIPercentageByMonth,
+    getRangeStats,
+    getTopCreators,
+    exportXlsxIncomes,
+    getLiveShopIncomeByMonth,
+    getAdsCostSplitByMonth,
+    insertIncomeAndUpdateSource,
+    getTotalCountIncomeByMonth
+  }
+}

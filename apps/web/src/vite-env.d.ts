@@ -1,0 +1,16 @@
+/// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
+
+interface ImportMetaEnv {
+  readonly BACKEND_URL: string
+  readonly WEB_SOCKET_URL: string
+  readonly ENV: string
+  readonly CLOUDINARY_UPLOAD_PRESET: string
+  readonly CLOUDINARY_CLOUD_NAME: string
+  readonly CLOUDINARY_API_KEY: string
+  readonly NEW_ITEMS_DATE: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
