@@ -1,0 +1,19 @@
+# Dependencies and package-manager files
+node_modules/
+.pnpm-store/
+
+# Build and test outputs
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Tooling and OS files
+.DS_Store
+*.log
