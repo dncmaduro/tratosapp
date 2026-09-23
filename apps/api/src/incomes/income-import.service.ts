@@ -2,29 +2,188 @@ import { BadRequestException, Injectable } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
 import * as XLSX from "xlsx"
 import { Model, Types } from "mongoose"
+import { Channel, ChannelDocument } from "../channels/channel.schema"
 import { Income, IncomeDocument } from "./income.schema"
+
+const valueAt = (row: Record<string, unknown>, ...headers: string[]) =>
+  headers.map((header) => row[header]).find((value) => value !== undefined && value !== null && String(value).trim() !== "")
+
+const text = (value: unknown) => String(value ?? "").trim()
+
+const number = (value: unknown) => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0
+  const raw = text(value).replace(/[%₫đ\s]/gi, "")
+  if (!raw) return 0
+  const normalized = raw.includes(",") && raw.includes(".")
+    ? raw.lastIndexOf(",") > raw.lastIndexOf(".")
+      ? raw.replace(/\./g, "").replace(",", ".")
+      : raw.replace(/,/g, "")
+    : raw.includes(",")
+      ? raw.replace(",", ".")
+      : raw
+  const parsed = Number(normalized)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const hasValue = (value: unknown) => value !== undefined && value !== null && text(value) !== ""
+
+const date = (value: unknown) => {
+  if (value instanceof Date && !Number.isNaN(value.valueOf())) return value
+  if (typeof value === "number") {
+    const parsed = XLSX.SSF.parse_date_code(value)
+    if (parsed) return new Date(parsed.y, parsed.m - 1, parsed.d, parsed.H, parsed.M, parsed.S)
+  }
+  const parsed = new Date(text(value))
+  return Number.isNaN(parsed.valueOf()) ? undefined : parsed
+}
 
 @Injectable()
 export class IncomeImportService {
-  constructor(@InjectModel(Income.name) private readonly incomes: Model<IncomeDocument>) {}
-  async importTotal(file: Express.Multer.File, channelId: string) {
-    const sheet = XLSX.read(file.buffer, { type: "buffer" }).Sheets[XLSX.read(file.buffer, { type: "buffer" }).SheetNames[0]]
-    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet)
-    const groups = new Map<string, Record<string, unknown>[]>()
-    for (const row of rows) { const id = String(row["Order ID"] ?? "").trim(); if (id && String(row["Cancelation/Return Type"] ?? "") !== "Cancel") groups.set(id, [...(groups.get(id) ?? []), row]) }
-    const docs = [...groups].map(([orderId, lines]) => { const first = lines[0]; const date = new Date(String(first["Created Time"] ?? "")); if (Number.isNaN(date.valueOf())) throw new BadRequestException("File tổng doanh thu thiếu cột Created Time hợp lệ"); return { orderId, customer: String(first["Buyer Username"] ?? ""), province: String(first["Province"] ?? ""), shippingProvider: String(first["Shipping Provider Name"] ?? ""), orderStatus: String(first["Order Status"] ?? ""), cancelationOrReturnType: String(first["Cancelation/Return Type"] ?? ""), channel: new Types.ObjectId(channelId), date, products: lines.map((line) => ({ code: String(line["Seller SKU"] ?? ""), name: String(line["Product Name"] ?? ""), source: "other", quantity: Number(line["Quantity"]) || 0, price: Number(line["SKU Subtotal Before Discount"]) || 0, priceAfterDiscount: Number(line["SKU Subtotal After Discount"]) || 0 })) } })
-    if (docs.length) await this.incomes.insertMany(docs, { ordered: false })
-    return { importedOrders: docs.length }
+  constructor(
+    @InjectModel(Income.name) private readonly incomes: Model<IncomeDocument>,
+    @InjectModel(Channel.name) private readonly channels: Model<ChannelDocument>
+  ) {}
+
+  private rows(file: Express.Multer.File) {
+    const workbook = XLSX.read(file.buffer, { type: "buffer", cellDates: true })
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+    if (!worksheet) throw new BadRequestException("File Excel không có sheet dữ liệu")
+    return XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: "" })
   }
-  async importAffiliate(file: Express.Multer.File, channelId: string, channelUsername = "") {
-    const workbook = XLSX.read(file.buffer, { type: "buffer" }); const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[workbook.SheetNames[0]])
+
+  async importTotal(file: Express.Multer.File, channelId: string) {
+    const rows = this.rows(file)
+    const groups = new Map<string, Record<string, unknown>[]>()
+
+    for (const row of rows) {
+      const orderId = text(valueAt(row, "Order ID"))
+      if (!orderId) continue
+      const cancellation = text(valueAt(row, "Cancelation/Return Type", "Cancellation/Return Type"))
+      if (cancellation.toLowerCase() === "cancel") continue
+      groups.set(orderId, [...(groups.get(orderId) ?? []), row])
+    }
+
+    const operations = [...groups].map(([orderId, lines]) => {
+      const first = lines[0]
+      const createdAt = date(valueAt(first, "Created Time"))
+      if (!createdAt) {
+        throw new BadRequestException("File tổng doanh thu thiếu cột Created Time hợp lệ")
+      }
+      const income = {
+        orderId,
+        customer: text(valueAt(first, "Buyer Username")),
+        province: text(valueAt(first, "Province")),
+        shippingProvider: text(valueAt(first, "Shipping Provider Name")),
+        orderStatus: text(valueAt(first, "Order Status")),
+        cancelationOrReturnType: text(valueAt(first, "Cancelation/Return Type", "Cancellation/Return Type")),
+        channel: new Types.ObjectId(channelId),
+        date: createdAt,
+        products: lines.map((line) => ({
+          code: text(valueAt(line, "Seller SKU")),
+          name: text(valueAt(line, "Product Name")),
+          source: "other",
+          sourceChecked: false,
+          affiliateAdsPercentage: 0,
+          affiliateAdsAmount: 0,
+          standardAffPercentage: 0,
+          standardAffAmount: 0,
+          quantity: number(valueAt(line, "Quantity")),
+          price: number(valueAt(line, "SKU Subtotal Before Discount")),
+          priceAfterDiscount: number(valueAt(line, "SKU Subtotal After Discount"))
+        }))
+      }
+      return {
+        updateOne: {
+          filter: { orderId, channel: new Types.ObjectId(channelId) },
+          update: { $set: income },
+          upsert: true
+        }
+      }
+    })
+
+    if (!operations.length) return { importedOrders: 0, updatedOrders: 0 }
+    const result = await this.incomes.bulkWrite(operations, { ordered: false })
+    return {
+      importedOrders: result.upsertedCount,
+      updatedOrders: result.modifiedCount
+    }
+  }
+
+  async importAffiliate(file: Express.Multer.File, channelId: string) {
+    const rows = this.rows(file)
+    const channel = await this.channels.findById(channelId).lean()
+    const aliases = new Set(
+      [channel?.username, ...(channel?.usernames ?? [])]
+        .map((item) => text(item).toLowerCase())
+        .filter(Boolean)
+    )
     let updated = 0
-    for (const row of rows) { const orderId = String(row["ID đơn hàng"] ?? "").trim(); const code = String(row["Sku người bán"] ?? "").trim(); const quantity = Number(row["Số lượng"]); if (!orderId || !code || !Number.isFinite(quantity)) continue; const creator = String(row["Tên người dùng nhà sáng tạo"] ?? ""); const ads = Number(row["Tỷ lệ hoa hồng Quảng cáo cửa hàng"]); const standard = Number(row["Tỷ lệ hoa hồng tiêu chuẩn"]); const source = creator.toLowerCase() === channelUsername.toLowerCase() ? "ads" : Number.isFinite(ads) && !Number.isFinite(standard) ? "affiliate-ads" : Number.isFinite(standard) ? "affiliate" : "other"; const result = await this.incomes.updateOne({ orderId, channel: new Types.ObjectId(channelId), products: { $elemMatch: { code, quantity } } }, { $set: { "products.$.sourceChecked": true, "products.$.creator": creator, "products.$.content": String(row["Loại nội dung"] ?? ""), "products.$.source": source, "products.$.affiliateAdsPercentage": Number.isFinite(ads) ? ads : 0, "products.$.standardAffPercentage": Number.isFinite(standard) ? standard : 0 } }); updated += result.modifiedCount }
+
+    for (const row of rows) {
+      const orderId = text(valueAt(row, "ID đơn hàng", "Order ID"))
+      const code = text(valueAt(row, "Sku người bán", "SKU người bán", "Seller SKU"))
+      const quantity = number(valueAt(row, "Số lượng", "Quantity"))
+      if (!orderId || !code || quantity <= 0) continue
+
+      const creator = text(valueAt(row, "Tên người dùng nhà sáng tạo", "Creator Username"))
+      const adsRaw = valueAt(row, "Tỷ lệ hoa hồng Quảng cáo cửa hàng", "Tỷ lệ hoa hồng quảng cáo cửa hàng")
+      const standardRaw = valueAt(row, "Tỷ lệ hoa hồng tiêu chuẩn")
+      const affiliateAdsAmount = number(valueAt(row, "Hoa hồng Quảng cáo cửa hàng", "Số tiền hoa hồng Quảng cáo cửa hàng"))
+      const standardAffAmount = number(valueAt(row, "Hoa hồng tiêu chuẩn", "Số tiền hoa hồng tiêu chuẩn"))
+      const ads = number(adsRaw)
+      const standard = number(standardRaw)
+      const source = aliases.has(creator.toLowerCase())
+        ? "ads"
+        : hasValue(adsRaw) && !hasValue(standardRaw)
+          ? "affiliate-ads"
+          : hasValue(standardRaw)
+            ? "affiliate"
+            : "other"
+
+      const result = await this.incomes.updateOne(
+        {
+          orderId,
+          channel: new Types.ObjectId(channelId),
+          products: { $elemMatch: { code, quantity } }
+        },
+        {
+          $set: {
+            "products.$.sourceChecked": true,
+            "products.$.creator": creator,
+            "products.$.content": text(valueAt(row, "Loại nội dung", "Content Type")),
+            "products.$.source": source,
+            "products.$.affiliateAdsPercentage": ads,
+            "products.$.affiliateAdsAmount": affiliateAdsAmount,
+            "products.$.standardAffPercentage": standard,
+            "products.$.standardAffAmount": standardAffAmount
+          }
+        }
+      )
+      updated += result.modifiedCount
+    }
     return { updated }
   }
+
   async updateStatuses(file: Express.Multer.File, channelId: string) {
-    const workbook = XLSX.read(file.buffer, { type: "buffer" }); const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[workbook.SheetNames[0]])
-    const operations = rows.map((row) => ({ updateOne: { filter: { orderId: String(row["Order ID"] ?? "").trim(), channel: new Types.ObjectId(channelId) }, update: { $set: { orderStatus: String(row["Order Status"] ?? ""), cancelationOrReturnType: String(row["Cancelation/Return Type"] ?? "") } } } })).filter((op) => Boolean(op.updateOne.filter.orderId))
-    if (!operations.length) return { updated: 0 }; const result = await this.incomes.bulkWrite(operations, { ordered: false }); return { updated: result.modifiedCount }
+    const operations = this.rows(file)
+      .map((row) => {
+        const orderId = text(valueAt(row, "Order ID"))
+        if (!orderId) return undefined
+        return {
+          updateOne: {
+            filter: { orderId, channel: new Types.ObjectId(channelId) },
+            update: {
+              $set: {
+                orderStatus: text(valueAt(row, "Order Status")),
+                cancelationOrReturnType: text(valueAt(row, "Cancelation/Return Type", "Cancellation/Return Type"))
+              }
+            }
+          }
+        }
+      })
+      .filter((operation): operation is NonNullable<typeof operation> => Boolean(operation))
+    if (!operations.length) return { updated: 0 }
+    const result = await this.incomes.bulkWrite(operations, { ordered: false })
+    return { updated: result.modifiedCount }
   }
 }

@@ -6,6 +6,7 @@ import { HealthController } from "./health.controller"
 import { AuthController } from "./auth/auth.controller"
 import { AuthService } from "./auth/auth.service"
 import { JwtAuthGuard } from "./auth/jwt-auth.guard"
+import { PermissionsGuard } from "./auth/permissions.guard"
 import { User, UserSchema } from "./users/user.schema"
 import { Channel, ChannelSchema } from "./channels/channel.schema"
 import { ChannelsController } from "./channels/channels.controller"
@@ -20,9 +21,11 @@ import { MonthGoal, MonthGoalSchema } from "./month-goals/month-goal.schema"
 import { MonthGoalsController } from "./month-goals/month-goals.controller"
 import { PackingRule, PackingRuleSchema } from "./packing-rules/packing-rule.schema"
 import { PackingRulesController } from "./packing-rules/packing-rules.controller"
+import { StorageItem, StorageItemSchema } from "./storage-items/storage-item.schema"
+import { StorageItemsController } from "./storage-items/storage-items.controller"
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), MongooseModule.forRoot(process.env.DATABASE_URL ?? "mongodb://127.0.0.1:27017/tratosapp"), MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: Channel.name, schema: ChannelSchema }, { name: Product.name, schema: ProductSchema }, { name: Income.name, schema: IncomeSchema }, { name: DailyAdsMetrics.name, schema: DailyAdsMetricsSchema }, { name: MonthGoal.name, schema: MonthGoalSchema }, { name: PackingRule.name, schema: PackingRuleSchema }]), JwtModule.register({ secret: process.env.JWT_SECRET ?? "development-only-secret" })],
-  controllers: [HealthController, AuthController, ChannelsController, ProductsController, AdsController, IncomesController, MonthGoalsController, PackingRulesController], providers: [AuthService, JwtAuthGuard, IncomeImportService]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), MongooseModule.forRoot(process.env.DATABASE_URL ?? "mongodb://127.0.0.1:27017/tratosapp"), MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: Channel.name, schema: ChannelSchema }, { name: Product.name, schema: ProductSchema }, { name: Income.name, schema: IncomeSchema }, { name: DailyAdsMetrics.name, schema: DailyAdsMetricsSchema }, { name: MonthGoal.name, schema: MonthGoalSchema }, { name: PackingRule.name, schema: PackingRuleSchema }, { name: StorageItem.name, schema: StorageItemSchema }]), JwtModule.register({ secret: process.env.JWT_SECRET ?? "development-only-secret" })],
+  controllers: [HealthController, AuthController, ChannelsController, ProductsController, AdsController, IncomesController, MonthGoalsController, PackingRulesController, StorageItemsController], providers: [AuthService, JwtAuthGuard, PermissionsGuard, IncomeImportService]
 })
 export class AppModule {}

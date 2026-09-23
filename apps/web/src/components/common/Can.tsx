@@ -33,7 +33,9 @@ export const Can = ({
 
   if (!permissions || permissions.length === 0) return <>{children}</>
 
-  const has = permissions.some((permission) => userPermissions.includes(permission))
+  const has =
+    userPermissions.includes("*") ||
+    permissions.some((permission) => userPermissions.includes(permission))
   const pass = not ? !has : has
 
   if (!pass) return <>{fallback}</>

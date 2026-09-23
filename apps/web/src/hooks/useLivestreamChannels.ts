@@ -43,7 +43,7 @@ export const useLivestreamChannels = () => {
   const getLivestreamChannelDetail = async (id: string) => {
     return callApi<never, GetLivestreamChannelDetailResponse>({
       method: "GET",
-      path: `/v1/livestreamchannels/${id}`,
+      path: `/v1/channels/${id}`,
       token: accessToken
     })
   }
@@ -53,8 +53,8 @@ export const useLivestreamChannels = () => {
     req: UpdateLivestreamChannelRequest
   ) => {
     return callApi<UpdateLivestreamChannelRequest, never>({
-      method: "PUT",
-      path: `/v1/livestreamchannels/${id}`,
+      method: "PATCH",
+      path: `/v1/channels/${id}`,
       data: req,
       token: accessToken
     })
@@ -65,7 +65,7 @@ export const useLivestreamChannels = () => {
   ) => {
     return callApi<never, never>({
       method: "DELETE",
-      path: `/v1/livestreamchannels/${req.id}`,
+      path: `/v1/channels/${req.id}`,
       token: accessToken
     })
   }

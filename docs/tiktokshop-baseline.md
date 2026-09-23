@@ -133,7 +133,7 @@ API NestJS dùng prefix `/api/v1`; FE hiện gọi base URL + các path `/v1/...
 5. `DailyAdsMetrics` tự lưu các giá trị tính toán. Cần giữ nguyên công thức nguồn trong lần tách để dashboard không đổi kết quả.
 6. Các title và thương hiệu hiện hiển thị `MyCandy` cần đổi thành Tratos khi tách FE.
 
-* [ ]  Source of truth
+Source of truth
 
 - FE routes: `../candy-cal-fe/src/routes/tiktokshop/`
 - Shared income workspace: `../candy-cal-fe/src/routes/marketing-storage/incomes/`
