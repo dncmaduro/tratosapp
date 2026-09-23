@@ -167,12 +167,14 @@ export class IncomesController {
     @Query("channelId") channelId?: string,
     @Query("startDate") startDate?: string,
     @Query("endDate") endDate?: string,
+    @Query("orderId") orderId?: string,
     @Query("page") page = "1",
     @Query("limit") limit = "10",
     @Query("searchText") searchText = ""
   ) {
     const filter: Record<string, unknown> = {}
     if (channelId) filter.channel = this.channel(channelId)
+    if (orderId) filter.orderId = orderId
     if (startDate || endDate) {
       filter.date = {
         ...(startDate ? { $gte: new Date(startDate) } : {}),

@@ -15,7 +15,7 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>SKU (TikTok Shop) | MyCandy</title>
+        <title>SKU (TikTok Shop) | Tratosapp</title>
       </Helmet>
       <AppLayout navs={TIKTOKSHOP_NAVS}>
         <ProductsV2 />

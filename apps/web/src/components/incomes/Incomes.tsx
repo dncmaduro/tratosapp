@@ -76,7 +76,7 @@ export const Incomes = () => {
 
   const endOfDayISO = (d: Date) => {
     const dt = new Date(d)
-    dt.setHours(1, 59, 59, 999)
+    dt.setHours(23, 59, 59, 999)
     return dt.toISOString()
   }
 

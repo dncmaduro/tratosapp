@@ -5,6 +5,7 @@ import {
   CreateLivestreamChannelRequest,
   DeleteLivestreamChannelRequest,
   GetLivestreamChannelDetailResponse,
+  LivestreamChannel,
   SearchLivestreamChannelsRequest,
   SearchLivestreamChannelsResponse,
   UpdateLivestreamChannelRequest
@@ -20,7 +21,7 @@ export const useLivestreamChannels = () => {
   const createLivestreamChannel = async (
     req: CreateLivestreamChannelRequest
   ) => {
-    return callApi<CreateLivestreamChannelRequest, never>({
+    return callApi<CreateLivestreamChannelRequest, LivestreamChannel>({
       method: "POST",
       path: `/v1/channels`,
       data: req,

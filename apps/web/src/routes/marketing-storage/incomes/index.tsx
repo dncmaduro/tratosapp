@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useAuthGuard } from "../../../hooks/useAuthGuard"
 import { useEffect, useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { AppLayout } from "../../../components/layouts/AppLayout"
 import {
   Tabs,
@@ -11,7 +12,9 @@ import {
   Box,
   Paper,
   Group,
-  ThemeIcon
+  ThemeIcon,
+  Button,
+  TextInput
 } from "@mantine/core"
 import { IconBrandYoutube } from "@tabler/icons-react"
 import { Incomes } from "../../../components/incomes/Incomes"
@@ -64,7 +67,9 @@ export function StorageIncomesPage({
   useAuthGuard(allowedPermissions)
   const { tab, channel } = search
   const navigate = useNavigate()
-  const { searchLivestreamChannels } = useLivestreamChannels()
+  const { searchLivestreamChannels, createLivestreamChannel } = useLivestreamChannels()
+  const [newChannelName, setNewChannelName] = useState("")
+  const [newChannelUsername, setNewChannelUsername] = useState("")
 
   const [channels, setChannels] = useState<
     Array<{
@@ -183,11 +188,25 @@ export function StorageIncomesPage({
   }
 
   const currentChannel = channels.find((c) => c._id === selectedChannelId)
+  const { mutate: createChannel, isPending: isCreatingChannel } = useMutation({
+    mutationFn: createLivestreamChannel,
+    onSuccess: (response) => {
+      const created = response.data
+      setChannels((current) => [...current, created])
+      setSelectedChannelId(created._id)
+      setNewChannelName("")
+      setNewChannelUsername("")
+      navigate({
+        to: `${baseUrl}/incomes`,
+        search: { channel: created._id, tab: "dashboard" }
+      })
+    }
+  })
 
   return (
     <>
       <Helmet>
-        <title>{`Bán hàng - ${tab === "dashboard" ? "Dashboard" : tab === "kpi" ? "KPI Tháng" : tab === "packing-rules" ? "Quy cách đóng hộp" : "Doanh thu"} | MyCandy`}</title>
+        <title>{`TikTok Shop - ${tab === "dashboard" ? "Dashboard" : tab === "kpi" ? "KPI Tháng" : tab === "packing-rules" ? "Quy cách đóng hộp" : "Doanh thu"} | Tratosapp`}</title>
       </Helmet>
       <AppLayout navs={navs}>
         <LivestreamChannelProvider
@@ -225,7 +244,39 @@ export function StorageIncomesPage({
                 height: "50vh"
               }}
             >
-              <Text c="dimmed">Không có kênh livestream nào</Text>
+              <Paper p="xl" withBorder radius="lg" maw={520} w="100%">
+                <Stack gap="md">
+                  <Text fw={700} size="lg">Tạo kênh TikTok Shop đầu tiên</Text>
+                  <Text c="dimmed" size="sm">
+                    Kênh dùng để tách doanh thu, KPI và Ads Metrics.
+                  </Text>
+                  <TextInput
+                    label="Tên hiển thị"
+                    value={newChannelName}
+                    onChange={(event) => setNewChannelName(event.currentTarget.value)}
+                    placeholder="Ví dụ: Tratos Official"
+                  />
+                  <TextInput
+                    label="Username TikTok Shop"
+                    value={newChannelUsername}
+                    onChange={(event) => setNewChannelUsername(event.currentTarget.value)}
+                    placeholder="Ví dụ: tratos.official"
+                  />
+                  <Button
+                    onClick={() => createChannel({
+                      name: newChannelName,
+                      username: newChannelUsername,
+                      usernames: [newChannelUsername],
+                      platform: "tiktokshop",
+                      link: ""
+                    })}
+                    disabled={!newChannelName.trim() || !newChannelUsername.trim()}
+                    loading={isCreatingChannel}
+                  >
+                    Tạo kênh
+                  </Button>
+                </Stack>
+              </Paper>
             </Box>
           ) : (
             <Stack gap="md" mt={16}>
