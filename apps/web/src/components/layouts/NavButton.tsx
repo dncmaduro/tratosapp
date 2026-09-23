@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import * as TablerIcons from "@tabler/icons-react"
+import { IconBox, IconCoin, IconSquareRounded } from "@tabler/icons-react"
 import { ReactNode } from "react"
 import { useMediaQuery } from "@mantine/hooks"
 import { modals } from "@mantine/modals"
@@ -8,7 +8,7 @@ interface Props {
   to: string
   label: string
   // Support both dynamic icon name and direct ReactNode for backward compatibility
-  iconName?: keyof typeof TablerIcons | string
+  iconName?: string
   icon?: ReactNode
   beta?: boolean
   collapsed?: boolean
@@ -27,13 +27,17 @@ export const NavButton = ({
   const isMobile = useMediaQuery("(max-width: 768px)")
   const navigate = useNavigate()
 
-  // Resolve icon component from Tabler by name if provided
+  // Tratos has a deliberately small navigation; static imports keep Tabler
+  // tree-shakeable instead of bundling every icon for dynamic lookup.
+  const iconMap: Record<string, typeof IconBox> = {
+    IconBox,
+    IconCoin,
+    IconSquareRounded
+  }
   let ResolvedIcon: ReactNode = null
   if (iconName && typeof iconName === "string") {
-    const Cmp =
-      (TablerIcons as any)[iconName] ||
-      (TablerIcons as any)["IconSquareRounded"]
-    if (Cmp) ResolvedIcon = <Cmp size={isMobile ? 14 : 20} />
+    const IconComponent = iconMap[iconName] ?? IconSquareRounded
+    ResolvedIcon = <IconComponent size={isMobile ? 14 : 20} />
   }
 
   const baseClasses = [

@@ -32,8 +32,21 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined
-          const parts = id.split("node_modules/")[1].split("/")
-          return parts[0].startsWith("@") ? `${parts[0]}/${parts[1]}` : parts[0]
+          // pnpm paths contain nested node_modules entries. Use the final one,
+          // otherwise every dependency is grouped under the `.pnpm` folder.
+          const modulePath = id.slice(id.lastIndexOf("node_modules/") + 13)
+          if (modulePath.startsWith("@mantine/")) return "vendor-mantine"
+          if (modulePath.startsWith("@tanstack/")) return "vendor-tanstack"
+          if (modulePath.startsWith("@tabler/icons-react")) return "vendor-icons"
+          if (/^(react|react-dom|scheduler)(\/|$)/.test(modulePath)) {
+            return "vendor-react"
+          }
+          if (modulePath.startsWith("xlsx/")) return "vendor-xlsx"
+          if (modulePath.startsWith("recharts/")) return "vendor-charts"
+          if (modulePath.startsWith("html2canvas/")) return "vendor-html2canvas"
+          if (modulePath.startsWith("socket.io-client/")) return "vendor-socket"
+          if (modulePath.startsWith("lodash/")) return "vendor-lodash"
+          return "vendor"
         }
       }
     }
