@@ -16,7 +16,7 @@ import {
   Button,
   TextInput
 } from "@mantine/core"
-import { IconBrandYoutube } from "@tabler/icons-react"
+import { IconBrandTiktok } from "@tabler/icons-react"
 import { Incomes } from "../../../components/incomes/Incomes"
 import { Dashboard } from "../../../components/incomes/Dashboard"
 import { Helmet } from "react-helmet-async"
@@ -301,7 +301,7 @@ export function StorageIncomesPage({
                         variant="white"
                         color="grape"
                       >
-                        <IconBrandYoutube size={20} />
+                        <IconBrandTiktok size={20} />
                       </ThemeIcon>
                       <Box>
                         <Text size="sm" fw={700} c="white" opacity={0.9}>
