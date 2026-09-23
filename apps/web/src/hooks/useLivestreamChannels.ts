@@ -12,7 +12,7 @@ import {
 
 /**
  * Hook for livestream channels operations
- * Endpoints: /v1/livestreamchannels/*
+ * Temporary compatibility hook for Tratosapp TikTok channels.
  */
 export const useLivestreamChannels = () => {
   const { accessToken } = useUserStore()
@@ -22,7 +22,7 @@ export const useLivestreamChannels = () => {
   ) => {
     return callApi<CreateLivestreamChannelRequest, never>({
       method: "POST",
-      path: `/v1/livestreamchannels`,
+      path: `/v1/channels`,
       data: req,
       token: accessToken
     })
@@ -35,7 +35,7 @@ export const useLivestreamChannels = () => {
 
     return callApi<never, SearchLivestreamChannelsResponse>({
       method: "GET",
-      path: `/v1/livestreamchannels/search?${query}`,
+      path: `/v1/channels?${query}`,
       token: accessToken
     })
   }

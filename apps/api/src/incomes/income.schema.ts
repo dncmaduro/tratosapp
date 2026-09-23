@@ -1,0 +1,7 @@
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
+import { HydratedDocument, Types } from "mongoose"
+export type IncomeDocument = HydratedDocument<Income>
+@Schema({ _id: false }) class IncomeProduct { @Prop() code!: string; @Prop() name!: string; @Prop({ default: "other" }) source!: string; @Prop({ default: false }) sourceChecked!: boolean; @Prop() creator?: string; @Prop() content?: string; @Prop({ default: 0 }) affiliateAdsPercentage!: number; @Prop({ default: 0 }) affiliateAdsAmount!: number; @Prop({ default: 0 }) standardAffPercentage!: number; @Prop({ default: 0 }) standardAffAmount!: number; @Prop({ default: 1 }) quantity!: number; @Prop({ default: 0 }) price!: number; @Prop({ default: 0 }) priceAfterDiscount!: number }
+const IncomeProductSchema = SchemaFactory.createForClass(IncomeProduct)
+@Schema({ timestamps: true }) export class Income { @Prop({ required: true }) orderId!: string; @Prop({ default: "" }) customer!: string; @Prop({ default: "" }) province!: string; @Prop({ default: "" }) shippingProvider!: string; @Prop({ default: "" }) orderStatus!: string; @Prop({ default: "" }) cancelationOrReturnType!: string; @Prop({ type: Types.ObjectId, ref: "Channel", required: true }) channel!: Types.ObjectId; @Prop({ required: true }) date!: Date; @Prop({ type: [IncomeProductSchema], default: [] }) products!: IncomeProduct[] }
+export const IncomeSchema = SchemaFactory.createForClass(Income); IncomeSchema.index({ channel: 1, date: 1 })

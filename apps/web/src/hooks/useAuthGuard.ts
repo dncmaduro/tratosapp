@@ -30,7 +30,7 @@ export const useAuthGuard = (permissions: string[] = []) => {
     if (
       permissions.length > 0 &&
       meData &&
-      !permissions.some((permission) =>
+      !(meData.permissions ?? []).includes("*") && !permissions.some((permission) =>
         (meData.permissions ?? []).includes(permission)
       )
     ) {

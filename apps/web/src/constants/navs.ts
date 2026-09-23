@@ -14,7 +14,7 @@ export const TIKTOKSHOP_NAVS: NavigationItem[] = [
 export const NAVS = TIKTOKSHOP_NAVS
 
 export const hasAnyPermission = (userPermissions: string[] = [], required: string[] = []) =>
-  required.length === 0 || required.some((permission) => userPermissions.includes(permission))
+  required.length === 0 || userPermissions.includes("*") || required.some((permission) => userPermissions.includes(permission))
 
 export const getVisibleNavigationItems = <T extends NavigationItem>(navs: T[], permissions: string[] = []) =>
   navs.filter((nav) => !nav.deprecated && hasAnyPermission(permissions, nav.permissions))
