@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: tratosapp-api
+    runtime: node
+    rootDir: .
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.5 --activate && pnpm install --frozen-lockfile && pnpm --filter @tratosapp/api build
+    startCommand: pnpm --filter @tratosapp/api start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.23.2
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOW_ORIGIN
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: SEED_ADMIN_NAME
+        value: Tratosapp Admin

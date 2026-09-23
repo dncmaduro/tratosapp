@@ -24,7 +24,9 @@ export class AuthService {
     } catch { throw new UnauthorizedException("Refresh token không hợp lệ") }
   }
   async check(accessToken: string) { try { await this.jwt.verifyAsync(accessToken); return { valid: true } } catch { return { valid: false } } }
+  async changePassword(id: string, oldPassword: string, newPassword: string) { const user = await this.users.findById(id); if (!user || !(await bcrypt.compare(oldPassword, user.passwordHash))) throw new UnauthorizedException("Mật khẩu hiện tại không đúng"); user.passwordHash = await bcrypt.hash(newPassword, 12); await user.save(); return { message: "Đã đổi mật khẩu" } }
+  async updateProfile(id: string, body: { name?: string; avatarUrl?: string }) { await this.users.findByIdAndUpdate(id, { $set: body }); return { message: "Đã cập nhật hồ sơ" } }
   private signAccess(user: UserDocument) { return this.jwt.signAsync({ sub: user.id, email: user.email }, { expiresIn: "15m" }) }
   private signRefresh(user: UserDocument) { return this.jwt.signAsync({ sub: user.id, type: "refresh" }, { expiresIn: "10d" }) }
-  private publicUser(user: UserDocument) { return { _id: user.id, email: user.email, name: user.name, permissions: user.permissions } }
+  private publicUser(user: UserDocument) { return { _id: user.id, email: user.email, username: user.email, name: user.name, avatarUrl: user.avatarUrl, permissions: user.permissions, active: user.active } }
 }
