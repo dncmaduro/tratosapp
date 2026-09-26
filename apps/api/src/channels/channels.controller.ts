@@ -17,6 +17,8 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard"
 import { PermissionsGuard } from "../auth/permissions.guard"
 import { RequirePermissions } from "../auth/require-permissions.decorator"
 import { Channel, ChannelDocument } from "./channel.schema"
+import { channelInput } from "./channel-input"
+import { inputId, withDuplicateConflict } from "../common/input-validation"
 
 @ApiTags("channels")
 @ApiBearerAuth()
@@ -57,25 +59,27 @@ export class ChannelsController {
 
   @Get(":id")
   async detail(@Param("id") id: string) {
-    const channel = await this.channels.findById(id).lean()
+    const channel = await this.channels.findById(inputId(id)).lean()
     if (!channel) throw new NotFoundException("Không tìm thấy kênh")
     return channel
   }
 
   @Post()
   @RequirePermissions("api.livestreamchannels.create-livestream-channel")
-  async create(@Body() body: Partial<Channel>) {
-    return this.channels.create({
-      ...body,
-      platform: "tiktokshop",
-      usernames: body.usernames?.length ? body.usernames : [body.username]
-    })
+  async create(@Body() body: unknown) {
+    const data = channelInput(body, true)
+    return withDuplicateConflict(() => this.channels.create(data), "Username kênh đã tồn tại")
   }
 
   @Patch(":id")
   @RequirePermissions("api.livestreamchannels.update-livestream-channel")
-  async update(@Param("id") id: string, @Body() body: Partial<Channel>) {
-    const channel = await this.channels.findByIdAndUpdate(id, body, { new: true }).lean()
+  async update(@Param("id") id: string, @Body() body: unknown) {
+    inputId(id)
+    const data = channelInput(body, false)
+    const channel = await withDuplicateConflict(
+      () => this.channels.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true }).lean(),
+      "Username kênh đã tồn tại"
+    )
     if (!channel) throw new NotFoundException("Không tìm thấy kênh")
     return channel
   }
@@ -83,7 +87,7 @@ export class ChannelsController {
   @Delete(":id")
   @RequirePermissions("api.livestreamchannels.delete-livestream-channel")
   async remove(@Param("id") id: string) {
-    const channel = await this.channels.findByIdAndDelete(id).lean()
+    const channel = await this.channels.findByIdAndDelete(inputId(id)).lean()
     if (!channel) throw new NotFoundException("Không tìm thấy kênh")
     return { success: true }
   }

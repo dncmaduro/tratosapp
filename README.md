@@ -45,6 +45,12 @@ Quyền ghi kênh giữ tên tương thích với ứng dụng gốc dù URL API
 Admin có thể lấy các khóa này qua `GET /api/v1/users/permissions` để cấp quyền.
 User chỉ có quyền xem sẽ bị trả 403 khi ghi; tài khoản có `*` vẫn được phép.
 
+API kiểm tra body trước khi ghi dữ liệu: kênh chỉ là `tiktokshop`, chỉ nhận các
+trường đã công bố và báo `409` khi trùng username. API user kiểm tra email,
+mật khẩu (8 ký tự, không quá 72 byte UTF-8), URL avatar, ID, `active` và các
+quyền có trong catalog; field thừa hoặc dữ liệu sai nhận `400`, user không có
+nhận `404`, email trùng nhận `409`.
+
 ## Deploy
 
 - Render: tạo Blueprint từ repository để dùng `render.yaml`; điền `DATABASE_URL`, `ALLOW_ORIGIN` và thông tin seed admin. Sau lần deploy đầu, chạy `pnpm --filter @tratosapp/api seed:admin` trong Render Shell.
