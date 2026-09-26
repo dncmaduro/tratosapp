@@ -25,10 +25,42 @@ import { MonthGoal, MonthGoalDocument } from "../month-goals/month-goal.schema"
 import { Income, IncomeDocument } from "./income.schema"
 import { IncomeImportService } from "./income-import.service"
 import { Channel, ChannelDocument } from "../channels/channel.schema"
-import { inputId, inputString } from "../common/input-validation"
+import { inputBusinessDay, inputId, inputString } from "../common/input-validation"
 
 const importModes = ["full", "status-only", "base-only", "affiliate-only"] as const
 type ImportMode = (typeof importModes)[number]
+const dayOnly = /^\d{4}-\d{2}-\d{2}$/
+
+function queryDate(value: unknown, field: string, endOfDay = false): Date {
+  if (typeof value !== "string" || !value.trim()) throw new BadRequestException(`${field} không hợp lệ`)
+  if (dayOnly.test(value)) {
+    const start = inputBusinessDay(value, field)
+    if (!endOfDay) return start
+    return new Date(start.valueOf() + 86_400_000 - 1)
+  }
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.valueOf())) throw new BadRequestException(`${field} không hợp lệ`)
+  return parsed
+}
+
+function queryMonth(monthValue: unknown, yearValue: unknown) {
+  const month = Number(monthValue)
+  const year = Number(yearValue)
+  if (!Number.isInteger(month) || month < 0 || month > 11 || !Number.isInteger(year) || year < 2000 || year > 2100) {
+    throw new BadRequestException("month hoặc year không hợp lệ")
+  }
+  const start = new Date(Date.UTC(year, month, 1) - 7 * 60 * 60 * 1000)
+  const end = new Date(Date.UTC(year, month + 1, 1) - 7 * 60 * 60 * 1000)
+  return { month, year, start, end }
+}
+
+function queryPage(value: unknown, field: string, maximum: number) {
+  const result = Number(value)
+  if (!Number.isInteger(result) || result < 1 || result > maximum) throw new BadRequestException(`${field} không hợp lệ`)
+  return result
+}
+
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 
 function importInput(
   files: Express.Multer.File[] | undefined,
@@ -84,11 +116,14 @@ export class IncomesController {
   ) {}
 
   private channel(channelId: string) {
-    return new Types.ObjectId(channelId)
+    return new Types.ObjectId(inputId(channelId))
   }
 
   private dates(startDate: string, endDate: string) {
-    return { $gte: new Date(startDate), $lte: new Date(endDate) }
+    const start = queryDate(startDate, "startDate")
+    const end = queryDate(endDate, "endDate", true)
+    if (start > end) throw new BadRequestException("startDate phải trước hoặc bằng endDate")
+    return { $gte: start, $lte: end }
   }
 
   private isLive(source?: string) {
@@ -212,22 +247,26 @@ export class IncomesController {
   ) {
     const filter: Record<string, unknown> = {}
     if (channelId) filter.channel = this.channel(channelId)
-    if (orderId) filter.orderId = orderId
-    if (productSource) filter["products.source"] = productSource
+    if (orderId) filter.orderId = inputString(orderId, "orderId")
+    if (productSource) filter["products.source"] = inputString(productSource, "productSource")
     if (startDate || endDate) {
+      const start = startDate ? queryDate(startDate, "startDate") : undefined
+      const end = endDate ? queryDate(endDate, "endDate", true) : undefined
+      if (start && end && start > end) throw new BadRequestException("startDate phải trước hoặc bằng endDate")
       filter.date = {
-        ...(startDate ? { $gte: new Date(startDate) } : {}),
-        ...(endDate ? { $lte: new Date(endDate) } : {})
+        ...(start ? { $gte: start } : {}),
+        ...(end ? { $lte: end } : {})
       }
     }
     if (searchText) {
+      const search = escapeRegex(inputString(searchText, "searchText"))
       filter.$or = [
-        { orderId: { $regex: searchText, $options: "i" } },
-        { customer: { $regex: searchText, $options: "i" } }
+        { orderId: { $regex: search, $options: "i" } },
+        { customer: { $regex: search, $options: "i" } }
       ]
     }
-    const currentPage = Math.max(1, Number(page))
-    const size = Math.min(10_000, Math.max(1, Number(limit)))
+    const currentPage = queryPage(page, "page", 1_000_000)
+    const size = queryPage(limit, "limit", 10_000)
     const [incomes, total] = await Promise.all([
       this.incomes
         .find(filter)
@@ -259,8 +298,7 @@ export class IncomesController {
     @Query("year") year: string,
     @Query("channelId") channelId: string
   ) {
-    const start = new Date(Number(year), Number(month), 1)
-    const end = new Date(Number(year), Number(month) + 1, 1)
+    const { start, end } = queryMonth(month, year)
     const docs = await this.incomes
       .find({ channel: this.channel(channelId), date: { $gte: start, $lt: end } })
       .lean()
@@ -279,8 +317,7 @@ export class IncomesController {
     @Query("year") year: string,
     @Query("channelId") channelId: string
   ) {
-    const start = new Date(Number(year), Number(month), 1)
-    const end = new Date(Number(year), Number(month) + 1, 1)
+    const { start, end } = queryMonth(month, year)
     const docs = await this.incomes
       .find({ channel: this.channel(channelId), date: { $gte: start, $lt: end } })
       .lean()
@@ -311,12 +348,13 @@ export class IncomesController {
     @Query("year") year: string,
     @Query("channelId") channelId: string
   ) {
+    const target = queryMonth(month, year)
     const [goal, income] = await Promise.all([
       this.goals
         .findOne({
           channel: this.channel(channelId),
-          month: Number(month),
-          year: Number(year)
+          month: target.month,
+          year: target.year
         })
         .lean(),
       this.monthlyIncome(month, year, channelId)
@@ -336,17 +374,16 @@ export class IncomesController {
     @Query("year") year: string,
     @Query("channelId") channelId: string
   ) {
-    const start = new Date(Number(year), Number(month), 1)
-    const end = new Date(Number(year), Number(month) + 1, 0, 23, 59, 59, 999)
+    const { month: targetMonth, year: targetYear, start, end } = queryMonth(month, year)
     const [docs, goal] = await Promise.all([
       this.incomes
-        .find({ channel: this.channel(channelId), date: { $gte: start, $lte: end } })
+        .find({ channel: this.channel(channelId), date: { $gte: start, $lt: end } })
         .lean(),
       this.goals
         .findOne({
           channel: this.channel(channelId),
-          month: Number(month),
-          year: Number(year)
+          month: targetMonth,
+          year: targetYear
         })
         .lean()
     ])
@@ -355,7 +392,7 @@ export class IncomesController {
     const after = this.splitRevenue(products, true)
     const ads = await this.metricsSummary(
       channelId,
-      { $gte: start, $lte: end },
+      { $gte: start, $lte: new Date(end.valueOf() - 1) },
       before.totalIncome,
       after.totalIncome
     )
@@ -414,15 +451,9 @@ export class IncomesController {
     const liveOrders = docs.filter((income) =>
       income.products.some((product) => this.isLive(product.source))
     ).length
-    const days = Math.max(
-      1,
-      Math.ceil(
-        (new Date(endDate).getTime() - new Date(startDate).getTime() + 1) /
-          86_400_000
-      )
-    )
+    const days = Math.max(1, Math.round((date.$lte.valueOf() - date.$gte.valueOf() + 1) / 86_400_000))
     return {
-      period: { startDate: new Date(startDate), endDate: new Date(endDate), days },
+      period: { startDate: date.$gte, endDate: date.$lte, days },
       current: {
         beforeDiscount,
         afterDiscount,
@@ -454,9 +485,8 @@ export class IncomesController {
     @Query("date") dateText: string,
     @Query("channelId") channelId: string
   ) {
-    const day = new Date(dateText)
-    const next = new Date(day)
-    next.setDate(next.getDate() + 1)
+    const day = inputBusinessDay(dateText)
+    const next = new Date(day.valueOf() + 86_400_000)
     const result = await this.incomes.deleteMany({
       channel: this.channel(channelId),
       date: { $gte: day, $lt: next }

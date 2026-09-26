@@ -55,6 +55,13 @@ export function inputBusinessDay(value: unknown, field = "date"): Date {
   if (typeof value !== "string" && !(value instanceof Date)) {
     throw new BadRequestException(`${field} không hợp lệ`)
   }
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map(Number)
+    const calendarDay = new Date(Date.UTC(year, month - 1, day))
+    if (calendarDay.getUTCFullYear() !== year || calendarDay.getUTCMonth() !== month - 1 || calendarDay.getUTCDate() !== day) {
+      throw new BadRequestException(`${field} không hợp lệ`)
+    }
+  }
   const parsed = new Date(value)
   if (Number.isNaN(parsed.valueOf())) throw new BadRequestException(`${field} không hợp lệ`)
   const parts = Object.fromEntries(
