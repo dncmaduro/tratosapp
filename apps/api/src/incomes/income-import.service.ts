@@ -27,13 +27,42 @@ const number = (value: unknown) => {
 
 const hasValue = (value: unknown) => value !== undefined && value !== null && text(value) !== ""
 
+const vietnamDate = (
+  year: number,
+  month: number,
+  day: number,
+  hour = 0,
+  minute = 0,
+  second = 0,
+  millisecond = 0
+) => {
+  const validated = new Date(Date.UTC(year, month - 1, day, hour, minute, second, millisecond))
+  if (validated.getUTCFullYear() !== year || validated.getUTCMonth() !== month - 1 ||
+      validated.getUTCDate() !== day || validated.getUTCHours() !== hour ||
+      validated.getUTCMinutes() !== minute || validated.getUTCSeconds() !== second ||
+      validated.getUTCMilliseconds() !== millisecond) return undefined
+  // Vietnam has no daylight-saving changes, so UTC+07:00 is stable.
+  return new Date(validated.valueOf() - 7 * 60 * 60 * 1000)
+}
+
 const date = (value: unknown) => {
   if (value instanceof Date && !Number.isNaN(value.valueOf())) return value
   if (typeof value === "number") {
     const parsed = XLSX.SSF.parse_date_code(value)
-    if (parsed) return new Date(parsed.y, parsed.m - 1, parsed.d, parsed.H, parsed.M, parsed.S)
+    if (parsed) return vietnamDate(parsed.y, parsed.m, parsed.d, parsed.H, parsed.M, parsed.S)
   }
-  const parsed = new Date(text(value))
+  const raw = text(value)
+  const vietnamDayFirst = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?$/)
+  if (vietnamDayFirst) {
+    const [, day, month, year, hour = "0", minute = "0", second = "0", milliseconds = "0"] = vietnamDayFirst
+    return vietnamDate(Number(year), Number(month), Number(day), Number(hour), Number(minute), Number(second), Number(milliseconds.padEnd(3, "0")))
+  }
+  const vietnamYearFirst = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?$/)
+  if (vietnamYearFirst) {
+    const [, year, month, day, hour = "0", minute = "0", second = "0", milliseconds = "0"] = vietnamYearFirst
+    return vietnamDate(Number(year), Number(month), Number(day), Number(hour), Number(minute), Number(second), Number(milliseconds.padEnd(3, "0")))
+  }
+  const parsed = new Date(raw)
   return Number.isNaN(parsed.valueOf()) ? undefined : parsed
 }
 
@@ -45,7 +74,9 @@ export class IncomeImportService {
   ) {}
 
   private rows(file: Express.Multer.File) {
-    const workbook = XLSX.read(file.buffer, { type: "buffer", cellDates: true })
+    // Keep Excel dates as serial numbers, then convert them explicitly to Vietnam time.
+    // Letting SheetJS construct Date values here would depend on Render's timezone.
+    const workbook = XLSX.read(file.buffer, { type: "buffer", cellDates: false })
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     if (!worksheet) throw new BadRequestException("File Excel không có sheet dữ liệu")
     return XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: "" })

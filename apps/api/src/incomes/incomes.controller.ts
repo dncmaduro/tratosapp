@@ -110,9 +110,9 @@ export class IncomesController {
     }
 
     for (const product of products) {
-      const revenue =
-        (afterDiscount ? product.priceAfterDiscount || product.price : product.price || 0) *
-        (product.quantity || 0)
+      // TikTok Shop's SKU Subtotal columns already include Quantity.
+      // Keep this aligned with the original Candy calculation: sum each line once.
+      const revenue = afterDiscount ? product.priceAfterDiscount || product.price : product.price || 0
       const source = (product.source || "other").toLowerCase()
       result.totalIncome += revenue
       if (this.isLive(source)) result.liveIncome += revenue
@@ -128,10 +128,10 @@ export class IncomesController {
   private monthSplit(products: Income["products"], afterDiscount: boolean) {
     return products.reduce(
       (split, product) => {
-        const revenue =
-          (afterDiscount
-            ? product.priceAfterDiscount || product.price
-            : product.price || 0) * (product.quantity || 0)
+        // See splitRevenue: this is a line subtotal, not a unit price.
+        const revenue = afterDiscount
+          ? product.priceAfterDiscount || product.price
+          : product.price || 0
         if (this.isLive(product.source)) split.live += revenue
         else split.shop += revenue
         return split

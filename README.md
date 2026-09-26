@@ -61,6 +61,14 @@ DailyAdsMetrics lưu ngày theo `Asia/Ho_Chi_Minh` thay vì timezone của serve
 sáu trường nhập là bắt buộc và phải là số không âm. Công thức metrics được giữ
 nguyên từ ứng dụng nguồn.
 
+`SKU Subtotal Before/After Discount` của file TikTok Shop là tổng tiền của từng
+dòng SKU, đã bao gồm `Quantity`. Dashboard cộng subtotal một lần; quantity chỉ
+dùng cho các chỉ số số lượng và đối chiếu dữ liệu affiliate.
+
+Ngày `Created Time` khi import được hiểu theo giờ Việt Nam cho Excel serial,
+`dd/MM/yyyy HH:mm:ss` và chuỗi ISO không có timezone; chuỗi ISO có offset hoặc
+`Z` giữ nguyên thời điểm gốc.
+
 ## Deploy
 
 - Render: tạo Blueprint từ repository để dùng `render.yaml`; điền `DATABASE_URL`, `ALLOW_ORIGIN` và thông tin seed admin. Sau lần deploy đầu, chạy `pnpm --filter @tratosapp/api seed:admin` trong Render Shell.
