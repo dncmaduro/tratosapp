@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Post,
   Query,
   Res,
@@ -22,6 +24,40 @@ import { DailyAdsMetrics, DailyAdsMetricsDocument } from "../ads/daily-ads-metri
 import { MonthGoal, MonthGoalDocument } from "../month-goals/month-goal.schema"
 import { Income, IncomeDocument } from "./income.schema"
 import { IncomeImportService } from "./income-import.service"
+import { Channel, ChannelDocument } from "../channels/channel.schema"
+import { inputId, inputString } from "../common/input-validation"
+
+const importModes = ["full", "status-only", "base-only", "affiliate-only"] as const
+type ImportMode = (typeof importModes)[number]
+
+function importInput(
+  files: Express.Multer.File[] | undefined,
+  channel: unknown,
+  updateMode: unknown,
+  chunkIndex: unknown,
+  chunkCount: unknown
+) {
+  const mode = updateMode === undefined ? "full" : inputString(updateMode, "updateMode")
+  if (!importModes.includes(mode as ImportMode)) throw new BadRequestException("updateMode không hợp lệ")
+  const expectedFiles = mode === "full" ? 2 : 1
+  if (!files || files.length !== expectedFiles) {
+    throw new BadRequestException(`Chế độ ${mode} cần đúng ${expectedFiles} file`)
+  }
+  for (const file of files) {
+    if (!file?.buffer?.length || !/\.(xlsx|xls|csv)$/i.test(file.originalname ?? "")) {
+      throw new BadRequestException("Chỉ hỗ trợ file .xlsx, .xls hoặc .csv có dữ liệu")
+    }
+  }
+  const hasChunk = chunkIndex !== undefined || chunkCount !== undefined
+  if (hasChunk) {
+    const index = Number(chunkIndex)
+    const count = Number(chunkCount)
+    if (!Number.isInteger(index) || !Number.isInteger(count) || index < 0 || count < 1 || index >= count) {
+      throw new BadRequestException("Thông tin thứ tự chunk không hợp lệ")
+    }
+  }
+  return { channel: inputId(channel), mode: mode as ImportMode }
+}
 
 type RevenueSplit = {
   totalIncome: number
@@ -43,6 +79,7 @@ export class IncomesController {
     @InjectModel(DailyAdsMetrics.name)
     private readonly metrics: Model<DailyAdsMetricsDocument>,
     @InjectModel(MonthGoal.name) private readonly goals: Model<MonthGoalDocument>,
+    @InjectModel(Channel.name) private readonly channels: Model<ChannelDocument>,
     private readonly importer: IncomeImportService
   ) {}
 
@@ -464,27 +501,30 @@ export class IncomesController {
   async import(
     @UploadedFiles() files: Express.Multer.File[],
     @Body("channel") channel: string,
-    @Body("updateMode") updateMode = "full"
+    @Body("updateMode") updateMode: string | undefined,
+    @Body("chunkIndex") chunkIndex: string | undefined,
+    @Body("chunkCount") chunkCount: string | undefined
   ) {
-    if (!channel || !files?.length) throw new Error("Thiếu kênh hoặc file import")
-    if (updateMode === "status-only") {
+    const input = importInput(files, channel, updateMode, chunkIndex, chunkCount)
+    if (!await this.channels.exists({ _id: input.channel })) throw new NotFoundException("Không tìm thấy kênh")
+    if (input.mode === "status-only") {
       return {
         success: true,
         message: "Đã cập nhật trạng thái",
-        ...(await this.importer.updateStatuses(files[0], channel))
+        ...(await this.importer.updateStatuses(files[0], input.channel))
       }
     }
-    if (updateMode === "affiliate-only") {
+    if (input.mode === "affiliate-only") {
       return {
         success: true,
         message: "Đã cập nhật affiliate",
-        ...(await this.importer.importAffiliate(files[0], channel))
+        ...(await this.importer.importAffiliate(files[0], input.channel))
       }
     }
-    const total = await this.importer.importTotal(files[0], channel)
+    const total = await this.importer.importTotal(files[0], input.channel)
     const affiliate =
-      updateMode === "full" && files[1]
-        ? await this.importer.importAffiliate(files[1], channel)
+      input.mode === "full"
+        ? await this.importer.importAffiliate(files[1], input.channel)
         : undefined
     return {
       success: true,

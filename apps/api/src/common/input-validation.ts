@@ -31,6 +31,40 @@ export function inputBoolean(value: unknown, field: string): boolean {
   return value
 }
 
+export function inputNonNegativeNumber(value: unknown, field: string): number {
+  if ((typeof value !== "number" && typeof value !== "string") ||
+      (typeof value === "string" && !value.trim())) {
+    throw new BadRequestException(`${field} phải là số không âm`)
+  }
+  const number = Number(value)
+  if (!Number.isFinite(number) || number < 0) {
+    throw new BadRequestException(`${field} phải là số không âm`)
+  }
+  return number
+}
+
+const businessDateParts = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Ho_Chi_Minh",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+})
+
+/** Stores an Asia/Ho_Chi_Minh calendar day as its UTC instant at local midnight. */
+export function inputBusinessDay(value: unknown, field = "date"): Date {
+  if (typeof value !== "string" && !(value instanceof Date)) {
+    throw new BadRequestException(`${field} không hợp lệ`)
+  }
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.valueOf())) throw new BadRequestException(`${field} không hợp lệ`)
+  const parts = Object.fromEntries(
+    businessDateParts.formatToParts(parsed)
+      .filter(part => part.type !== "literal")
+      .map(part => [part.type, part.value])
+  )
+  return new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day)) - 7 * 60 * 60 * 1000)
+}
+
 export function inputId(value: unknown): string {
   if (typeof value !== "string" || !/^[a-f\d]{24}$/i.test(value)) {
     throw new BadRequestException("ID không hợp lệ")

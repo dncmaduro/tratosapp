@@ -25,10 +25,11 @@ Với Node.js `22.23.2` và pnpm `9.15.5`, chạy từ root:
 pnpm --filter @tratosapp/api test
 ```
 
-Lệnh này build API rồi chạy test xác thực bằng JWT thật và user model giả lập;
+Lệnh này build API rồi chạy test xác thực bằng JWT thật và model giả lập;
 không cần kết nối MongoDB. Test kiểm tra loại token, token lỗi/hết hạn,
-Authorization header, tài khoản bị khóa/xóa, quyền ghi kênh/vật tư và khả năng
-nạp AppModule/schema (không thay thế test khởi động với MongoDB thật).
+Authorization header, tài khoản bị khóa/xóa, quyền ghi kênh/vật tư, validation
+user/kênh/Ads/import và khả năng nạp AppModule/schema (không thay thế test
+khởi động với MongoDB thật).
 
 Access token phải có `type: "access"`; refresh token chỉ được dùng để đổi token.
 Access token cũ chưa có `type` sẽ bị từ chối sau cập nhật: cần refresh để lấy
@@ -50,6 +51,15 @@ trường đã công bố và báo `409` khi trùng username. API user kiểm tr
 mật khẩu (8 ký tự, không quá 72 byte UTF-8), URL avatar, ID, `active` và các
 quyền có trong catalog; field thừa hoặc dữ liệu sai nhận `400`, user không có
 nhận `404`, email trùng nhận `409`.
+
+Import doanh thu chỉ chấp nhận file `.xlsx`, `.xls` hoặc `.csv` có dữ liệu và
+đúng số file cho từng mode: `full` là 2 file, còn `base-only`, `affiliate-only`
+và `status-only` là 1 file. API xác thực kênh tồn tại và kiểm tra thứ tự chunk
+trước khi đọc file; điều này giữ tương thích với luồng import chunk ở web.
+
+DailyAdsMetrics lưu ngày theo `Asia/Ho_Chi_Minh` thay vì timezone của server;
+sáu trường nhập là bắt buộc và phải là số không âm. Công thức metrics được giữ
+nguyên từ ứng dụng nguồn.
 
 ## Deploy
 
