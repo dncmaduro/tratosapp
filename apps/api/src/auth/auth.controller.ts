@@ -9,7 +9,7 @@ import { RequirePermissions } from "./require-permissions.decorator"
 import { AuthService } from "./auth.service"
 import { JwtAuthGuard } from "./jwt-auth.guard"
 
-const permissionKeys = ["api.products.search-products", "api.products.create-product", "api.products.update-product", "api.products.delete-product", "api.products.restore-product", "api.products.cal-xlsx", "api.incomes.get-incomes-by-date-range", "api.incomes.insert-and-update-affiliate-type", "api.incomes.delete-income-by-date", "api.dailyads.upsert-daily-ads-metrics", "api.dailyads.delete-daily-ads-metrics", "api.livestreammonthgoals.create-livestream-month-goal", "api.livestreammonthgoals.update-livestream-month-goal", "api.packingrules.create-rule", "api.packingrules.update-rule"]
+const permissionKeys = ["api.products.search-products", "api.products.create-product", "api.products.update-product", "api.products.delete-product", "api.products.restore-product", "api.products.cal-xlsx", "api.incomes.get-incomes-by-date-range", "api.incomes.insert-and-update-affiliate-type", "api.incomes.delete-income-by-date", "api.dailyads.upsert-daily-ads-metrics", "api.dailyads.delete-daily-ads-metrics", "api.livestreammonthgoals.create-livestream-month-goal", "api.livestreammonthgoals.update-livestream-month-goal", "api.packingrules.create-rule", "api.packingrules.update-rule", "api.livestreamchannels.create-livestream-channel", "api.livestreamchannels.update-livestream-channel", "api.livestreamchannels.delete-livestream-channel", "api.storageitems.create-item"]
 
 @ApiTags("auth") @Controller("users")
 export class AuthController {

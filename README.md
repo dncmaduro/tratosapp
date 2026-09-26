@@ -27,12 +27,23 @@ pnpm --filter @tratosapp/api test
 
 Lệnh này build API rồi chạy test xác thực bằng JWT thật và user model giả lập;
 không cần kết nối MongoDB. Test kiểm tra loại token, token lỗi/hết hạn,
-Authorization header và tài khoản bị khóa/xóa.
+Authorization header, tài khoản bị khóa/xóa, quyền ghi kênh/vật tư và khả năng
+nạp AppModule/schema (không thay thế test khởi động với MongoDB thật).
 
 Access token phải có `type: "access"`; refresh token chỉ được dùng để đổi token.
 Access token cũ chưa có `type` sẽ bị từ chối sau cập nhật: cần refresh để lấy
 token mới hoặc đăng nhập lại. API kiểm tra tài khoản còn tồn tại và đang hoạt
 động trên mỗi request có JWT guard.
+
+Quyền ghi kênh giữ tên tương thích với ứng dụng gốc dù URL API là `/channels`:
+
+- `api.livestreamchannels.create-livestream-channel`: tạo kênh.
+- `api.livestreamchannels.update-livestream-channel`: sửa kênh.
+- `api.livestreamchannels.delete-livestream-channel`: xóa kênh.
+- `api.storageitems.create-item`: tạo vật tư.
+
+Admin có thể lấy các khóa này qua `GET /api/v1/users/permissions` để cấp quyền.
+User chỉ có quyền xem sẽ bị trả 403 khi ghi; tài khoản có `*` vẫn được phép.
 
 ## Deploy
 

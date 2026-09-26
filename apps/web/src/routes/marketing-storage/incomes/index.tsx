@@ -29,6 +29,7 @@ import { LivestreamChannelProvider } from "../../../context/LivestreamChannelCon
 import { ShopeeDashboard } from "../../../components/incomes/ShopeeDashboard"
 import { ShopeeIncomes } from "../../../components/incomes/ShopeeIncomes"
 import { NAVS, NAVS_URL, STORAGE_ACCESS_PERMISSIONS } from "../../../constants/navs"
+import { Can } from "../../../components/common/Can"
 
 export type Subtab = {
   tab: string
@@ -245,37 +246,46 @@ export function StorageIncomesPage({
               }}
             >
               <Paper p="xl" withBorder radius="lg" maw={520} w="100%">
-                <Stack gap="md">
-                  <Text fw={700} size="lg">Tạo kênh TikTok Shop đầu tiên</Text>
-                  <Text c="dimmed" size="sm">
-                    Kênh dùng để tách doanh thu, KPI và Ads Metrics.
-                  </Text>
-                  <TextInput
-                    label="Tên hiển thị"
-                    value={newChannelName}
-                    onChange={(event) => setNewChannelName(event.currentTarget.value)}
-                    placeholder="Ví dụ: Tratos Official"
-                  />
-                  <TextInput
-                    label="Username TikTok Shop"
-                    value={newChannelUsername}
-                    onChange={(event) => setNewChannelUsername(event.currentTarget.value)}
-                    placeholder="Ví dụ: tratos.official"
-                  />
-                  <Button
-                    onClick={() => createChannel({
-                      name: newChannelName,
-                      username: newChannelUsername,
-                      usernames: [newChannelUsername],
-                      platform: "tiktokshop",
-                      link: ""
-                    })}
-                    disabled={!newChannelName.trim() || !newChannelUsername.trim()}
-                    loading={isCreatingChannel}
-                  >
-                    Tạo kênh
-                  </Button>
-                </Stack>
+                <Can
+                  permissions={["api.livestreamchannels.create-livestream-channel"]}
+                  fallback={
+                    <Text c="dimmed">
+                      Chưa có kênh TikTok Shop. Liên hệ quản trị viên để tạo kênh hoặc cấp quyền tạo kênh.
+                    </Text>
+                  }
+                >
+                  <Stack gap="md">
+                    <Text fw={700} size="lg">Tạo kênh TikTok Shop đầu tiên</Text>
+                    <Text c="dimmed" size="sm">
+                      Kênh dùng để tách doanh thu, KPI và Ads Metrics.
+                    </Text>
+                    <TextInput
+                      label="Tên hiển thị"
+                      value={newChannelName}
+                      onChange={(event) => setNewChannelName(event.currentTarget.value)}
+                      placeholder="Ví dụ: Tratos Official"
+                    />
+                    <TextInput
+                      label="Username TikTok Shop"
+                      value={newChannelUsername}
+                      onChange={(event) => setNewChannelUsername(event.currentTarget.value)}
+                      placeholder="Ví dụ: tratos.official"
+                    />
+                    <Button
+                      onClick={() => createChannel({
+                        name: newChannelName,
+                        username: newChannelUsername,
+                        usernames: [newChannelUsername],
+                        platform: "tiktokshop",
+                        link: ""
+                      })}
+                      disabled={!newChannelName.trim() || !newChannelUsername.trim()}
+                      loading={isCreatingChannel}
+                    >
+                      Tạo kênh
+                    </Button>
+                  </Stack>
+                </Can>
               </Paper>
             </Box>
           ) : (

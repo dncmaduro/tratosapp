@@ -14,11 +14,13 @@ import { InjectModel } from "@nestjs/mongoose"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { Model } from "mongoose"
 import { JwtAuthGuard } from "../auth/jwt-auth.guard"
+import { PermissionsGuard } from "../auth/permissions.guard"
+import { RequirePermissions } from "../auth/require-permissions.decorator"
 import { Channel, ChannelDocument } from "./channel.schema"
 
 @ApiTags("channels")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller("channels")
 export class ChannelsController {
   constructor(
@@ -61,6 +63,7 @@ export class ChannelsController {
   }
 
   @Post()
+  @RequirePermissions("api.livestreamchannels.create-livestream-channel")
   async create(@Body() body: Partial<Channel>) {
     return this.channels.create({
       ...body,
@@ -70,6 +73,7 @@ export class ChannelsController {
   }
 
   @Patch(":id")
+  @RequirePermissions("api.livestreamchannels.update-livestream-channel")
   async update(@Param("id") id: string, @Body() body: Partial<Channel>) {
     const channel = await this.channels.findByIdAndUpdate(id, body, { new: true }).lean()
     if (!channel) throw new NotFoundException("Không tìm thấy kênh")
@@ -77,6 +81,7 @@ export class ChannelsController {
   }
 
   @Delete(":id")
+  @RequirePermissions("api.livestreamchannels.delete-livestream-channel")
   async remove(@Param("id") id: string) {
     const channel = await this.channels.findByIdAndDelete(id).lean()
     if (!channel) throw new NotFoundException("Không tìm thấy kênh")
