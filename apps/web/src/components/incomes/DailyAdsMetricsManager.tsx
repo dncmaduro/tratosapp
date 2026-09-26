@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { isAxiosError } from "axios"
 import { ColumnDef } from "@tanstack/react-table"
 import { eachDayOfInterval, format, subDays } from "date-fns"
 import { modals } from "@mantine/modals"
@@ -60,6 +61,7 @@ const buildInitialData = (
 })
 
 export function DailyAdsMetricsManager() {
+  const queryClient = useQueryClient()
   const { selectedChannelId, channels, setSelectedChannelId } =
     useLivestreamChannel()
   const { getDailyAdsMetrics, deleteAdsMetrics } = useDailyAds()
@@ -106,8 +108,11 @@ export function DailyAdsMetricsManager() {
               channelId: selectedChannelId
             })
             return response.data
-          } catch {
-            return null
+          } catch (error) {
+            // A missing record is expected for days with no saved metrics.
+            // Other failures must reach the query's error state.
+            if (isAxiosError(error) && error.response?.status === 404) return null
+            throw error
           }
         })
       )
@@ -121,11 +126,15 @@ export function DailyAdsMetricsManager() {
     mutationFn: async (req: DeleteDailyAdsMetricsRequest) => {
       await deleteAdsMetrics(req)
     },
-    onSuccess: (_, args) => {
+    onSuccess: async (_, args) => {
       CToast.success({
         title: `Đã xóa chỉ số ads ngày ${format(args.date, "dd/MM/yyyy")}`
       })
-      void refetch()
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["daily-ads-metrics-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["getRangeStats"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard-ads-split"] })
+      ])
     },
     onError: (error) => {
       CToast.error({
@@ -135,10 +144,12 @@ export function DailyAdsMetricsManager() {
     }
   })
 
+  const totalPages = Math.max(1, Math.ceil(metricsRows.length / limit))
+  const currentPage = Math.min(page, totalPages)
   const pagedRows = useMemo(() => {
-    const startIndex = (page - 1) * limit
+    const startIndex = (currentPage - 1) * limit
     return metricsRows.slice(startIndex, startIndex + limit)
-  }, [limit, metricsRows, page])
+  }, [currentPage, limit, metricsRows])
 
   const openCreateModal = () => {
     modals.open({
@@ -328,8 +339,9 @@ export function DailyAdsMetricsManager() {
               isLoading={isLoading}
               hideSearch
               hideColumnToggle
-              page={page}
-              totalPages={Math.max(1, Math.ceil(metricsRows.length / limit))}
+              page={currentPage}
+              totalPages={totalPages}
+              initialPageSize={limit}
               onPageChange={setPage}
               onPageSizeChange={(value) => {
                 setLimit(value)
@@ -397,7 +409,7 @@ export function DailyAdsMetricsManager() {
                   >
                     Làm mới
                   </Button>
-                  <Can permissions={["api.dailyads.delete-daily-ads-metrics"]}>
+                  <Can permissions={["api.dailyads.upsert-daily-ads-metrics"]}>
                     <Button
                       size="sm"
                       radius="md"
@@ -412,8 +424,9 @@ export function DailyAdsMetricsManager() {
               }
               emptyState={
                 <Text c="dimmed" size="sm">
-                  Chưa có DailyAdsMetrics nào được lưu trong khoảng ngày đang
-                  chọn.
+                  {error
+                    ? "Không tải được dữ liệu. Bấm Làm mới để thử lại."
+                    : "Chưa có chỉ số ads nào được lưu trong khoảng ngày đang chọn."}
                 </Text>
               }
             />
