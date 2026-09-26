@@ -259,8 +259,8 @@ export function DailyAdsMetricsManager() {
         header: "",
         size: 96,
         cell: ({ row }) => (
-          <Can permissions={["api.dailyads.upsert-daily-ads-metrics"]}>
-            <Flex gap={4}>
+          <Flex gap={4}>
+            <Can permissions={["api.dailyads.upsert-daily-ads-metrics"]}>
               <Button
                 size="xs"
                 variant="light"
@@ -269,6 +269,8 @@ export function DailyAdsMetricsManager() {
               >
                 Sửa
               </Button>
+            </Can>
+            <Can permissions={["api.dailyads.delete-daily-ads-metrics"]}>
               <Button
                 size="xs"
                 variant="light"
@@ -279,8 +281,8 @@ export function DailyAdsMetricsManager() {
               >
                 Xóa
               </Button>
-            </Flex>
-          </Can>
+            </Can>
+          </Flex>
         )
       }
     ],
