@@ -223,20 +223,21 @@ export class IncomeImportService {
         {
           orderId,
           channel: new Types.ObjectId(channelId),
-          products: { $elemMatch: { code, quantity } }
+          products: { $elemMatch: { code, quantity, sourceChecked: false } }
         },
         {
           $set: {
-            "products.$.sourceChecked": true,
-            "products.$.creator": creator,
-            "products.$.content": text(valueAt(row, "Loại nội dung", "Content Type")),
-            "products.$.source": source,
-            "products.$.affiliateAdsPercentage": ads,
-            "products.$.affiliateAdsAmount": affiliateAdsAmount,
-            "products.$.standardAffPercentage": standard,
-            "products.$.standardAffAmount": standardAffAmount
+            "products.$[product].sourceChecked": true,
+            "products.$[product].creator": creator,
+            "products.$[product].content": text(valueAt(row, "Loại nội dung", "Content Type")),
+            "products.$[product].source": source,
+            "products.$[product].affiliateAdsPercentage": ads,
+            "products.$[product].affiliateAdsAmount": affiliateAdsAmount,
+            "products.$[product].standardAffPercentage": standard,
+            "products.$[product].standardAffAmount": standard
           }
-        }
+        },
+        { arrayFilters: [{ "product.code": code, "product.quantity": quantity, "product.sourceChecked": false }] }
       )
       updated += result.modifiedCount
     }

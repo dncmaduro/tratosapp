@@ -73,6 +73,10 @@ Parser chuẩn hóa BOM/khoảng trắng trong header, kiểm tra cột bắt bu
 file, và nhận các format tiền `1,234.56` hoặc `1.234,56`. Dòng tổng doanh thu
 thiếu/không hợp lệ `Quantity` hay `SKU Subtotal` sẽ dừng import trước khi ghi DB.
 
+Affiliate chỉ cập nhật các dòng product chưa `sourceChecked`; một lần cập nhật
+áp dụng cho mọi dòng cùng order/SKU/quantity chưa check. Import lại file affiliate
+không ghi đè các dòng đã được phân loại.
+
 ## Deploy
 
 - Render: tạo Blueprint từ repository để dùng `render.yaml`; điền `DATABASE_URL`, `ALLOW_ORIGIN` và thông tin seed admin. Sau lần deploy đầu, chạy `pnpm --filter @tratosapp/api seed:admin` trong Render Shell.
