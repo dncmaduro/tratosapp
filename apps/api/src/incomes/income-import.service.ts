@@ -5,24 +5,38 @@ import { Model, Types } from "mongoose"
 import { Channel, ChannelDocument } from "../channels/channel.schema"
 import { Income, IncomeDocument } from "./income.schema"
 
+const header = (value: unknown) => String(value ?? "").replace(/^\uFEFF/, "").trim()
+
 const valueAt = (row: Record<string, unknown>, ...headers: string[]) =>
-  headers.map((header) => row[header]).find((value) => value !== undefined && value !== null && String(value).trim() !== "")
+  headers.map((key) => row[header(key)]).find((value) => value !== undefined && value !== null && String(value).trim() !== "")
 
 const text = (value: unknown) => String(value ?? "").trim()
 
-const number = (value: unknown) => {
-  if (typeof value === "number") return Number.isFinite(value) ? value : 0
+const parsedNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined
   const raw = text(value).replace(/[%₫đ\s]/gi, "")
-  if (!raw) return 0
+  if (!raw) return undefined
   const normalized = raw.includes(",") && raw.includes(".")
     ? raw.lastIndexOf(",") > raw.lastIndexOf(".")
       ? raw.replace(/\./g, "").replace(",", ".")
       : raw.replace(/,/g, "")
     : raw.includes(",")
-      ? raw.replace(",", ".")
+      ? /,\d{3}$/.test(raw) ? raw.replace(/,/g, "") : raw.replace(",", ".")
+      : raw.includes(".")
+        ? /\.\d{3}$/.test(raw) ? raw.replace(/\./g, "") : raw
       : raw
   const parsed = Number(normalized)
-  return Number.isFinite(parsed) ? parsed : 0
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+const number = (value: unknown) => parsedNumber(value) ?? 0
+
+const requiredNumber = (value: unknown, field: string, positive = false) => {
+  const result = parsedNumber(value)
+  if (result === undefined || result < 0 || (positive && result <= 0)) {
+    throw new BadRequestException(`${field} không hợp lệ`)
+  }
+  return result
 }
 
 const hasValue = (value: unknown) => value !== undefined && value !== null && text(value) !== ""
@@ -79,11 +93,45 @@ export class IncomeImportService {
     const workbook = XLSX.read(file.buffer, { type: "buffer", cellDates: false })
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     if (!worksheet) throw new BadRequestException("File Excel không có sheet dữ liệu")
-    return XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: "" })
+    const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: "" })
+      .map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [header(key), value])))
+    const [rawHeaders = []] = XLSX.utils.sheet_to_json<unknown[]>(worksheet, { header: 1, defval: "" })
+    return { rows, headers: new Set(rawHeaders.map(header).filter(Boolean)) }
+  }
+
+  private requireHeaders(headers: Set<string>, required: string[][], type: string) {
+    const missing = required.filter((alternatives) => !alternatives.some((item) => headers.has(header(item))))
+    if (missing.length) {
+      throw new BadRequestException(`File ${type} thiếu cột: ${missing.map((items) => items[0]).join(", ")}`)
+    }
+  }
+
+  private totalRows(file: Express.Multer.File) {
+    const sheet = this.rows(file)
+    this.requireHeaders(sheet.headers, [
+      ["Order ID"], ["Created Time", "Order Created Time", "Order Creation Time"], ["Seller SKU"],
+      ["Quantity"], ["SKU Subtotal Before Discount"], ["SKU Subtotal After Discount"]
+    ], "tổng doanh thu")
+    if (!sheet.rows.length) throw new BadRequestException("File tổng doanh thu không có dòng dữ liệu")
+    return sheet.rows
+  }
+
+  private affiliateRows(file: Express.Multer.File) {
+    const sheet = this.rows(file)
+    this.requireHeaders(sheet.headers, [["ID đơn hàng", "Order ID"], ["Sku người bán", "SKU người bán", "Seller SKU"], ["Số lượng", "Quantity"]], "affiliate")
+    if (!sheet.rows.length) throw new BadRequestException("File affiliate không có dòng dữ liệu")
+    return sheet.rows
+  }
+
+  private statusRows(file: Express.Multer.File) {
+    const sheet = this.rows(file)
+    this.requireHeaders(sheet.headers, [["Order ID"], ["Order Status"], ["Cancelation/Return Type", "Cancellation/Return Type"]], "cập nhật trạng thái")
+    if (!sheet.rows.length) throw new BadRequestException("File cập nhật trạng thái không có dòng dữ liệu")
+    return sheet.rows
   }
 
   async importTotal(file: Express.Multer.File, channelId: string) {
-    const rows = this.rows(file)
+    const rows = this.totalRows(file)
     const groups = new Map<string, Record<string, unknown>[]>()
 
     for (const row of rows) {
@@ -118,9 +166,9 @@ export class IncomeImportService {
           affiliateAdsAmount: 0,
           standardAffPercentage: 0,
           standardAffAmount: 0,
-          quantity: number(valueAt(line, "Quantity")),
-          price: number(valueAt(line, "SKU Subtotal Before Discount")),
-          priceAfterDiscount: number(valueAt(line, "SKU Subtotal After Discount"))
+          quantity: requiredNumber(valueAt(line, "Quantity"), "Quantity", true),
+          price: requiredNumber(valueAt(line, "SKU Subtotal Before Discount"), "SKU Subtotal Before Discount"),
+          priceAfterDiscount: requiredNumber(valueAt(line, "SKU Subtotal After Discount"), "SKU Subtotal After Discount")
         }))
       }
       return {
@@ -141,7 +189,7 @@ export class IncomeImportService {
   }
 
   async importAffiliate(file: Express.Multer.File, channelId: string) {
-    const rows = this.rows(file)
+    const rows = this.affiliateRows(file)
     const channel = await this.channels.findById(channelId).lean()
     const aliases = new Set(
       [channel?.username, ...(channel?.usernames ?? [])]
@@ -196,7 +244,7 @@ export class IncomeImportService {
   }
 
   async updateStatuses(file: Express.Multer.File, channelId: string) {
-    const operations = this.rows(file)
+    const operations = this.statusRows(file)
       .map((row) => {
         const orderId = text(valueAt(row, "Order ID"))
         if (!orderId) return undefined

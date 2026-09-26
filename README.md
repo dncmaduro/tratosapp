@@ -69,6 +69,10 @@ Ngày `Created Time` khi import được hiểu theo giờ Việt Nam cho Excel 
 `dd/MM/yyyy HH:mm:ss` và chuỗi ISO không có timezone; chuỗi ISO có offset hoặc
 `Z` giữ nguyên thời điểm gốc.
 
+Parser chuẩn hóa BOM/khoảng trắng trong header, kiểm tra cột bắt buộc theo loại
+file, và nhận các format tiền `1,234.56` hoặc `1.234,56`. Dòng tổng doanh thu
+thiếu/không hợp lệ `Quantity` hay `SKU Subtotal` sẽ dừng import trước khi ghi DB.
+
 ## Deploy
 
 - Render: tạo Blueprint từ repository để dùng `render.yaml`; điền `DATABASE_URL`, `ALLOW_ORIGIN` và thông tin seed admin. Sau lần deploy đầu, chạy `pnpm --filter @tratosapp/api seed:admin` trong Render Shell.
