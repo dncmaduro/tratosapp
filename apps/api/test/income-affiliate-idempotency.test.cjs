@@ -33,6 +33,8 @@ test("affiliate import targets every unchecked matching product and leaves check
   assert.deepEqual(options, { arrayFilters: [{ "product.code": "SKU-1", "product.quantity": 2, "product.sourceChecked": false }] })
   assert.equal(update.$set["products.$[product].sourceChecked"], true)
   assert.equal(update.$set["products.$[product].source"], "affiliate")
+  assert.equal(update.$set["products.$[product].standardAffPercentage"], 10)
+  assert.equal(update.$set["products.$[product].standardAffAmount"], 20)
   assert.equal(update.$set["products.$.sourceChecked"], undefined)
 })
 

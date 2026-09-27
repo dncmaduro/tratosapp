@@ -234,7 +234,7 @@ export class IncomeImportService {
             "products.$[product].affiliateAdsPercentage": ads,
             "products.$[product].affiliateAdsAmount": affiliateAdsAmount,
             "products.$[product].standardAffPercentage": standard,
-            "products.$[product].standardAffAmount": standard
+            "products.$[product].standardAffAmount": standardAffAmount
           }
         },
         { arrayFilters: [{ "product.code": code, "product.quantity": quantity, "product.sourceChecked": false }] }
