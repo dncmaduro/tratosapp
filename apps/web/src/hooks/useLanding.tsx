@@ -12,7 +12,6 @@ export const useLanding = () => {
     return callApi<never, LandingResponse>({
       path: `/order?${query}`,
       method: "GET",
-      customUrl: "https://www.mycandyvn.shop/api"
     })
   }
 

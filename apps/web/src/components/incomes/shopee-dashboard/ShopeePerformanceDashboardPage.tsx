@@ -504,7 +504,7 @@ export const ShopeePerformanceDashboardPage = ({
   return (
     <>
       <Helmet>
-        <title>{pageTitle} | MyCandy</title>
+        <title>{pageTitle} | Tratosapp</title>
       </Helmet>
 
       <AppLayout navs={navs}>

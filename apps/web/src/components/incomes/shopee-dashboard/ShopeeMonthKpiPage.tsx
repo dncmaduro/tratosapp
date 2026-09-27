@@ -387,7 +387,7 @@ export const ShopeeMonthKpiPage = ({
   return (
     <>
       <Helmet>
-        <title>KPI Shopee | MyCandy</title>
+        <title>KPI Shopee | Tratosapp</title>
       </Helmet>
 
       <AppLayout navs={SHOPEE_NAVS}>

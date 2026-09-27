@@ -194,10 +194,7 @@ export const MaintenancePage = ({
 
             {/* Footer */}
             <Text size="sm" c="dimmed" mt="xl" ta="center">
-              Nếu cần hỗ trợ, vui lòng liên hệ{" "}
-              <Text component="span" fw={600} c="indigo">
-                support@mycandy.vn
-              </Text>
+              Nếu cần hỗ trợ, vui lòng liên hệ quản trị viên Tratosapp.
             </Text>
           </Stack>
         </Paper>

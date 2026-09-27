@@ -10,7 +10,7 @@ import {
   Center,
   Box
 } from "@mantine/core"
-import { IconCandy, IconLock, IconUser } from "@tabler/icons-react"
+import { IconBrandTiktok, IconLock, IconUser } from "@tabler/icons-react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
 import { Helmet } from "react-helmet-async"
@@ -117,7 +117,7 @@ function RouteComponent() {
                       "0 8px 18px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.7)"
                   }}
                 >
-                  <IconCandy size={30} color="#6366f1" />
+                  <IconBrandTiktok size={30} color="#6366f1" />
                 </Box>
                 <Text
                   fw={800}

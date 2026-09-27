@@ -22,8 +22,8 @@ export const getVisibleNavigationItems = <T extends NavigationItem>(navs: T[], p
 export const getStorageAppBasePath = (_pathname?: string) => TIKTOKSHOP_NAVS_URL
 export const getStorageNavsByPath = () => TIKTOKSHOP_NAVS
 
-// Temporary source-compatibility exports. They are not exposed by the Tratosapp
-// route tree and will disappear when the unused Candy Cal files are removed.
+// Temporary compatibility exports retained for shared source files. They are
+// not exposed by the Tratosapp route tree.
 export const SHOPEE_NAVS: NavigationItem[] = []
 export const SHOPEE_ACCESS_PERMISSIONS: string[] = []
 export const LANDING_NAVS: NavigationItem[] = []

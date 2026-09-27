@@ -155,7 +155,7 @@ export const LandingLayout = ({ children }: Props) => {
         <Container size="xl" px={{ base: 16, md: 32 }} h="100%">
           <Flex h="100%" align="center" justify="space-between">
             <Text size="sm" c="dimmed">
-              © {new Date().getFullYear()} Candy Cal. Bảo lưu mọi quyền.
+              © {new Date().getFullYear()} Tratosapp. Bảo lưu mọi quyền.
             </Text>
             <Group gap="md">
               <Anchor

@@ -219,7 +219,7 @@ export class IncomesController {
 
     for (const product of products) {
       // TikTok Shop's SKU Subtotal columns already include Quantity.
-      // Keep this aligned with the original Candy calculation: sum each line once.
+      // Keep this aligned with the source app calculation: sum each line once.
       const revenue = afterDiscount ? product.priceAfterDiscount || product.price : product.price || 0
       const source = (product.source || "other").toLowerCase()
       result.totalIncome += revenue
