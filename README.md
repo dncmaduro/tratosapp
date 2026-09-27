@@ -107,7 +107,10 @@ không ghi đè các dòng đã được phân loại.
 
 ## Deploy
 
-- Render: tạo Blueprint từ repository để dùng `render.yaml`; điền `DATABASE_URL`, `ALLOW_ORIGIN` và thông tin seed admin. Sau lần deploy đầu, chạy `pnpm --filter @tratosapp/api seed:admin` trong Render Shell.
-- Vercel: import repository ở root, Vercel tự dùng `vercel.json`; đặt `VITE_BACKEND_URL=https://<render-service>.onrender.com/api` rồi redeploy. Giá trị `ALLOW_ORIGIN` ở Render là URL Vercel không có dấu `/` cuối.
+- Render: tạo Blueprint từ repository để dùng `render.yaml`; API dùng compute plan `free` và Node.js `22.23.2`. Điền `DATABASE_URL`, `ALLOW_ORIGIN` và thông tin seed admin trước khi deploy. Free web service sẽ sleep sau 15 phút không có traffic, có thể mất khoảng một phút để thức dậy, và không có Render Shell; đây là giới hạn của gói Free, không nên xem là production uptime.
+- Seed admin trên máy local sau khi API đã deploy: điền `apps/api/.env` (file local đã bị Git ignore), mở shell với Node.js `22.23.2`, chạy `set -a && source apps/api/.env && set +a && pnpm --filter @tratosapp/api seed:admin`. Lệnh này kết nối MongoDB bằng `DATABASE_URL` trong env; không commit `.env`.
+- Vercel: liên kết project với repository ở root và đặt `VITE_BACKEND_URL=https://<render-service>.onrender.com/api` trong Production Environment Variables. Vì Vercel chỉ chọn major Node.js và tự cập nhật patch, FE được build trong GitHub Actions bằng Node.js `22.23.2`, sau đó deploy prebuilt output bằng Vercel CLI. Đặt Ignored Build Step của project thành `Don't build anything` để Vercel không chạy thêm build từ Git.
+- Thêm ba GitHub Actions repository secrets để bật workflow `.github/workflows/deploy-web-vercel.yml`: `VERCEL_TOKEN`, `VERCEL_ORG_ID` và `VERCEL_PROJECT_ID`. Workflow chạy khi có thay đổi liên quan web trên `main`, hoặc thủ công qua `workflow_dispatch`. Nếu chưa có đủ secrets, workflow cảnh báo và bỏ qua deploy.
+- `ALLOW_ORIGIN` trên Render phải là domain FE Vercel (ví dụ `https://<project>.vercel.app`), không có dấu `/` ở cuối. Có thể nhập nhiều origin, phân tách bằng dấu phẩy.
 
 Node runtime bắt buộc: `22.23.2`; package manager: pnpm `9.15.5`.

@@ -1,6 +1,7 @@
 services:
   - type: web
     name: tratosapp-api
+    plan: free
     runtime: node
     rootDir: .
     buildCommand: corepack enable && corepack prepare pnpm@9.15.5 --activate && pnpm install --frozen-lockfile && pnpm --filter @tratosapp/api build
