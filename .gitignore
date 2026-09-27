@@ -17,3 +17,5 @@ coverage/
 # Tooling and OS files
 .DS_Store
 *.log
+.vercel
+.env*
