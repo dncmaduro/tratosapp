@@ -8,6 +8,7 @@ const { JwtAuthGuard } = require("../dist/auth/jwt-auth.guard")
 const { PERMISSIONS_KEY } = require("../dist/auth/require-permissions.decorator")
 const { AuthController } = require("../dist/auth/auth.controller")
 const { ChannelsController } = require("../dist/channels/channels.controller")
+const { IncomesController } = require("../dist/incomes/incomes.controller")
 const { StorageItemsController } = require("../dist/storage-items/storage-items.controller")
 
 const protectedWrites = [
@@ -16,6 +17,9 @@ const protectedWrites = [
   [ChannelsController, "remove", "api.livestreamchannels.delete-livestream-channel"],
   [StorageItemsController, "create", "api.storageitems.create-item"]
 ]
+const protectedIncomeReads = [
+  "list", "monthlyIncome", "monthlyQuantity", "kpiPercentage", "monthlyAds", "rangeStats", "export"
+].map(method => [IncomesController, method, "api.incomes.get-incomes-by-date-range"])
 const reflector = new Reflector()
 const forbidden = error => error.getStatus?.() === 403
 function context(Controller, method, user = { sub: "507f1f77bcf86cd799439011" }) {
@@ -34,23 +38,38 @@ function setup() {
   }
 }
 
-test("channel and storage writes declare both guards and their original permission keys", () => {
-  for (const [Controller, method, permission] of protectedWrites) {
+test("protected writes and income reads declare both guards and their permission keys", () => {
+  for (const [Controller, method, permission] of [...protectedWrites, ...protectedIncomeReads]) {
     const targets = [Controller.prototype[method], Controller]
     assert.deepEqual(reflector.getAllAndOverride(GUARDS_METADATA, targets), [JwtAuthGuard, PermissionsGuard])
     assert.deepEqual(reflector.getAllAndOverride(PERMISSIONS_KEY, targets), [permission])
   }
 })
 
-test("write permissions are assignable through the admin permission catalogue", () => {
+test("write and income-read permissions are assignable through the admin permission catalogue", () => {
   const keys = new AuthController({}, {}).permissions().data.map(item => item.key)
-  for (const [, , permission] of protectedWrites) assert.ok(keys.includes(permission), permission)
+  for (const [, , permission] of [...protectedWrites, ...protectedIncomeReads]) assert.ok(keys.includes(permission), permission)
   assert.equal(new Set(keys).size, keys.length)
 })
 
 test("writes reject missing or unrelated permissions but allow the exact key and wildcard", async () => {
   const f = setup()
   for (const [Controller, method, permission] of protectedWrites) {
+    const ctx = context(Controller, method)
+    for (const permissions of [[], ["api.products.search-products"]]) {
+      f.setUser({ active: true, permissions })
+      await assert.rejects(f.guard.canActivate(ctx), forbidden)
+    }
+    for (const permissions of [[permission], ["*"]]) {
+      f.setUser({ active: true, permissions })
+      assert.equal(await f.guard.canActivate(ctx), true)
+    }
+  }
+})
+
+test("income reads reject missing permissions but allow their exact key and wildcard", async () => {
+  const f = setup()
+  for (const [Controller, method, permission] of protectedIncomeReads) {
     const ctx = context(Controller, method)
     for (const permissions of [[], ["api.products.search-products"]]) {
       f.setUser({ active: true, permissions })

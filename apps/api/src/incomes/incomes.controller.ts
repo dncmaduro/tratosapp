@@ -308,6 +308,7 @@ export class IncomesController {
   }
 
   @Get()
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async list(
     @Query("channelId") channelId?: string,
     @Query("startDate") startDate?: string,
@@ -371,6 +372,7 @@ export class IncomesController {
   }
 
   @Get("income-split-by-month")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async monthlyIncome(
     @Query("month") month: string,
     @Query("year") year: string,
@@ -390,6 +392,7 @@ export class IncomesController {
   }
 
   @Get("quantity-split-by-month")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async monthlyQuantity(
     @Query("month") month: string,
     @Query("year") year: string,
@@ -421,6 +424,7 @@ export class IncomesController {
   }
 
   @Get("kpi-percentage-split-by-month")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async kpiPercentage(
     @Query("month") month: string,
     @Query("year") year: string,
@@ -447,6 +451,7 @@ export class IncomesController {
   }
 
   @Get("monthly-ads-cost-split")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async monthlyAds(
     @Query("month") month: string,
     @Query("year") year: string,
@@ -487,6 +492,7 @@ export class IncomesController {
   }
 
   @Get("range-stats")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async rangeStats(
     @Query("startDate") startDate: string,
     @Query("endDate") endDate: string,
@@ -573,6 +579,7 @@ export class IncomesController {
   }
 
   @Get("export-xlsx")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async export(
     @Query("startDate") startDate: string,
     @Query("endDate") endDate: string,

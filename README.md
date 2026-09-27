@@ -45,6 +45,9 @@ Quyền ghi kênh giữ tên tương thích với ứng dụng gốc dù URL API
 
 Admin có thể lấy các khóa này qua `GET /api/v1/users/permissions` để cấp quyền.
 User chỉ có quyền xem sẽ bị trả 403 khi ghi; tài khoản có `*` vẫn được phép.
+Các endpoint đọc, thống kê và xuất doanh thu cũng yêu cầu
+`api.incomes.get-incomes-by-date-range`; việc ẩn menu ở web không phải là lớp
+bảo vệ duy nhất.
 
 API kiểm tra body trước khi ghi dữ liệu: kênh chỉ là `tiktokshop`, chỉ nhận các
 trường đã công bố và báo `409` khi trùng username. API user kiểm tra email,
