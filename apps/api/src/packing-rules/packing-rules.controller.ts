@@ -8,7 +8,7 @@ import { RequirePermissions } from "../auth/require-permissions.decorator"
 import { PackingRule, PackingRuleDocument } from "./packing-rule.schema"
 @ApiTags("packing-rules") @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @Controller("packingrules") export class PackingRulesController {
  constructor(@InjectModel(PackingRule.name) private readonly rules: Model<PackingRuleDocument>) {}
- @Get() async list(@Query("searchText") searchText = "") { const filter = searchText ? { "products.productCode": { $regex: searchText, $options: "i" } } : {}; return { rules: await this.rules.find(filter).lean() } }
+ @Get() @RequirePermissions("api.incomes.get-incomes-by-date-range") async list(@Query("searchText") searchText = "") { const filter = searchText ? { "products.productCode": { $regex: searchText, $options: "i" } } : {}; return { rules: await this.rules.find(filter).lean() } }
  @Post() @RequirePermissions("api.packingrules.create-rule") create(@Body() body: Partial<PackingRule>) { return this.rules.create(body) }
  @Patch(":productCode") @RequirePermissions("api.packingrules.update-rule") async update(@Param("productCode") productCode: string, @Body() body: Partial<PackingRule>) { const rule = await this.rules.findOneAndUpdate({ "products.productCode": productCode }, body, { new: true }); if (!rule) throw new NotFoundException("Không tìm thấy quy tắc đóng hàng"); return rule }
 }

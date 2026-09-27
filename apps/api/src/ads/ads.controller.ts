@@ -62,6 +62,7 @@ export class AdsController {
   }
 
   @Get("metrics")
+  @RequirePermissions("api.incomes.get-incomes-by-date-range")
   async get(@Query("date") dateText: string, @Query("channelId") channelId: string) {
     const date = inputBusinessDay(dateText)
     const data = await this.metrics.findOne({ date, channel: new Types.ObjectId(inputId(channelId)) }).lean()
