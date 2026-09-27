@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common"
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FileInterceptor } from "@nestjs/platform-express"
 import { InjectModel } from "@nestjs/mongoose"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
@@ -7,8 +7,32 @@ import * as XLSX from "xlsx"
 import { JwtAuthGuard } from "../auth/jwt-auth.guard"
 import { PermissionsGuard } from "../auth/permissions.guard"
 import { RequirePermissions } from "../auth/require-permissions.decorator"
+import { inputId, inputNonNegativeNumber, inputObject, inputString, withDuplicateConflict } from "../common/input-validation"
 import { StorageItem, StorageItemDocument } from "../storage-items/storage-item.schema"
 import { Product, ProductDocument } from "./product.schema"
+
+const productFields = ["name", "items"] as const
+const productUpdateFields = ["_id", "deletedAt", ...productFields] as const
+const productItemFields = ["_id", "quantity"] as const
+
+type ProductInput = { id?: string; name: string; items: { _id: string; quantity: number }[] }
+
+function productInput(value: unknown, updating = false): ProductInput {
+  const body = inputObject(value, updating ? productUpdateFields : productFields)
+  if (!Array.isArray(body.items)) throw new BadRequestException("items phải là một mảng")
+  const items = body.items.map((item) => {
+    const value = inputObject(item, productItemFields)
+    const quantity = inputNonNegativeNumber(value.quantity, "items.quantity")
+    if (!Number.isSafeInteger(quantity) || quantity < 1) {
+      throw new BadRequestException("items.quantity phải là số nguyên dương")
+    }
+    return { _id: inputId(value._id), quantity }
+  })
+  if (new Set(items.map((item) => item._id)).size !== items.length) {
+    throw new BadRequestException("items không được trùng mặt hàng")
+  }
+  return { id: updating ? inputId(body._id) : undefined, name: inputString(body.name, "name"), items }
+}
 
 @ApiTags("products") @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @Controller("products")
 export class ProductsController {
@@ -23,16 +47,37 @@ export class ProductsController {
   }
 
   @Post() @RequirePermissions("api.products.create-product")
-  create(@Body() body: Partial<Product>) { return this.products.create(body) }
+  async create(@Body() body: unknown) {
+    const input = productInput(body)
+    await this.ensureItemsExist(input.items)
+    return withDuplicateConflict(() => this.products.create({ name: input.name, items: input.items }), "Tên sản phẩm đã tồn tại")
+  }
 
   @Put() @RequirePermissions("api.products.update-product")
-  update(@Body() body: Partial<Product> & { _id: string }) { return this.products.findByIdAndUpdate(body._id, body, { new: true }) }
+  async update(@Body() body: unknown) {
+    const input = productInput(body, true)
+    await this.ensureItemsExist(input.items)
+    const product = await withDuplicateConflict(
+      () => this.products.findByIdAndUpdate(input.id, { $set: { name: input.name, items: input.items } }, { new: true, runValidators: true }),
+      "Tên sản phẩm đã tồn tại"
+    )
+    if (!product) throw new NotFoundException("Không tìm thấy sản phẩm")
+    return product
+  }
 
   @Delete(":id") @RequirePermissions("api.products.delete-product")
-  remove(@Param("id") id: string) { return this.products.findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true }) }
+  async remove(@Param("id") id: string) {
+    const product = await this.products.findByIdAndUpdate(inputId(id), { deletedAt: new Date() }, { new: true })
+    if (!product) throw new NotFoundException("Không tìm thấy sản phẩm")
+    return product
+  }
 
   @Patch(":id/restore") @RequirePermissions("api.products.restore-product")
-  restore(@Param("id") id: string) { return this.products.findByIdAndUpdate(id, { deletedAt: null }, { new: true }) }
+  async restore(@Param("id") id: string) {
+    const product = await this.products.findByIdAndUpdate(inputId(id), { deletedAt: null }, { new: true })
+    if (!product) throw new NotFoundException("Không tìm thấy sản phẩm")
+    return product
+  }
 
   @Post("cal-xlsx") @RequirePermissions("api.products.cal-xlsx") @UseInterceptors(FileInterceptor("file"))
   async calXlsx(@UploadedFile() file: Express.Multer.File) {
@@ -60,5 +105,11 @@ export class ProductsController {
       ;(grouped[key] ||= { products: productsInOrder, quantity: 0 }).quantity += 1
     }
     return { items: itemDocs.map((item) => ({ _id: item._id.toString(), name: item.name, quantity: quantities[item._id.toString()] || 0, storageItems: [item] })), orders: Object.values(grouped), total: Object.values(grouped).reduce((sum, order) => sum + order.quantity, 0) }
+  }
+
+  private async ensureItemsExist(items: ProductInput["items"]) {
+    if (!items.length) return
+    const stored = await this.items.find({ _id: { $in: items.map((item) => item._id) } }).select("_id").lean()
+    if (stored.length !== items.length) throw new NotFoundException("Có mặt hàng không tồn tại")
   }
 }

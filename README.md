@@ -88,6 +88,11 @@ tỷ lệ ads `0–100`; KPI trùng theo kênh/tháng trả `409`. Packing Rules
 loại hộp đã công bố, product không trùng và quantity nguyên dương hoặc `null`,
 với `maxQuantity` không nhỏ hơn `minQuantity`.
 
+Product chỉ nhận tên và danh sách mặt hàng không trùng, với quantity nguyên
+dương và mỗi storage item phải tồn tại. Storage quick-create vẫn nhận payload
+legacy từ form cũ nhưng chỉ lưu `code` và `name` trong schema Tratosapp; field
+lạ ngoài payload legacy bị từ chối và code trùng trả `409`.
+
 Parser chuẩn hóa BOM/khoảng trắng trong header, kiểm tra cột bắt buộc theo loại
 file, và nhận các format tiền `1,234.56` hoặc `1.234,56`. Dòng tổng doanh thu
 thiếu/không hợp lệ `Quantity` hay `SKU Subtotal` sẽ dừng import trước khi ghi DB.
