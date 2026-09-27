@@ -86,3 +86,22 @@ test("storage quick-create accepts its legacy payload but stores only schema fie
   f.model.create = async () => { const error = new Error("duplicate"); error.code = 11000; throw error }
   await assert.rejects(f.controller.create({ code: "BOX-01", name: "Hộp nhỏ" }), status(409))
 })
+
+test("product and storage searches use literal text and strict deleted flags", async () => {
+  const calls = { products: [], storage: [] }
+  const productController = new ProductsController(
+    { find: filter => { calls.products.push(filter); return { lean: async () => [] } } },
+    {}
+  )
+  const storageController = new StorageItemsController({
+    find: filter => { calls.storage.push(filter); return { sort: () => ({ lean: async () => [] }) } }
+  })
+  await productController.search(".*", "false")
+  await storageController.search(".*", "true")
+  assert.equal(calls.products[0].name.$regex, "\\.\\*")
+  assert.equal(calls.products[0].deletedAt, null)
+  assert.equal(calls.storage[0].$or[0].code.$regex, "\\.\\*")
+  assert.deepEqual(calls.storage[0].deletedAt, { $ne: null })
+  assert.throws(() => productController.search("", "all"), status(400))
+  assert.throws(() => storageController.search("", "all"), status(400))
+})

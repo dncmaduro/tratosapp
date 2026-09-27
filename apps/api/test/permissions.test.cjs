@@ -12,6 +12,7 @@ const { ChannelsController } = require("../dist/channels/channels.controller")
 const { IncomesController } = require("../dist/incomes/incomes.controller")
 const { MonthGoalsController } = require("../dist/month-goals/month-goals.controller")
 const { PackingRulesController } = require("../dist/packing-rules/packing-rules.controller")
+const { ProductsController } = require("../dist/products/products.controller")
 const { StorageItemsController } = require("../dist/storage-items/storage-items.controller")
 
 const protectedWrites = [
@@ -26,6 +27,9 @@ const protectedIncomeReads = [
 const protectedIncomeSupportReads = [
   [AdsController, "get"], [MonthGoalsController, "list"], [MonthGoalsController, "get"], [PackingRulesController, "list"]
 ].map(([Controller, method]) => [Controller, method, "api.incomes.get-incomes-by-date-range"])
+const protectedProductReads = [
+  [ProductsController, "search"], [StorageItemsController, "search"]
+].map(([Controller, method]) => [Controller, method, "api.products.search-products"])
 const reflector = new Reflector()
 const forbidden = error => error.getStatus?.() === 403
 function context(Controller, method, user = { sub: "507f1f77bcf86cd799439011" }) {
@@ -45,7 +49,7 @@ function setup() {
 }
 
 test("protected writes and income reads declare both guards and their permission keys", () => {
-  for (const [Controller, method, permission] of [...protectedWrites, ...protectedIncomeReads, ...protectedIncomeSupportReads]) {
+  for (const [Controller, method, permission] of [...protectedWrites, ...protectedIncomeReads, ...protectedIncomeSupportReads, ...protectedProductReads]) {
     const targets = [Controller.prototype[method], Controller]
     assert.deepEqual(reflector.getAllAndOverride(GUARDS_METADATA, targets), [JwtAuthGuard, PermissionsGuard])
     assert.deepEqual(reflector.getAllAndOverride(PERMISSIONS_KEY, targets), [permission])
@@ -54,7 +58,7 @@ test("protected writes and income reads declare both guards and their permission
 
 test("write and income-read permissions are assignable through the admin permission catalogue", () => {
   const keys = new AuthController({}, {}).permissions().data.map(item => item.key)
-  for (const [, , permission] of [...protectedWrites, ...protectedIncomeReads, ...protectedIncomeSupportReads]) assert.ok(keys.includes(permission), permission)
+  for (const [, , permission] of [...protectedWrites, ...protectedIncomeReads, ...protectedIncomeSupportReads, ...protectedProductReads]) assert.ok(keys.includes(permission), permission)
   assert.equal(new Set(keys).size, keys.length)
 })
 
@@ -88,6 +92,21 @@ test("income reads reject missing permissions but allow their exact key and wild
   }
 })
 
+test("product and storage reads reject missing permissions but allow their exact key and wildcard", async () => {
+  const f = setup()
+  for (const [Controller, method, permission] of protectedProductReads) {
+    const ctx = context(Controller, method)
+    for (const permissions of [[], ["api.incomes.get-incomes-by-date-range"]]) {
+      f.setUser({ active: true, permissions })
+      await assert.rejects(f.guard.canActivate(ctx), forbidden)
+    }
+    for (const permissions of [[permission], ["*"]]) {
+      f.setUser({ active: true, permissions })
+      assert.equal(await f.guard.canActivate(ctx), true)
+    }
+  }
+})
+
 test("revoking a permission or disabling/deleting its account blocks the next write", async () => {
   const f = setup()
   for (const [Controller, method, permission] of protectedWrites) {
@@ -102,10 +121,10 @@ test("revoking a permission or disabling/deleting its account blocks the next wr
   }
 })
 
-test("channel and storage reads remain available without a write permission", async () => {
+test("channel reads remain available without a write permission", async () => {
   const f = setup()
   for (const [Controller, method] of [
-    [ChannelsController, "list"], [ChannelsController, "detail"], [StorageItemsController, "search"]
+    [ChannelsController, "list"], [ChannelsController, "detail"]
   ]) {
     assert.ok(Reflect.getMetadata(GUARDS_METADATA, Controller).includes(JwtAuthGuard))
     assert.equal(await f.guard.canActivate(context(Controller, method)), true)

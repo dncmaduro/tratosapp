@@ -14,6 +14,13 @@ import { Product, ProductDocument } from "./product.schema"
 const productFields = ["name", "items"] as const
 const productUpdateFields = ["_id", "deletedAt", ...productFields] as const
 const productItemFields = ["_id", "quantity"] as const
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+function searchInput(searchText: unknown, deleted: unknown) {
+  const text = inputString(searchText, "searchText", true)
+  if (deleted !== "true" && deleted !== "false") throw new BadRequestException("deleted phải là true hoặc false")
+  return { text, deleted: deleted === "true" }
+}
 
 type ProductInput = { id?: string; name: string; items: { _id: string; quantity: number }[] }
 
@@ -42,8 +49,10 @@ export class ProductsController {
   ) {}
 
   @Get("search")
-  search(@Query("searchText") q = "", @Query("deleted") deleted = "false") {
-    return this.products.find({ name: { $regex: q, $options: "i" }, deletedAt: deleted === "true" ? { $ne: null } : null }).lean()
+  @RequirePermissions("api.products.search-products")
+  search(@Query("searchText") searchText: string = "", @Query("deleted") deleted: string = "false") {
+    const input = searchInput(searchText, deleted)
+    return this.products.find({ name: { $regex: escapeRegex(input.text), $options: "i" }, deletedAt: input.deleted ? { $ne: null } : null }).lean()
   }
 
   @Post() @RequirePermissions("api.products.create-product")
