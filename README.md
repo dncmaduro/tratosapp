@@ -83,6 +83,11 @@ query; text tìm kiếm được escape để tìm theo đúng ký tự người
 không nhận field thừa và trả `409` khi order đã tồn tại trong cùng kênh. Luồng
 import file TikTok Shop vẫn dùng `POST /api/v1/incomes/insert-and-update-source`.
 
+Month Goals chỉ nhận tháng `0–11`, năm hợp lệ, channel tồn tại, KPI không âm và
+tỷ lệ ads `0–100`; KPI trùng theo kênh/tháng trả `409`. Packing Rules chỉ nhận
+loại hộp đã công bố, product không trùng và quantity nguyên dương hoặc `null`,
+với `maxQuantity` không nhỏ hơn `minQuantity`.
+
 Parser chuẩn hóa BOM/khoảng trắng trong header, kiểm tra cột bắt buộc theo loại
 file, và nhận các format tiền `1,234.56` hoặc `1.234,56`. Dòng tổng doanh thu
 thiếu/không hợp lệ `Quantity` hay `SKU Subtotal` sẽ dừng import trước khi ghi DB.
