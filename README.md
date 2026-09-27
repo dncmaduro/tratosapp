@@ -74,6 +74,11 @@ theo `Asia/Ho_Chi_Minh`; báo cáo tháng dùng đúng ranh giới tháng Việt
 trả `400` cho ngày, tháng, ID, page hoặc limit không hợp lệ thay vì âm thầm đổi
 query; text tìm kiếm được escape để tìm theo đúng ký tự người dùng nhập.
 
+`POST /api/v1/incomes` (tạo đơn thủ công) chỉ nhận JSON đơn hàng với `orderId`,
+`channel`, `date` và ít nhất một product hợp lệ; API kiểm tra channel tồn tại,
+không nhận field thừa và trả `409` khi order đã tồn tại trong cùng kênh. Luồng
+import file TikTok Shop vẫn dùng `POST /api/v1/incomes/insert-and-update-source`.
+
 Parser chuẩn hóa BOM/khoảng trắng trong header, kiểm tra cột bắt buộc theo loại
 file, và nhận các format tiền `1,234.56` hoặc `1.234,56`. Dòng tổng doanh thu
 thiếu/không hợp lệ `Quantity` hay `SKU Subtotal` sẽ dừng import trước khi ghi DB.

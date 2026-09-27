@@ -25,11 +25,29 @@ import { MonthGoal, MonthGoalDocument } from "../month-goals/month-goal.schema"
 import { Income, IncomeDocument } from "./income.schema"
 import { IncomeImportService } from "./income-import.service"
 import { Channel, ChannelDocument } from "../channels/channel.schema"
-import { inputBusinessDay, inputId, inputString } from "../common/input-validation"
+import {
+  inputBoolean,
+  inputBusinessDay,
+  inputId,
+  inputNonNegativeNumber,
+  inputObject,
+  inputString,
+  withDuplicateConflict
+} from "../common/input-validation"
 
 const importModes = ["full", "status-only", "base-only", "affiliate-only"] as const
 type ImportMode = (typeof importModes)[number]
 const dayOnly = /^\d{4}-\d{2}-\d{2}$/
+const incomeFields = [
+  "orderId", "customer", "province", "shippingProvider", "orderStatus",
+  "cancelationOrReturnType", "channel", "date", "products"
+] as const
+const productFields = [
+  "code", "name", "source", "sourceChecked", "creator", "content",
+  "affiliateAdsPercentage", "affiliateAdsAmount", "standardAffPercentage",
+  "standardAffAmount", "quantity", "price", "priceAfterDiscount"
+] as const
+const productSources = ["live", "livestream", "affiliate", "affiliate-ads", "affiliate_ads", "ads", "other"]
 
 function queryDate(value: unknown, field: string, endOfDay = false): Date {
   if (typeof value !== "string" || !value.trim()) throw new BadRequestException(`${field} không hợp lệ`)
@@ -61,6 +79,61 @@ function queryPage(value: unknown, field: string, maximum: number) {
 }
 
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+function optionalString(body: Record<string, unknown>, field: string) {
+  return field in body ? inputString(body[field], field, true) : ""
+}
+
+function incomeDate(value: unknown): Date {
+  if (typeof value !== "string" || !value.trim()) throw new BadRequestException("date không hợp lệ")
+  if (dayOnly.test(value)) return inputBusinessDay(value)
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.valueOf())) throw new BadRequestException("date không hợp lệ")
+  return parsed
+}
+
+function incomeProduct(value: unknown): Income["products"][number] {
+  const body = inputObject(value, productFields)
+  const source = "source" in body ? inputString(body.source, "products.source") : "other"
+  if (!productSources.includes(source)) throw new BadRequestException("products.source không hợp lệ")
+  const quantity = inputNonNegativeNumber(body.quantity, "products.quantity")
+  if (!Number.isSafeInteger(quantity) || quantity < 1) {
+    throw new BadRequestException("products.quantity phải là số nguyên dương")
+  }
+  return {
+    code: inputString(body.code, "products.code"),
+    name: inputString(body.name, "products.name"),
+    source,
+    sourceChecked: "sourceChecked" in body ? inputBoolean(body.sourceChecked, "products.sourceChecked") : false,
+    creator: optionalString(body, "creator"),
+    content: optionalString(body, "content"),
+    affiliateAdsPercentage: "affiliateAdsPercentage" in body ? inputNonNegativeNumber(body.affiliateAdsPercentage, "products.affiliateAdsPercentage") : 0,
+    affiliateAdsAmount: "affiliateAdsAmount" in body ? inputNonNegativeNumber(body.affiliateAdsAmount, "products.affiliateAdsAmount") : 0,
+    standardAffPercentage: "standardAffPercentage" in body ? inputNonNegativeNumber(body.standardAffPercentage, "products.standardAffPercentage") : 0,
+    standardAffAmount: "standardAffAmount" in body ? inputNonNegativeNumber(body.standardAffAmount, "products.standardAffAmount") : 0,
+    quantity,
+    price: inputNonNegativeNumber(body.price, "products.price"),
+    priceAfterDiscount: inputNonNegativeNumber(body.priceAfterDiscount, "products.priceAfterDiscount")
+  }
+}
+
+function incomeInput(value: unknown): Partial<Income> {
+  const body = inputObject(value, incomeFields)
+  if (!Array.isArray(body.products) || !body.products.length) {
+    throw new BadRequestException("products phải là mảng không rỗng")
+  }
+  return {
+    orderId: inputString(body.orderId, "orderId"),
+    customer: optionalString(body, "customer"),
+    province: optionalString(body, "province"),
+    shippingProvider: optionalString(body, "shippingProvider"),
+    orderStatus: optionalString(body, "orderStatus"),
+    cancelationOrReturnType: optionalString(body, "cancelationOrReturnType"),
+    channel: new Types.ObjectId(inputId(body.channel)),
+    date: incomeDate(body.date),
+    products: body.products.map(incomeProduct)
+  }
+}
 
 function importInput(
   files: Express.Multer.File[] | undefined,
@@ -288,8 +361,13 @@ export class IncomesController {
 
   @Post()
   @RequirePermissions("api.incomes.insert-and-update-affiliate-type")
-  create(@Body() body: Partial<Income>) {
-    return this.incomes.create(body)
+  async create(@Body() body: unknown) {
+    const input = incomeInput(body)
+    if (!await this.channels.exists({ _id: input.channel })) throw new NotFoundException("Không tìm thấy kênh")
+    return withDuplicateConflict(
+      () => this.incomes.create(input),
+      "Mã đơn hàng đã tồn tại trong kênh này"
+    )
   }
 
   @Get("income-split-by-month")
