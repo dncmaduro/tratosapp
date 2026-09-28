@@ -48,7 +48,10 @@ const incomeDetail = incomeDetailRoute.update({
 export const routeTree = rootRoute.addChildren([
   login,
   accessDenied,
-  tiktokshop.addChildren([sku, incomes, incomeDetail])
+  tiktokshop,
+  sku,
+  incomes,
+  incomeDetail
 ])
 
 declare module "@tanstack/react-router" {
