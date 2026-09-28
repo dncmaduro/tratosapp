@@ -22,7 +22,7 @@ function channelController() {
 }
 
 function authController() {
-  const calls = { login: [], profile: [], create: [], active: [], permissions: [] }
+  const calls = { login: [], profile: [], create: [], active: [], permissions: [], adminUpdate: [] }
   const auth = {
     login: async (...args) => { calls.login.push(args); return { ok: true } },
     refresh: async () => ({ ok: true }),
@@ -36,8 +36,9 @@ function authController() {
     findByIdAndUpdate: async (id, data, options) => {
       if (id === "507f1f77bcf86cd799439010") return null
       if ("active" in data) calls.active.push({ id, data, options })
+      else if ("email" in data || "name" in data || "passwordHash" in data) calls.adminUpdate.push({ id, data, options })
       else calls.permissions.push({ id, data, options })
-      return { id, active: data.active, permissions: data.permissions }
+      return { id, email: data.email, name: data.name, active: data.active, permissions: data.permissions }
     },
     find: () => ({ select: () => ({ skip: () => ({ limit: () => ({ lean: async () => [] }) }) }) }),
     countDocuments: async () => 0
@@ -113,10 +114,10 @@ test("admin user mutations validate identifiers, fields and assignable permissio
     { email: "n@example.com", name: "New", password: "short" }, { email: "n@example.com", name: "New", password: "safe-password", permissions: ["unknown.permission"] },
     { email: "n@example.com", name: "New", password: "safe-password", active: false }
   ]) await assert.rejects(f.controller.create(body), status(400))
-  await assert.rejects(f.controller.active("invalid", { active: true }), status(400))
-  await assert.rejects(f.controller.active(userId, { active: "yes" }), status(400))
-  await assert.rejects(f.controller.setPermissions(userId, { permissions: ["unknown.permission"] }), status(400))
-  await assert.rejects(f.controller.setPermissions(userId, { permissions: "*" }), status(400))
+  await assert.rejects(f.controller.active({ user: { sub: "507f1f77bcf86cd799439012" } }, "invalid", { active: true }), status(400))
+  await assert.rejects(f.controller.active({ user: { sub: "507f1f77bcf86cd799439012" } }, userId, { active: "yes" }), status(400))
+  await assert.rejects(f.controller.setPermissions({ user: { sub: "507f1f77bcf86cd799439012" } }, userId, { permissions: ["unknown.permission"] }), status(400))
+  await assert.rejects(f.controller.setPermissions({ user: { sub: "507f1f77bcf86cd799439012" } }, userId, { permissions: "*" }), status(400))
   assert.deepEqual(f.calls.active, [])
   assert.deepEqual(f.calls.permissions, [])
 })
@@ -124,6 +125,36 @@ test("admin user mutations validate identifiers, fields and assignable permissio
 test("admin mutations report missing users rather than a false success", async () => {
   const f = authController()
   const missingId = "507f1f77bcf86cd799439010"
-  await assert.rejects(f.controller.active(missingId, { active: false }), status(404))
-  await assert.rejects(f.controller.setPermissions(missingId, { permissions: [] }), status(404))
+  const otherAdmin = { user: { sub: "507f1f77bcf86cd799439012" } }
+  await assert.rejects(f.controller.active(otherAdmin, missingId, { active: false }), status(404))
+  await assert.rejects(f.controller.setPermissions(otherAdmin, missingId, { permissions: [] }), status(404))
+  await assert.rejects(f.controller.updateAdmin(otherAdmin, missingId, { email: "u@example.com", name: "U", permissions: [] }), status(404))
+})
+
+test("admin can edit account details but cannot remove their own admin access or lock themselves", async () => {
+  const f = authController()
+  const otherAdmin = { user: { sub: "507f1f77bcf86cd799439012" } }
+  await f.controller.updateAdmin(otherAdmin, userId, {
+    email: " NEW@EXAMPLE.COM ", name: " New User ", password: "new-password", permissions: ["api.products.search-products"]
+  })
+  assert.equal(f.calls.adminUpdate.length, 1)
+  assert.equal(f.calls.adminUpdate[0].data.email, "new@example.com")
+  assert.equal(f.calls.adminUpdate[0].data.name, "New User")
+  assert.deepEqual(f.calls.adminUpdate[0].data.permissions, ["api.products.search-products"])
+  assert.equal(typeof f.calls.adminUpdate[0].data.passwordHash, "string")
+  await assert.rejects(f.controller.updateAdmin({ user: { sub: userId } }, userId, {
+    email: "self@example.com", name: "Self", permissions: []
+  }), status(403))
+  await assert.rejects(f.controller.active({ user: { sub: userId } }, userId, { active: false }), status(403))
+  f.controller.users.findByIdAndUpdate = async () => { const error = new Error("duplicate"); error.code = 11000; throw error }
+  await assert.rejects(f.controller.updateAdmin(otherAdmin, userId, {
+    email: "used@example.com", name: "User", permissions: []
+  }), status(409))
+  for (const body of [
+    { email: "bad", name: "User", permissions: [] },
+    { email: "user@example.com", name: "", permissions: [] },
+    { email: "user@example.com", name: "User", permissions: ["unknown"] },
+    { email: "user@example.com", name: "User", permissions: [], password: "short" },
+    { email: "user@example.com", name: "User", permissions: [], active: false }
+  ]) await assert.rejects(f.controller.updateAdmin(otherAdmin, userId, body), status(400))
 })

@@ -30,5 +30,7 @@ export const LANDING_NAVS: NavigationItem[] = []
 export const LIVESTREAM_NAVS: NavigationItem[] = []
 export const SALES_NAVS: NavigationItem[] = []
 export const SALES_ACCESS_PERMISSIONS: string[] = []
-export const ADMIN_NAVS: NavigationItem[] = []
+export const ADMIN_NAVS: NavigationItem[] = [
+  { to: "/admin/users", label: "Quản lý tài khoản", icon: "IconSquareRounded", permissions: ["admin.users.manage"] }
+]
 export const canAccessSalesRoute = (_permissions?: string[], _pathname?: string) => false

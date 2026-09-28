@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Query, Req, UnauthorizedException, UseGuards } from "@nestjs/common"
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Post, Query, Req, UnauthorizedException, UseGuards } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import * as bcrypt from "bcryptjs"
@@ -61,15 +61,38 @@ export class AuthController {
     }), "Email đã tồn tại")
     return { _id: user.id, email: user.email, name: user.name }
   }
-  @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @RequirePermissions("admin.users.manage") @Patch(":id/active") async active(@Param("id") id: string, @Body() body: unknown) {
+  @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @RequirePermissions("admin.users.manage") @Patch("admin/:id") async updateAdmin(@Req() req: { user: { sub: string } }, @Param("id") id: string, @Body() body: unknown) {
+    const userId = inputId(id)
+    const value = inputObject(body, ["email", "name", "password", "permissions"])
+    const email = inputEmail(value.email)
+    const name = inputString(value.name, "name")
+    const permissions = inputPermissions(value.permissions, [...permissionKeys, "*"])
+    if (req.user.sub === userId && !permissions.includes("*") && !permissions.includes("admin.users.manage")) {
+      throw new ForbiddenException("Không thể tự gỡ quyền quản lý tài khoản")
+    }
+    const update: Record<string, unknown> = { email, name, permissions }
+    if (value.password !== undefined) update.passwordHash = await bcrypt.hash(inputPassword(value.password, "Mật khẩu", true), 12)
+    const user = await withDuplicateConflict(() => this.users.findByIdAndUpdate(userId, update, { new: true, runValidators: true }), "Email đã tồn tại")
+    if (!user) throw new NotFoundException("Không tìm thấy user")
+    return { message: "Đã cập nhật tài khoản", data: { _id: user.id, email: user.email, name: user.name, permissions: user.permissions } }
+  }
+  @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @RequirePermissions("admin.users.manage") @Patch(":id/active") async active(@Req() req: { user: { sub: string } }, @Param("id") id: string, @Body() body: unknown) {
+    const userId = inputId(id)
     const value = inputObject(body, ["active"])
-    const user = await this.users.findByIdAndUpdate(inputId(id), { active: inputBoolean(value.active, "active") }, { new: true, runValidators: true })
+    const active = inputBoolean(value.active, "active")
+    if (req.user.sub === userId && !active) throw new ForbiddenException("Không thể tự khóa tài khoản")
+    const user = await this.users.findByIdAndUpdate(userId, { active }, { new: true, runValidators: true })
     if (!user) throw new NotFoundException("Không tìm thấy user")
     return { message: "Đã cập nhật trạng thái", data: { _id: user.id, active: user.active } }
   }
-  @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @RequirePermissions("admin.users.manage") @Patch(":id/permissions") async setPermissions(@Param("id") id: string, @Body() body: unknown) {
+  @ApiBearerAuth() @UseGuards(JwtAuthGuard, PermissionsGuard) @RequirePermissions("admin.users.manage") @Patch(":id/permissions") async setPermissions(@Req() req: { user: { sub: string } }, @Param("id") id: string, @Body() body: unknown) {
+    const userId = inputId(id)
     const value = inputObject(body, ["permissions"])
-    const user = await this.users.findByIdAndUpdate(inputId(id), { permissions: inputPermissions(value.permissions, [...permissionKeys, "*"]) }, { new: true, runValidators: true })
+    const permissions = inputPermissions(value.permissions, [...permissionKeys, "*"])
+    if (req.user.sub === userId && !permissions.includes("*") && !permissions.includes("admin.users.manage")) {
+      throw new ForbiddenException("Không thể tự gỡ quyền quản lý tài khoản")
+    }
+    const user = await this.users.findByIdAndUpdate(userId, { permissions }, { new: true, runValidators: true })
     if (!user) throw new NotFoundException("Không tìm thấy user")
     return { message: "Đã cập nhật quyền", data: { _id: user.id, permissions: user.permissions } }
   }

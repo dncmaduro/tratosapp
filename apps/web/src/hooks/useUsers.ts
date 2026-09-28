@@ -6,6 +6,8 @@ import {
   AdminListUsersRequest,
   AdminListUsersResponse,
   AdminGetUserResponse,
+  AdminUserWriteRequest,
+  AdminUserWriteResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
   CheckTokenRequest,
@@ -112,6 +114,24 @@ export const useUsers = () => {
     })
   }
 
+  const adminCreateUser = async (req: AdminUserWriteRequest) => {
+    return callApi<AdminUserWriteRequest, AdminUserWriteResponse>({
+      method: "POST",
+      path: "/v1/users/admin",
+      data: req,
+      token: accessToken
+    })
+  }
+
+  const adminUpdateUser = async (userId: string, req: AdminUserWriteRequest) => {
+    return callApi<AdminUserWriteRequest, AdminUserWriteResponse>({
+      method: "PATCH",
+      path: `/v1/users/admin/${userId}`,
+      data: req,
+      token: accessToken
+    })
+  }
+
   const updateUserActive = async (
     userId: string,
     req: UpdateUserActiveRequest
@@ -170,6 +190,8 @@ export const useUsers = () => {
     updateUser,
     publicSearchUser,
     adminListUsers,
+    adminCreateUser,
+    adminUpdateUser,
     adminGetUser,
     updateUserActive,
     listPermissions,

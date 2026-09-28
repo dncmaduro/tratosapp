@@ -8,6 +8,7 @@ import { Route as tiktokshopRoute } from "./routes/tiktokshop/index"
 import { Route as skuRoute } from "./routes/tiktokshop/sku/index"
 import { Route as incomesRoute } from "./routes/tiktokshop/incomes/index"
 import { Route as incomeDetailRoute } from "./routes/tiktokshop/incomes/$incomeId"
+import { Route as adminUsersRoute } from "./routes/admin/users/index"
 
 const login = loginRoute.update({
   id: "/",
@@ -45,13 +46,20 @@ const incomeDetail = incomeDetailRoute.update({
   getParentRoute: () => rootRoute
 } as never)
 
+const adminUsers = adminUsersRoute.update({
+  id: "/admin/users/",
+  path: "/admin/users/",
+  getParentRoute: () => rootRoute
+} as never)
+
 export const routeTree = rootRoute.addChildren([
   login,
   accessDenied,
   tiktokshop,
   sku,
   incomes,
-  incomeDetail
+  incomeDetail,
+  adminUsers
 ])
 
 declare module "@tanstack/react-router" {
@@ -62,6 +70,7 @@ declare module "@tanstack/react-router" {
     "/tiktokshop/sku/": { id: "/tiktokshop/sku/"; path: "/tiktokshop/sku"; fullPath: "/tiktokshop/sku"; preLoaderRoute: typeof skuRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/incomes/": { id: "/tiktokshop/incomes/"; path: "/tiktokshop/incomes"; fullPath: "/tiktokshop/incomes"; preLoaderRoute: typeof incomesRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/incomes/$incomeId": { id: "/tiktokshop/incomes/$incomeId"; path: "/tiktokshop/incomes/$incomeId"; fullPath: "/tiktokshop/incomes/$incomeId"; preLoaderRoute: typeof incomeDetailRoute; parentRoute: typeof rootRoute }
+    "/admin/users/": { id: "/admin/users/"; path: "/admin/users"; fullPath: "/admin/users"; preLoaderRoute: typeof adminUsersRoute; parentRoute: typeof rootRoute }
     "/marketing-storage/incomes/": { id: "/marketing-storage/incomes/"; path: "/marketing-storage/incomes"; fullPath: "/marketing-storage/incomes"; preLoaderRoute: typeof incomesRoute; parentRoute: typeof rootRoute }
     "/marketing-storage/incomes/$incomeId": { id: "/marketing-storage/incomes/$incomeId"; path: "/marketing-storage/incomes/$incomeId"; fullPath: "/marketing-storage/incomes/$incomeId"; preLoaderRoute: typeof incomeDetailRoute; parentRoute: typeof rootRoute }
   }

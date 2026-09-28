@@ -625,6 +625,23 @@ export interface AdminListUsersResponse {
 }
 
 /** @interface */
+export interface AdminUserWriteRequest {
+  email: string
+  name: string
+  password?: string
+  permissions: string[]
+}
+
+/** @interface */
+export interface AdminUserWriteResponse {
+  _id?: string
+  email?: string
+  name?: string
+  message?: string
+  data?: { _id: string; email: string; name: string; permissions: string[] }
+}
+
+/** @interface */
 export interface UpdateUserActiveRequest {
   active: boolean
 }
