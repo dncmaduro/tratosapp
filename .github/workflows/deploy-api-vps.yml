@@ -1,0 +1,125 @@
+name: Deploy API to VPS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - "packages/contracts/**"
+      - "deploy/vps/**"
+      - ".github/workflows/deploy-api-vps.yml"
+      - ".dockerignore"
+      - ".npmrc"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-api-vps
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Verify runtime and enable pnpm
+        run: |
+          test "$(node --version)" = "v22.23.2"
+          corepack enable
+          corepack prepare pnpm@9.15.5 --activate
+          test "$(pnpm --version)" = "9.15.5"
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test and build API
+        run: pnpm --filter @tratosapp/api test
+
+      - name: Build production API image
+        run: docker build --file apps/api/Dockerfile --tag tratosapp-api:latest .
+
+      - name: Check VPS deployment secrets
+        id: vps_secrets
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_SSH_PRIVATE_KEY" ] || [ -z "$VPS_KNOWN_HOSTS" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=VPS deployment skipped::Add VPS_HOST, VPS_SSH_PRIVATE_KEY, and VPS_KNOWN_HOSTS repository secrets to enable deployment."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure SSH
+        if: steps.vps_secrets.outputs.configured == 'true'
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" > "$HOME/.ssh/tratosapp_vps"
+          chmod 600 "$HOME/.ssh/tratosapp_vps"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - name: Sync source to the dedicated app directory as root
+        if: steps.vps_secrets.outputs.configured == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+        run: |
+          port="${VPS_SSH_PORT:-22}"
+          if ! [[ "$port" =~ ^[0-9]{1,5}$ ]]; then
+            echo "VPS_SSH_PORT must be a valid numeric port."
+            exit 1
+          fi
+          rsync --archive --compress --delete \
+            --exclude='/.git/' \
+            --exclude='/node_modules/' \
+            --exclude='/**/node_modules/' \
+            --exclude='/.env' \
+            --exclude='/.env.*' \
+            --exclude='/**/.env' \
+            --exclude='/**/.env.*' \
+            --exclude='/**/dist/' \
+            -e "ssh -i $HOME/.ssh/tratosapp_vps -p $port -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o StrictHostKeyChecking=yes" \
+            ./ "root@$VPS_HOST:/opt/tratosapp/"
+
+      - name: Transfer built image to VPS
+        if: steps.vps_secrets.outputs.configured == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          port="${VPS_SSH_PORT:-22}"
+          docker save tratosapp-api:latest | gzip -1 | ssh -i "$HOME/.ssh/tratosapp_vps" -p "$port" \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes \
+            "root@$VPS_HOST" 'gzip -dc | docker load'
+
+      - name: Build, restart, and health-check on VPS
+        if: steps.vps_secrets.outputs.configured == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+        run: |
+          port="${VPS_SSH_PORT:-22}"
+          ssh -i "$HOME/.ssh/tratosapp_vps" -p "$port" \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes \
+            "root@$VPS_HOST" 'bash /opt/tratosapp/deploy/vps/deploy.sh'
