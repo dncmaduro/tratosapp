@@ -22,7 +22,7 @@ import { Helmet } from "react-helmet-async"
 import { modals } from "@mantine/modals"
 import { AppLayout } from "../../../components/layouts/AppLayout"
 import { CToast } from "../../../components/common/CToast"
-import { ADMIN_NAVS, TIKTOKSHOP_NAVS } from "../../../constants/navs"
+import { ADMIN_NAVS } from "../../../constants/navs"
 import { useAuthGuard } from "../../../hooks/useAuthGuard"
 import type { AdminUserWriteRequest } from "../../../hooks/models"
 import { useUsers } from "../../../hooks/useUsers"
@@ -30,7 +30,7 @@ import { useUsers } from "../../../hooks/useUsers"
 export const Route = createFileRoute("/admin/users/")({ component: RouteComponent })
 
 const PAGE_SIZE = 20
-const navs = [...TIKTOKSHOP_NAVS, ...ADMIN_NAVS]
+const navs = ADMIN_NAVS
 
 function RouteComponent() {
   const { meData } = useAuthGuard(["admin.users.manage"])
