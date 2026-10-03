@@ -55,7 +55,7 @@ export const ProductModalV2 = ({ product, refetch }: Props) => {
     mutationFn: createProduct,
     onSuccess: () => {
       modals.closeAll()
-      CToast.success({ title: "Tạo sản phẩm thành công" })
+      CToast.success({ title: "Đã tạo SKU" })
       refetch()
     },
     onError: () => {
@@ -68,7 +68,7 @@ export const ProductModalV2 = ({ product, refetch }: Props) => {
     mutationFn: updateProduct,
     onSuccess: () => {
       modals.closeAll()
-      CToast.success({ title: "Cập nhật sản phẩm thành công" })
+      CToast.success({ title: "Đã cập nhật SKU" })
       refetch()
     },
     onError: () => {
@@ -91,22 +91,22 @@ export const ProductModalV2 = ({ product, refetch }: Props) => {
     <form onSubmit={handleSubmit(submit)}>
       <Stack gap={20} p={2}>
         <Text fw={700} fz="lg" mb={2}>
-          {product ? "Chỉnh sửa sản phẩm" : "Tạo sản phẩm mới"}
+          {product ? "Chỉnh sửa SKU" : "Tạo SKU mới"}
         </Text>
         <Controller
           name="name"
           control={control}
           render={({ field }) => (
             <TextInput
-              label="Tên sản phẩm"
-              placeholder="Nhập tên sản phẩm"
+              label="Mã SKU"
+              placeholder="Nhập mã SKU"
               required
               {...field}
               size="md"
             />
           )}
         />
-        <Divider label="Thành phần sản phẩm" labelPosition="center" my={8} />
+        <Divider label="Mặt hàng cấu thành SKU" labelPosition="center" my={8} />
         <Box>
           <Stack gap={10}>
             {fields.map((field, index) => (
@@ -171,7 +171,7 @@ export const ProductModalV2 = ({ product, refetch }: Props) => {
         </Box>
         <Divider my={8} />
         <Button type="submit" color="indigo" radius="xl" fw={600} size="md">
-          {product ? "Lưu thay đổi" : "Tạo sản phẩm"}
+          {product ? "Lưu thay đổi" : "Tạo SKU"}
         </Button>
       </Stack>
     </form>

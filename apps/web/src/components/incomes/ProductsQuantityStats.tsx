@@ -69,7 +69,7 @@ export const ProductsQuantityStats = ({
     () => [
       {
         accessorKey: "code",
-        header: "Mã sản phẩm",
+        header: "Mã SKU",
         size: 200,
         meta: {
           align: "left"
@@ -112,13 +112,13 @@ export const ProductsQuantityStats = ({
 
   return (
     <DashboardSectionCard
-      title="Sản phẩm"
+      title="SKU bán chạy"
       subtitle={
         topItem
           ? isRevenueMode
             ? `${topItem.code} dẫn đầu với ${formatCurrency(topItem.value)} doanh thu`
-            : `${topItem.code} dẫn đầu với ${topItem.value.toLocaleString("vi-VN")} sản phẩm`
-          : `Tổng: ${totalQuantity.toLocaleString()} sản phẩm`
+            : `${topItem.code} dẫn đầu với ${topItem.value.toLocaleString("vi-VN")} SKU đã bán`
+          : `Tổng: ${totalQuantity.toLocaleString()} SKU đã bán`
       }
       icon={<IconPackage size={18} />}
       accentColor="blue"
@@ -149,7 +149,7 @@ export const ProductsQuantityStats = ({
         valueFormatter={(value) =>
           isRevenueMode
             ? formatCurrency(value)
-            : `${value.toLocaleString("vi-VN")} sản phẩm`
+            : `${value.toLocaleString("vi-VN")} SKU`
         }
         shareFormatter={(share) => formatPercent(share, 2, "truncate")}
         footer={

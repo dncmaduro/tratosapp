@@ -762,7 +762,7 @@ export const RangeStats = () => {
                         Cấu trúc doanh thu
                       </Text>
                       <Text fw={700} fz="xl">
-                        Nguồn tạo doanh thu và sản phẩm
+                        Nguồn tạo doanh thu và SKU
                       </Text>
                     </Stack>
 

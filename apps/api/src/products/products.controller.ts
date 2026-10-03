@@ -59,7 +59,7 @@ export class ProductsController {
   async create(@Body() body: unknown) {
     const input = productInput(body)
     await this.ensureItemsExist(input.items)
-    return withDuplicateConflict(() => this.products.create({ name: input.name, items: input.items }), "Tên sản phẩm đã tồn tại")
+    return withDuplicateConflict(() => this.products.create({ name: input.name, items: input.items }), "SKU đã tồn tại")
   }
 
   @Put() @RequirePermissions("api.products.update-product")
@@ -68,23 +68,23 @@ export class ProductsController {
     await this.ensureItemsExist(input.items)
     const product = await withDuplicateConflict(
       () => this.products.findByIdAndUpdate(input.id, { $set: { name: input.name, items: input.items } }, { new: true, runValidators: true }),
-      "Tên sản phẩm đã tồn tại"
+      "SKU đã tồn tại"
     )
-    if (!product) throw new NotFoundException("Không tìm thấy sản phẩm")
+    if (!product) throw new NotFoundException("Không tìm thấy SKU")
     return product
   }
 
   @Delete(":id") @RequirePermissions("api.products.delete-product")
   async remove(@Param("id") id: string) {
     const product = await this.products.findByIdAndUpdate(inputId(id), { deletedAt: new Date() }, { new: true })
-    if (!product) throw new NotFoundException("Không tìm thấy sản phẩm")
+    if (!product) throw new NotFoundException("Không tìm thấy SKU")
     return product
   }
 
   @Patch(":id/restore") @RequirePermissions("api.products.restore-product")
   async restore(@Param("id") id: string) {
     const product = await this.products.findByIdAndUpdate(inputId(id), { deletedAt: null }, { new: true })
-    if (!product) throw new NotFoundException("Không tìm thấy sản phẩm")
+    if (!product) throw new NotFoundException("Không tìm thấy SKU")
     return product
   }
 

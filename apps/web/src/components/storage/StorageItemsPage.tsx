@@ -47,23 +47,23 @@ export const StorageItemsPage = () => {
 
   const createMutation = useMutation({
     mutationFn: createStorageItem,
-    onSuccess: () => { CToast.success({ title: "Đã tạo Storage Item" }); modals.closeAll(); refresh() },
-    onError: () => CToast.error({ title: "Không tạo được Storage Item" })
+    onSuccess: () => { CToast.success({ title: "Đã tạo mặt hàng" }); modals.closeAll(); refresh() },
+    onError: () => CToast.error({ title: "Không tạo được mặt hàng" })
   })
   const updateMutation = useMutation({
     mutationFn: updateStorageItem,
-    onSuccess: () => { CToast.success({ title: "Đã cập nhật Storage Item" }); modals.closeAll(); refresh() },
-    onError: () => CToast.error({ title: "Không cập nhật được Storage Item" })
+    onSuccess: () => { CToast.success({ title: "Đã cập nhật mặt hàng" }); modals.closeAll(); refresh() },
+    onError: () => CToast.error({ title: "Không cập nhật được mặt hàng" })
   })
   const deleteMutation = useMutation({
     mutationFn: deleteStorageItem,
-    onSuccess: () => { CToast.success({ title: "Đã xóa Storage Item" }); refresh() },
-    onError: () => CToast.error({ title: "Không xóa được Storage Item" })
+    onSuccess: () => { CToast.success({ title: "Đã xóa mặt hàng" }); refresh() },
+    onError: () => CToast.error({ title: "Không xóa được mặt hàng" })
   })
   const restoreMutation = useMutation({
     mutationFn: restoreStorageItem,
-    onSuccess: () => { CToast.success({ title: "Đã khôi phục Storage Item" }); refresh() },
-    onError: () => CToast.error({ title: "Không khôi phục được Storage Item" })
+    onSuccess: () => { CToast.success({ title: "Đã khôi phục mặt hàng" }); refresh() },
+    onError: () => CToast.error({ title: "Không khôi phục được mặt hàng" })
   })
 
   const permissions = meData?.permissions ?? []
@@ -74,7 +74,7 @@ export const StorageItemsPage = () => {
 
   const openForm = (item?: SearchStorageItemResponse) => {
     modals.open({
-      title: item ? "Chỉnh sửa Storage Item" : "Tạo Storage Item",
+      title: item ? "Chỉnh sửa mặt hàng" : "Tạo mặt hàng",
       size: "md",
       zIndex: 500,
       children: <StorageItemForm item={item} onSubmit={(values) => {
@@ -86,8 +86,8 @@ export const StorageItemsPage = () => {
 
   const confirmDelete = (item: SearchStorageItemResponse) => {
     modals.openConfirmModal({
-      title: "Xóa Storage Item?",
-      children: <Text size="sm">“{item.name}” sẽ được chuyển sang danh sách đã xóa. SKU cũ vẫn giữ liên kết; item đã xóa sẽ không xuất hiện khi tạo hoặc sửa SKU.</Text>,
+      title: "Xóa mặt hàng?",
+      children: <Text size="sm">“{item.name}” sẽ được chuyển sang danh sách đã xóa. SKU cũ vẫn giữ liên kết; mặt hàng đã xóa sẽ không xuất hiện khi tạo hoặc sửa SKU.</Text>,
       labels: { confirm: "Xóa", cancel: "Hủy" },
       confirmProps: { color: "red", loading: deleteMutation.isPending },
       zIndex: 500,
@@ -101,10 +101,10 @@ export const StorageItemsPage = () => {
     <Stack gap="lg" py="lg">
       <Group justify="space-between" align="flex-end">
         <div>
-          <Text fw={700} size="xl">Quản lý Storage Items</Text>
-          <Text c="dimmed" size="sm" mt={4}>Danh mục mặt hàng dùng để cấu thành SKU. Trang này không theo dõi tồn kho.</Text>
+          <Text fw={700} size="xl">Quản lý mặt hàng</Text>
+          <Text c="dimmed" size="sm" mt={4}>Danh mục mặt hàng dùng để cấu thành SKU.</Text>
         </div>
-        {canCreate && !showDeleted && <Button leftSection={<IconPlus size={16} />} onClick={() => openForm()}>Thêm Storage Item</Button>}
+        {canCreate && !showDeleted && <Button leftSection={<IconPlus size={16} />} onClick={() => openForm()}>Thêm mặt hàng</Button>}
       </Group>
 
       <Paper withBorder radius="md" p="md">
@@ -119,10 +119,10 @@ export const StorageItemsPage = () => {
           <Switch label="Hiện đã xóa" checked={showDeleted} onChange={(event) => setShowDeleted(event.currentTarget.checked)} />
         </Group>
 
-        {itemsQuery.isLoading ? <Text c="dimmed">Đang tải Storage Items…</Text> : items.length === 0 ? <Text c="dimmed" ta="center" py="xl">Chưa có Storage Item nào.</Text> : (
+        {itemsQuery.isLoading ? <Text c="dimmed">Đang tải mặt hàng…</Text> : items.length === 0 ? <Text c="dimmed" ta="center" py="xl">Chưa có mặt hàng nào.</Text> : (
           <Table.ScrollContainer minWidth={600}>
             <Table verticalSpacing="sm" highlightOnHover>
-              <Table.Thead><Table.Tr><Table.Th>Mã</Table.Th><Table.Th>Tên</Table.Th><Table.Th w={190}>Thao tác</Table.Th></Table.Tr></Table.Thead>
+              <Table.Thead><Table.Tr><Table.Th>Mã mặt hàng</Table.Th><Table.Th>Tên mặt hàng</Table.Th><Table.Th w={190}>Thao tác</Table.Th></Table.Tr></Table.Thead>
               <Table.Tbody>
                 {items.map((item) => (
                   <Table.Tr key={item._id}>
@@ -142,7 +142,7 @@ export const StorageItemsPage = () => {
             </Table>
           </Table.ScrollContainer>
         )}
-        {!itemsQuery.isLoading && <Text size="xs" c="dimmed" mt="sm">{items.length} Storage Item{items.length === 1 ? "" : "s"}</Text>}
+        {!itemsQuery.isLoading && <Text size="xs" c="dimmed" mt="sm">{items.length} mặt hàng</Text>}
       </Paper>
     </Stack>
   )
@@ -156,16 +156,16 @@ function StorageItemForm({ item, onSubmit, loading }: {
   const form = useForm<Pick<CreateStorageItemRequest, "code" | "name">>({
     initialValues: { code: item?.code ?? "", name: item?.name ?? "" },
     validate: {
-      code: (value) => value.trim() ? null : "Nhập mã Storage Item",
-      name: (value) => value.trim() ? null : "Nhập tên Storage Item"
+      code: (value) => value.trim() ? null : "Nhập mã mặt hàng",
+      name: (value) => value.trim() ? null : "Nhập tên mặt hàng"
     }
   })
 
   return (
     <form onSubmit={form.onSubmit((values) => onSubmit({ code: values.code.trim(), name: values.name.trim() }))}>
       <Stack>
-        <TextInput label="Mã Storage Item" required autoFocus {...form.getInputProps("code")} />
-        <TextInput label="Tên Storage Item" required {...form.getInputProps("name")} />
+        <TextInput label="Mã mặt hàng" required autoFocus {...form.getInputProps("code")} />
+        <TextInput label="Tên mặt hàng" required {...form.getInputProps("name")} />
         <Group justify="flex-end" mt="sm"><Button type="submit" loading={loading}>{item ? "Lưu thay đổi" : "Tạo"}</Button></Group>
       </Stack>
     </form>

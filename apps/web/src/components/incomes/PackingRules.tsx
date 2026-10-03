@@ -62,7 +62,7 @@ export const PackingRules = () => {
     () => [
       {
         accessorKey: "productCode",
-        header: "Mã sản phẩm",
+        header: "Mã SKU",
         size: 180,
         cell: ({ getValue }) => (
           <Text size="sm" fw={600}>

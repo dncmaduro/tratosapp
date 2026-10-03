@@ -36,22 +36,22 @@ const navs = ADMIN_NAVS
 
 const PERMISSION_GROUP_LABELS: Record<string, string> = {
   admin: "Quản trị tài khoản",
-  "api.products": "Sản phẩm & SKU",
+  "api.products": "SKU",
   "api.incomes": "Doanh thu",
   "api.dailyads": "Quảng cáo",
   "api.livestreammonthgoals": "Mục tiêu livestream",
   "api.packingrules": "Quy tắc đóng gói",
   "api.livestreamchannels": "Kênh livestream",
-  "api.storageitems": "Storage Items"
+  "api.storageitems": "Mặt hàng"
 }
 
 const PERMISSION_LABELS: Record<string, string> = {
   "admin.users.manage": "Quản lý tài khoản",
-  "api.products.search-products": "Xem sản phẩm và SKU",
-  "api.products.create-product": "Tạo sản phẩm",
-  "api.products.update-product": "Chỉnh sửa sản phẩm",
-  "api.products.delete-product": "Xóa sản phẩm",
-  "api.products.restore-product": "Khôi phục sản phẩm",
+  "api.products.search-products": "Xem SKU",
+  "api.products.create-product": "Tạo SKU",
+  "api.products.update-product": "Chỉnh sửa SKU",
+  "api.products.delete-product": "Xóa SKU",
+  "api.products.restore-product": "Khôi phục SKU",
   "api.products.cal-xlsx": "Tính dữ liệu từ Excel",
   "api.incomes.get-incomes-by-date-range": "Xem doanh thu",
   "api.incomes.insert-and-update-affiliate-type": "Phân loại affiliate",
@@ -65,11 +65,11 @@ const PERMISSION_LABELS: Record<string, string> = {
   "api.livestreamchannels.create-livestream-channel": "Tạo kênh livestream",
   "api.livestreamchannels.update-livestream-channel": "Chỉnh sửa kênh livestream",
   "api.livestreamchannels.delete-livestream-channel": "Xóa kênh livestream",
-  "api.storageitems.search-items": "Xem Storage Items",
-  "api.storageitems.create-item": "Tạo Storage Item",
-  "api.storageitems.update-item": "Chỉnh sửa Storage Item",
-  "api.storageitems.delete-item": "Xóa Storage Item",
-  "api.storageitems.restore-item": "Khôi phục Storage Item"
+  "api.storageitems.search-items": "Xem mặt hàng",
+  "api.storageitems.create-item": "Tạo mặt hàng",
+  "api.storageitems.update-item": "Chỉnh sửa mặt hàng",
+  "api.storageitems.delete-item": "Xóa mặt hàng",
+  "api.storageitems.restore-item": "Khôi phục mặt hàng"
 }
 
 const groupPermissions = (permissions: PermissionResponse[]) => {

@@ -81,7 +81,7 @@ export const StorageItemModal = ({ item, refetch }: Props) => {
     onSuccess: () => {
       modals.closeAll()
       CToast.success({
-        title: "Cập nhật sản phẩm thành công"
+        title: "Cập nhật mặt hàng thành công"
       })
       refetch()
     },
@@ -98,7 +98,7 @@ export const StorageItemModal = ({ item, refetch }: Props) => {
     onSuccess: () => {
       modals.closeAll()
       CToast.success({
-        title: "Xoá sản phẩm thành công"
+        title: "Xoá mặt hàng thành công"
       })
       refetch()
     },
@@ -115,7 +115,7 @@ export const StorageItemModal = ({ item, refetch }: Props) => {
     onSuccess: () => {
       modals.closeAll()
       CToast.success({
-        title: "Khôi phục sản phẩm thành công"
+        title: "Khôi phục mặt hàng thành công"
       })
       refetch()
     },

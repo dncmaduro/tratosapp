@@ -261,7 +261,7 @@ export const Incomes = () => {
         size: 80,
         cell: ({ getValue }) => (
           <Badge variant="light" color="blue" size="sm">
-            {getValue<number>()} SP
+            {getValue<number>()} SKU
           </Badge>
         )
       },
@@ -509,7 +509,7 @@ export const Incomes = () => {
                 style={{ width: 160 }}
               />
               <Select
-                label="Nguồn sản phẩm"
+                label="Nguồn SKU"
                 data={sourceOptions}
                 value={productSource}
                 onChange={(val) => setProductSource(val || "")}

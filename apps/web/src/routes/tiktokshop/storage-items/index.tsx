@@ -10,7 +10,7 @@ export const Route = createFileRoute("/tiktokshop/storage-items/")({ component: 
 function RouteComponent() {
   return (
     <>
-      <Helmet><title>Storage Items | Tratosapp</title></Helmet>
+      <Helmet><title>Mặt hàng | Tratosapp</title></Helmet>
       <AppLayout navs={TIKTOKSHOP_NAVS}>
         <StorageItemsPage />
       </AppLayout>

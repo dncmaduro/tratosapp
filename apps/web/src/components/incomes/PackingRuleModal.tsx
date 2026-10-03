@@ -59,7 +59,7 @@ const ProductSection = ({
     <Paper p="md" withBorder style={{ background: "#f9fafb" }}>
       <Group justify="space-between" mb="sm">
         <Text fw={600} size="sm">
-          Sản phẩm #{productIndex + 1}
+          SKU #{productIndex + 1}
         </Text>
         {canRemove && (
           <ActionIcon
@@ -80,8 +80,8 @@ const ProductSection = ({
           rules={{ required: true }}
           render={({ field }) => (
             <Select
-              label="Mã sản phẩm"
-              placeholder="Chọn sản phẩm"
+              label="Mã SKU"
+              placeholder="Chọn SKU"
               required
               data={productsData || []}
               disabled={isEdit}
@@ -284,7 +284,7 @@ export const PackingRuleModal = ({ rule, refetch }: Props) => {
           )}
         />
 
-        <Divider label="Danh sách sản phẩm" labelPosition="center" my="sm" />
+        <Divider label="Danh sách SKU" labelPosition="center" my="sm" />
 
         {productFields.map((productField, productIndex) => (
           <ProductSection
@@ -320,7 +320,7 @@ export const PackingRuleModal = ({ rule, refetch }: Props) => {
           loading={creating || updating}
           style={{ fontWeight: 600 }}
         >
-          Thêm sản phẩm
+          Thêm SKU
         </Button>
 
         <Divider my={6} />

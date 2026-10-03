@@ -344,12 +344,12 @@ export function MonthlyRevenueDashboard({
       tone: "slate"
     },
     {
-      label: "Tổng sản phẩm",
+      label: "Tổng số lượng SKU",
       value:
         typeof totalProducts === "number"
-          ? `${totalProducts.toLocaleString("vi-VN")} sp`
+          ? `${totalProducts.toLocaleString("vi-VN")} SKU`
           : "...",
-      hint: "Khối lượng hàng đã bán trong tháng",
+      hint: "Tổng số lượng SKU đã bán trong tháng",
       tone: "slate"
     },
     {

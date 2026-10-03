@@ -62,22 +62,22 @@ export const ProductsV2 = () => {
   const { mutate: deleteMutation } = useMutation({
     mutationFn: deleteProduct,
     onSuccess: () => {
-      CToast.success({ title: "Xóa sản phẩm thành công" })
+      CToast.success({ title: "Đã xóa SKU" })
       refetch()
     },
     onError: () => {
-      CToast.error({ title: "Có lỗi xảy ra khi xóa sản phẩm" })
+      CToast.error({ title: "Không xóa được SKU" })
     }
   })
 
   const { mutate: restoreMutation, isPending: restoring } = useMutation({
     mutationFn: restoreProduct,
     onSuccess: () => {
-      CToast.success({ title: "Khôi phục sản phẩm thành công" })
+      CToast.success({ title: "Đã khôi phục SKU" })
       refetch()
     },
     onError: () => {
-      CToast.error({ title: "Có lỗi xảy ra khi khôi phục sản phẩm" })
+      CToast.error({ title: "Không khôi phục được SKU" })
     }
   })
 
@@ -87,10 +87,10 @@ export const ProductsV2 = () => {
 
   const handleDeleteProduct = (productId: string, productName: string) => {
     modals.openConfirmModal({
-      title: <b>Xác nhận xóa sản phẩm</b>,
+      title: <b>Xác nhận xóa SKU</b>,
       children: (
         <Text size="sm">
-          Bạn có chắc chắn muốn xóa sản phẩm "{productName}"? Hành động này
+          Bạn có chắc chắn muốn xóa SKU "{productName}"? Hành động này
           không thể hoàn tác.
         </Text>
       ),
@@ -104,7 +104,7 @@ export const ProductsV2 = () => {
     () => [
       {
         accessorKey: "name",
-        header: "Tên sản phẩm",
+        header: "SKU",
         cell: ({ row }) => (
           <Text fw={500} className="whitespace-nowrap">
             {row.original.name}
@@ -139,7 +139,7 @@ export const ProductsV2 = () => {
                         modals.open({
                           title: (
                             <Text fw={700} fz="md">
-                              Sửa sản phẩm
+                              Sửa SKU
                             </Text>
                           ),
                           children: (
@@ -205,7 +205,7 @@ export const ProductsV2 = () => {
         value={searchText}
         onChange={(e) => setSearchText(e.currentTarget.value)}
         leftSection={<IconSearch size={16} />}
-        placeholder="Tìm kiếm sản phẩm..."
+        placeholder="Tìm kiếm SKU..."
         size="sm"
         w={{ base: "100%", sm: 260 }}
         radius="md"
@@ -228,7 +228,7 @@ export const ProductsV2 = () => {
         }}
       >
         <Switch
-          label="Hiển thị sản phẩm đã xóa"
+          label="Hiển thị SKU đã xóa"
           checked={showDeleted}
           onChange={(event) => setShowDeleted(event.currentTarget.checked)}
           color="red"
@@ -241,7 +241,7 @@ export const ProductsV2 = () => {
   const extraActions = (
     <Group gap={10} align="end" wrap="wrap">
       {!showDeleted && (
-        <Tooltip label="Thêm sản phẩm mới" withArrow>
+        <Tooltip label="Thêm SKU mới" withArrow>
           <Can permissions={["api.products.create-product"]}>
             <Button
               color="indigo"
@@ -253,7 +253,7 @@ export const ProductsV2 = () => {
                 modals.open({
                   title: (
                     <Text fw={700} fz="md">
-                      Thêm sản phẩm mới
+                      Thêm SKU mới
                     </Text>
                   ),
                   children: <ProductModalV2 refetch={refetch} />,
@@ -262,7 +262,7 @@ export const ProductsV2 = () => {
               }
               style={{ fontWeight: 600, letterSpacing: 0.1 }}
             >
-              Thêm sản phẩm
+              Thêm SKU
             </Button>
           </Can>
         </Tooltip>
@@ -297,12 +297,12 @@ export const ProductsV2 = () => {
       >
         <Box>
           <Text fw={700} fz="xl" mb={2}>
-            {showDeleted ? "Các sản phẩm đã xóa" : "Các sản phẩm đang có"}
+            {showDeleted ? "Các SKU đã xóa" : "Danh sách SKU"}
           </Text>
           <Text c="dimmed" fz="sm">
             {showDeleted
-              ? "Xem và khôi phục các sản phẩm đã bị xóa"
-              : "Quản lý, chỉnh sửa và tìm kiếm sản phẩm"}
+              ? "Xem và khôi phục các SKU đã bị xóa"
+              : "Quản lý, chỉnh sửa và tìm kiếm SKU"}
           </Text>
         </Box>
       </Flex>
@@ -314,7 +314,7 @@ export const ProductsV2 = () => {
           columns={columns}
           data={rows}
           isLoading={isLoading}
-          loadingText="Đang tải danh sách sản phẩm..."
+          loadingText="Đang tải danh sách SKU..."
           enableGlobalFilter={false}
           enableRowSelection={false}
           extraFilters={extraFilters}

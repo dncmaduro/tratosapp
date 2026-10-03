@@ -136,7 +136,7 @@ export function StorageIncomeDetailPage({
       },
       {
         accessorKey: "name",
-        header: "Tên sản phẩm",
+        header: "SKU",
         size: 200,
         cell: ({ row }) => <Text size="sm">{row.original.name}</Text>
       },
@@ -369,7 +369,7 @@ export function StorageIncomeDetailPage({
               </Text>
             </div>
             <Badge size="lg" color="blue" variant="light">
-              {income.products.length} sản phẩm
+              {income.products.length} SKU
             </Badge>
           </Group>
         </Box>
@@ -497,7 +497,7 @@ export function StorageIncomeDetailPage({
         {/* Products Table */}
         <Box px={{ base: 4, md: 28 }} py={20}>
           <Title order={4} mb="md">
-            Danh sách sản phẩm ({income.products.length})
+            Danh sách SKU ({income.products.length})
           </Title>
           <CDataTable
             columns={productColumns}
