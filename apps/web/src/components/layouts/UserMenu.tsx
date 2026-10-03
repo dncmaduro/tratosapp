@@ -13,7 +13,7 @@ import { useUsers } from "../../hooks/useUsers"
 import {
   ADMIN_NAVS,
   hasAnyPermission,
-  TIKTOKSHOP_ACCESS_PERMISSIONS,
+  TIKTOKSHOP_APP_ACCESS_PERMISSIONS,
   TIKTOKSHOP_NAVS
 } from "../../constants/navs"
 import { resetSessionCache } from "../../utils/authSession"
@@ -30,7 +30,7 @@ export const UserMenu = () => {
     select: (data) => data.data
   })
   const permissions = meData?.permissions ?? []
-  const canOpenTikTokShop = hasAnyPermission(permissions, TIKTOKSHOP_ACCESS_PERMISSIONS)
+  const canOpenTikTokShop = hasAnyPermission(permissions, TIKTOKSHOP_APP_ACCESS_PERMISSIONS)
   const canOpenAdmin = hasAnyPermission(permissions, ["admin.users.manage"])
   const firstTikTokShopPage = TIKTOKSHOP_NAVS.find((nav) =>
     hasAnyPermission(permissions, nav.permissions)

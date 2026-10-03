@@ -1,6 +1,6 @@
 import { useLivestreamChannels } from "../../hooks/useLivestreamChannels"
 import { useMutation } from "@tanstack/react-query"
-import { Stack, Button, Group, Select, TextInput } from "@mantine/core"
+import { Stack, Button, Group, TextInput } from "@mantine/core"
 import { useForm, Controller } from "react-hook-form"
 import { modals } from "@mantine/modals"
 import { CToast } from "../common/CToast"
@@ -24,7 +24,6 @@ interface FormData {
   name: string
   usernamesText: string
   link: string
-  platform: "tiktokshop" | "shopee"
 }
 
 export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
@@ -38,9 +37,10 @@ export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
   } = useForm<FormData>({
     defaultValues: {
       name: channel?.name ?? "",
-      usernamesText: channel?.usernames?.join(", ") ?? "",
-      link: channel?.link ?? "",
-      platform: "tiktokshop"
+      usernamesText: channel
+        ? [...new Set([channel.username, ...(channel.usernames ?? [])])].filter(Boolean).join(", ")
+        : "",
+      link: channel?.link ?? ""
     }
   })
 
@@ -80,10 +80,10 @@ export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean)
-    const legacyUsername = channel?.username || usernames[0] || ""
+    const legacyUsername = usernames[0] || channel?.username || ""
     const payload = {
       name: values.name,
-      link: values.link,
+      link: values.link.trim(),
       usernames,
       username: legacyUsername
     }
@@ -95,7 +95,7 @@ export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
       })
     } else {
       // Create new channel
-      createChannel({ ...payload, platform: values.platform })
+      createChannel({ ...payload, platform: "tiktokshop" })
     }
   }
 
@@ -125,7 +125,9 @@ export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
         <Controller
           name="usernamesText"
           control={control}
-          rules={{ required: "Vui lòng nhập ít nhất một username" }}
+          rules={{
+            validate: (value) => value.split(",").some((item) => item.trim()) || "Vui lòng nhập ít nhất một username"
+          }}
           render={({ field }) => (
             <TextInput
               label="Usernames"
@@ -145,9 +147,8 @@ export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
           name="link"
           control={control}
           rules={{
-            required: "Vui lòng nhập link kênh",
             pattern: {
-              value: /^https?:\/\/.+/,
+              value: /^$|^https?:\/\/.+/,
               message: "Link phải bắt đầu bằng http:// hoặc https://"
             }
           }}
@@ -157,37 +158,12 @@ export const LivestreamChannelModal = ({ channel, refetch }: Props) => {
               placeholder="https://..."
               value={field.value}
               onChange={field.onChange}
-              required
               disabled={isPending}
               size="md"
               error={errors.link?.message}
             />
           )}
         />
-
-        {!channel && (
-          <Controller
-            name="platform"
-            control={control}
-            rules={{ required: "Vui lòng chọn nền tảng" }}
-            render={({ field }) => (
-              <Select
-                label="Nền tảng"
-                placeholder="Chọn nền tảng livestream"
-                data={[
-                  { value: "tiktokshop", label: "TikTok Shop" },
-                  { value: "shopee", label: "Shopee" }
-                ]}
-                value={field.value}
-                onChange={field.onChange}
-                required
-                disabled={isPending}
-                size="md"
-                error={errors.platform?.message}
-              />
-            )}
-          />
-        )}
 
         <Group justify="flex-end" mt="md">
           <Button

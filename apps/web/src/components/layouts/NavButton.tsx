@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { IconBox, IconCoin, IconSquareRounded } from "@tabler/icons-react"
+import { IconBox, IconCoin, IconSquareRounded, IconUsers } from "@tabler/icons-react"
 import { ReactNode } from "react"
 import { useMediaQuery } from "@mantine/hooks"
 import { modals } from "@mantine/modals"
@@ -32,7 +32,8 @@ export const NavButton = ({
   const iconMap: Record<string, typeof IconBox> = {
     IconBox,
     IconCoin,
-    IconSquareRounded
+    IconSquareRounded,
+    IconUsers
   }
   let ResolvedIcon: ReactNode = null
   if (iconName && typeof iconName === "string") {

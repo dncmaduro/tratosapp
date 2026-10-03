@@ -4,11 +4,26 @@ export const STORAGE_ACCESS_PERMISSIONS = ["api.products.search-products", "api.
 
 export type NavigationItem = { to: string; label: string; permissions: string[]; icon: string; deprecated?: boolean; beta?: boolean }
 
-export const TIKTOKSHOP_ACCESS_PERMISSIONS = ["api.products.search-products", "api.incomes.get-incomes-by-date-range"]
+export const CHANNEL_MANAGEMENT_PERMISSIONS = [
+  "api.livestreamchannels.create-livestream-channel",
+  "api.livestreamchannels.update-livestream-channel",
+  "api.livestreamchannels.delete-livestream-channel"
+]
+
+export const TIKTOKSHOP_ACCESS_PERMISSIONS = [
+  "api.products.search-products",
+  "api.incomes.get-incomes-by-date-range"
+]
+
+export const TIKTOKSHOP_APP_ACCESS_PERMISSIONS = [
+  ...TIKTOKSHOP_ACCESS_PERMISSIONS,
+  ...CHANNEL_MANAGEMENT_PERMISSIONS
+]
 
 export const TIKTOKSHOP_NAVS: NavigationItem[] = [
   { to: `${TIKTOKSHOP_NAVS_URL}/sku`, label: "SKU", icon: "IconBox", permissions: ["api.products.search-products"] },
-  { to: `${TIKTOKSHOP_NAVS_URL}/incomes`, label: "Doanh thu", icon: "IconCoin", permissions: ["api.incomes.get-incomes-by-date-range"] }
+  { to: `${TIKTOKSHOP_NAVS_URL}/incomes`, label: "Doanh thu", icon: "IconCoin", permissions: ["api.incomes.get-incomes-by-date-range"] },
+  { to: `${TIKTOKSHOP_NAVS_URL}/channels`, label: "Quản lý kênh", icon: "IconUsers", permissions: CHANNEL_MANAGEMENT_PERMISSIONS }
 ]
 
 export const NAVS = TIKTOKSHOP_NAVS

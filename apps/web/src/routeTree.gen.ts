@@ -5,6 +5,7 @@ import { Route as rootRoute } from "./routes/__root"
 import { Route as loginRoute } from "./routes/index"
 import { Route as accessDeniedRoute } from "./routes/access-denied/index"
 import { Route as tiktokshopRoute } from "./routes/tiktokshop/index"
+import { Route as channelsRoute } from "./routes/tiktokshop/channels/index"
 import { Route as skuRoute } from "./routes/tiktokshop/sku/index"
 import { Route as incomesRoute } from "./routes/tiktokshop/incomes/index"
 import { Route as incomeDetailRoute } from "./routes/tiktokshop/incomes/$incomeId"
@@ -34,6 +35,12 @@ const sku = skuRoute.update({
   getParentRoute: () => rootRoute
 } as never)
 
+const channels = channelsRoute.update({
+  id: "/tiktokshop/channels/",
+  path: "/tiktokshop/channels/",
+  getParentRoute: () => rootRoute
+} as never)
+
 const incomes = incomesRoute.update({
   id: "/tiktokshop/incomes/",
   path: "/tiktokshop/incomes/",
@@ -57,6 +64,7 @@ export const routeTree = rootRoute.addChildren([
   accessDenied,
   tiktokshop,
   sku,
+  channels,
   incomes,
   incomeDetail,
   adminUsers
@@ -68,6 +76,7 @@ declare module "@tanstack/react-router" {
     "/access-denied/": { id: "/access-denied/"; path: "/access-denied"; fullPath: "/access-denied"; preLoaderRoute: typeof accessDeniedRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/": { id: "/tiktokshop/"; path: "/tiktokshop"; fullPath: "/tiktokshop"; preLoaderRoute: typeof tiktokshopRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/sku/": { id: "/tiktokshop/sku/"; path: "/tiktokshop/sku"; fullPath: "/tiktokshop/sku"; preLoaderRoute: typeof skuRoute; parentRoute: typeof rootRoute }
+    "/tiktokshop/channels/": { id: "/tiktokshop/channels/"; path: "/tiktokshop/channels"; fullPath: "/tiktokshop/channels"; preLoaderRoute: typeof channelsRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/incomes/": { id: "/tiktokshop/incomes/"; path: "/tiktokshop/incomes"; fullPath: "/tiktokshop/incomes"; preLoaderRoute: typeof incomesRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/incomes/$incomeId": { id: "/tiktokshop/incomes/$incomeId"; path: "/tiktokshop/incomes/$incomeId"; fullPath: "/tiktokshop/incomes/$incomeId"; preLoaderRoute: typeof incomeDetailRoute; parentRoute: typeof rootRoute }
     "/admin/users/": { id: "/admin/users/"; path: "/admin/users"; fullPath: "/admin/users"; preLoaderRoute: typeof adminUsersRoute; parentRoute: typeof rootRoute }

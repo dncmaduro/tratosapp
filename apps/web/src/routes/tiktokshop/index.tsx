@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
-import { TIKTOKSHOP_NAVS } from "../../constants/navs"
+import { hasAnyPermission, TIKTOKSHOP_APP_ACCESS_PERMISSIONS, TIKTOKSHOP_NAVS } from "../../constants/navs"
+import { useAuthGuard } from "../../hooks/useAuthGuard"
 
 export const Route = createFileRoute("/tiktokshop/")({
   component: RouteComponent
@@ -8,10 +9,15 @@ export const Route = createFileRoute("/tiktokshop/")({
 
 function RouteComponent() {
   const navigate = useNavigate()
+  const { meData } = useAuthGuard(TIKTOKSHOP_APP_ACCESS_PERMISSIONS)
 
   useEffect(() => {
-    navigate({ to: TIKTOKSHOP_NAVS[0].to })
-  }, [])
+    if (!meData) return
+    const destination = TIKTOKSHOP_NAVS.find((nav) =>
+      hasAnyPermission(meData.permissions, nav.permissions)
+    )?.to
+    if (destination) navigate({ to: destination as never })
+  }, [meData, navigate])
 
   return null
 }
