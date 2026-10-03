@@ -7,7 +7,9 @@ import {
   Loader,
   Modal,
   Pagination,
+  Paper,
   PasswordInput,
+  SimpleGrid,
   Stack,
   Table,
   Text,
@@ -24,13 +26,66 @@ import { AppLayout } from "../../../components/layouts/AppLayout"
 import { CToast } from "../../../components/common/CToast"
 import { ADMIN_NAVS } from "../../../constants/navs"
 import { useAuthGuard } from "../../../hooks/useAuthGuard"
-import type { AdminUserWriteRequest } from "../../../hooks/models"
+import type { AdminUserWriteRequest, PermissionResponse } from "../../../hooks/models"
 import { useUsers } from "../../../hooks/useUsers"
 
 export const Route = createFileRoute("/admin/users/")({ component: RouteComponent })
 
 const PAGE_SIZE = 20
 const navs = ADMIN_NAVS
+
+const PERMISSION_GROUP_LABELS: Record<string, string> = {
+  admin: "Quản trị tài khoản",
+  "api.products": "Sản phẩm & SKU",
+  "api.incomes": "Doanh thu",
+  "api.dailyads": "Quảng cáo",
+  "api.livestreammonthgoals": "Mục tiêu livestream",
+  "api.packingrules": "Quy tắc đóng gói",
+  "api.livestreamchannels": "Kênh livestream",
+  "api.storageitems": "Kho hàng"
+}
+
+const PERMISSION_LABELS: Record<string, string> = {
+  "admin.users.manage": "Quản lý tài khoản",
+  "api.products.search-products": "Xem sản phẩm và SKU",
+  "api.products.create-product": "Tạo sản phẩm",
+  "api.products.update-product": "Chỉnh sửa sản phẩm",
+  "api.products.delete-product": "Xóa sản phẩm",
+  "api.products.restore-product": "Khôi phục sản phẩm",
+  "api.products.cal-xlsx": "Tính dữ liệu từ Excel",
+  "api.incomes.get-incomes-by-date-range": "Xem doanh thu",
+  "api.incomes.insert-and-update-affiliate-type": "Phân loại affiliate",
+  "api.incomes.delete-income-by-date": "Xóa doanh thu",
+  "api.dailyads.upsert-daily-ads-metrics": "Ghi nhận và cập nhật ads",
+  "api.dailyads.delete-daily-ads-metrics": "Xóa dữ liệu ads",
+  "api.livestreammonthgoals.create-livestream-month-goal": "Tạo mục tiêu tháng",
+  "api.livestreammonthgoals.update-livestream-month-goal": "Chỉnh sửa mục tiêu tháng",
+  "api.packingrules.create-rule": "Tạo quy tắc đóng gói",
+  "api.packingrules.update-rule": "Chỉnh sửa quy tắc đóng gói",
+  "api.livestreamchannels.create-livestream-channel": "Tạo kênh livestream",
+  "api.livestreamchannels.update-livestream-channel": "Chỉnh sửa kênh livestream",
+  "api.livestreamchannels.delete-livestream-channel": "Xóa kênh livestream",
+  "api.storageitems.create-item": "Tạo mặt hàng kho"
+}
+
+const groupPermissions = (permissions: PermissionResponse[]) => {
+  const groups = new Map<string, { key: string; label: string; items: PermissionResponse[] }>()
+
+  for (const permission of permissions) {
+    const key = permission.key.startsWith("admin.")
+      ? "admin"
+      : permission.key.split(".").slice(0, 2).join(".")
+    const group = groups.get(key) ?? {
+      key,
+      label: PERMISSION_GROUP_LABELS[key] ?? key,
+      items: []
+    }
+    group.items.push(permission)
+    groups.set(key, group)
+  }
+
+  return [...groups.values()]
+}
 
 function RouteComponent() {
   const { meData } = useAuthGuard(["admin.users.manage"])
@@ -126,7 +181,18 @@ function RouteComponent() {
   const users = usersQuery.data?.data.data ?? []
   const total = usersQuery.data?.data.total ?? 0
   const permissions = permissionsQuery.data?.data.data ?? []
+  const permissionGroups = groupPermissions(permissions)
   const busy = createMutation.isPending || updateMutation.isPending
+  const isEditingOwnAccount = editingUser?._id === meData?._id
+
+  const updatePermissions = (keys: string[], checked: boolean) => {
+    const selected = new Set(form.values.permissions)
+    for (const key of keys) {
+      if (checked) selected.add(key)
+      else selected.delete(key)
+    }
+    form.setFieldValue("permissions", [...selected])
+  }
 
   return (
     <>
@@ -195,7 +261,7 @@ function RouteComponent() {
         </Stack>
       </AppLayout>
 
-      <Modal opened={opened} onClose={() => setOpened(false)} title={editingUser ? "Chỉnh sửa tài khoản" : "Tạo tài khoản"} size="lg">
+      <Modal opened={opened} onClose={() => setOpened(false)} title={editingUser ? "Chỉnh sửa tài khoản" : "Tạo tài khoản"} size="lg" zIndex={500}>
         <form onSubmit={submit}>
           <Stack>
             <TextInput label="Tên hiển thị" required {...form.getInputProps("name")} />
@@ -206,12 +272,48 @@ function RouteComponent() {
               autoComplete="new-password"
               {...form.getInputProps("password")}
             />
-            <Checkbox.Group label="Quyền truy cập" {...form.getInputProps("permissions")}>
-              <Stack gap="xs" mt="xs">
-                {permissions.map((permission) => <Checkbox key={permission.key} value={permission.key} label={permission.label} disabled={editingUser?._id === meData?._id} />)}
-              </Stack>
-            </Checkbox.Group>
-            {permissionsQuery.isLoading ? <Text size="sm" c="dimmed">Đang tải danh sách quyền…</Text> : null}
+            <Stack gap="xs">
+              <Text fw={600} size="sm">Quyền truy cập</Text>
+              {permissionsQuery.isLoading ? <Text size="sm" c="dimmed">Đang tải danh sách quyền…</Text> : null}
+              {!permissionsQuery.isLoading && !permissions.length ? <Text size="sm" c="dimmed">Chưa có quyền nào.</Text> : null}
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                {permissionGroups.map((group) => {
+                  const keys = group.items.map((permission) => permission.key)
+                  const selectedCount = keys.filter((key) => form.values.permissions.includes(key)).length
+                  const allSelected = selectedCount === keys.length
+
+                  return (
+                    <Paper key={group.key} withBorder p="sm" radius="md">
+                      <Stack gap="xs">
+                        <Group justify="space-between" gap="xs">
+                          <Text fw={600} size="sm">{group.label}</Text>
+                          <Text size="xs" c="dimmed">{selectedCount}/{keys.length}</Text>
+                        </Group>
+                        <Checkbox
+                          label={allSelected ? "Bỏ chọn cả nhóm" : "Chọn cả nhóm"}
+                          checked={allSelected}
+                          indeterminate={selectedCount > 0 && !allSelected}
+                          disabled={isEditingOwnAccount}
+                          onChange={(event) => updatePermissions(keys, event.currentTarget.checked)}
+                        />
+                        <Stack gap={6} pl="xs">
+                          {group.items.map((permission) => (
+                            <Checkbox
+                              key={permission.key}
+                              value={permission.key}
+                              label={PERMISSION_LABELS[permission.key] ?? permission.label}
+                              checked={form.values.permissions.includes(permission.key)}
+                              disabled={isEditingOwnAccount}
+                              onChange={(event) => updatePermissions([permission.key], event.currentTarget.checked)}
+                            />
+                          ))}
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                  )
+                })}
+              </SimpleGrid>
+            </Stack>
             <Group justify="flex-end" mt="sm">
               <Button variant="default" onClick={() => setOpened(false)}>Hủy</Button>
               <Button type="submit" loading={busy}>{editingUser ? "Lưu thay đổi" : "Tạo tài khoản"}</Button>
