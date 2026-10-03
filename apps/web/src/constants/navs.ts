@@ -17,11 +17,13 @@ export const TIKTOKSHOP_ACCESS_PERMISSIONS = [
 
 export const TIKTOKSHOP_APP_ACCESS_PERMISSIONS = [
   ...TIKTOKSHOP_ACCESS_PERMISSIONS,
+  "api.storageitems.search-items",
   ...CHANNEL_MANAGEMENT_PERMISSIONS
 ]
 
 export const TIKTOKSHOP_NAVS: NavigationItem[] = [
   { to: `${TIKTOKSHOP_NAVS_URL}/sku`, label: "SKU", icon: "IconBox", permissions: ["api.products.search-products"] },
+  { to: `${TIKTOKSHOP_NAVS_URL}/storage-items`, label: "Storage Items", icon: "IconBox", permissions: ["api.products.search-products", "api.storageitems.search-items"] },
   { to: `${TIKTOKSHOP_NAVS_URL}/incomes`, label: "Doanh thu", icon: "IconCoin", permissions: ["api.incomes.get-incomes-by-date-range"] },
   { to: `${TIKTOKSHOP_NAVS_URL}/channels`, label: "Quản lý kênh", icon: "IconUsers", permissions: CHANNEL_MANAGEMENT_PERMISSIONS }
 ]

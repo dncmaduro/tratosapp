@@ -22,8 +22,8 @@ export const useItems = () => {
     })
   }
 
-  const createStorageItem = async (item: CreateStorageItemRequest) => {
-    return callApi<CreateStorageItemRequest, never>({
+  const createStorageItem = async (item: Pick<CreateStorageItemRequest, "code" | "name">) => {
+    return callApi<Pick<CreateStorageItemRequest, "code" | "name">, never>({
       path: `/v1/storageitems`,
       method: "POST",
       data: item,
@@ -40,8 +40,8 @@ export const useItems = () => {
     })
   }
 
-  const updateStorageItem = async (item: SearchStorageItemResponse) => {
-    return callApi<SearchStorageItemResponse, SearchStorageItemResponse>({
+  const updateStorageItem = async (item: Pick<SearchStorageItemResponse, "_id" | "code" | "name">) => {
+    return callApi<Pick<SearchStorageItemResponse, "_id" | "code" | "name">, SearchStorageItemResponse>({
       path: `/v1/storageitems`,
       method: "PUT",
       data: item,

@@ -19,7 +19,10 @@ const protectedWrites = [
   [ChannelsController, "create", "api.livestreamchannels.create-livestream-channel"],
   [ChannelsController, "update", "api.livestreamchannels.update-livestream-channel"],
   [ChannelsController, "remove", "api.livestreamchannels.delete-livestream-channel"],
-  [StorageItemsController, "create", "api.storageitems.create-item"]
+  [StorageItemsController, "create", "api.storageitems.create-item"],
+  [StorageItemsController, "update", "api.storageitems.update-item"],
+  [StorageItemsController, "remove", "api.storageitems.delete-item"],
+  [StorageItemsController, "restore", "api.storageitems.restore-item"]
 ]
 const protectedIncomeReads = [
   "list", "monthlyIncome", "monthlyQuantity", "kpiPercentage", "monthlyAds", "rangeStats", "export"
@@ -52,13 +55,17 @@ test("protected writes and income reads declare both guards and their permission
   for (const [Controller, method, permission] of [...protectedWrites, ...protectedIncomeReads, ...protectedIncomeSupportReads, ...protectedProductReads]) {
     const targets = [Controller.prototype[method], Controller]
     assert.deepEqual(reflector.getAllAndOverride(GUARDS_METADATA, targets), [JwtAuthGuard, PermissionsGuard])
-    assert.deepEqual(reflector.getAllAndOverride(PERMISSIONS_KEY, targets), [permission])
+    const expected = Controller === StorageItemsController && method === "search"
+      ? [permission, "api.storageitems.search-items"]
+      : [permission]
+    assert.deepEqual(reflector.getAllAndOverride(PERMISSIONS_KEY, targets), expected)
   }
 })
 
 test("write and income-read permissions are assignable through the admin permission catalogue", () => {
   const keys = new AuthController({}, {}).permissions().data.map(item => item.key)
   for (const [, , permission] of [...protectedWrites, ...protectedIncomeReads, ...protectedIncomeSupportReads, ...protectedProductReads]) assert.ok(keys.includes(permission), permission)
+  assert.ok(keys.includes("api.storageitems.search-items"))
   assert.equal(new Set(keys).size, keys.length)
 })
 
@@ -100,7 +107,14 @@ test("product and storage reads reject missing permissions but allow their exact
       f.setUser({ active: true, permissions })
       await assert.rejects(f.guard.canActivate(ctx), forbidden)
     }
-    for (const permissions of [[permission], ["*"]]) {
+    const allowedPermissions = Controller === StorageItemsController
+      ? [permission, "api.storageitems.search-items"]
+      : [permission]
+    for (const exactPermission of allowedPermissions) {
+      f.setUser({ active: true, permissions: [exactPermission] })
+      assert.equal(await f.guard.canActivate(ctx), true)
+    }
+    for (const permissions of [["*"]]) {
       f.setUser({ active: true, permissions })
       assert.equal(await f.guard.canActivate(ctx), true)
     }

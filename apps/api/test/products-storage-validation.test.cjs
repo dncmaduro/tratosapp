@@ -25,8 +25,14 @@ function products(existingItems = [itemId]) {
 }
 
 function storage() {
-  const calls = { create: [] }
-  const model = { create: async value => { calls.create.push(value); return value } }
+  const calls = { create: [], update: [] }
+  const model = {
+    create: async value => { calls.create.push(value); return value },
+    findByIdAndUpdate: async (...args) => {
+      calls.update.push(args)
+      return args[0] === itemId ? { _id: itemId, ...args[1].$set } : null
+    }
+  }
   return { controller: new StorageItemsController(model), calls, model }
 }
 
@@ -34,7 +40,7 @@ test("products normalize valid item mappings and verify referenced storage items
   const f = products()
   const created = await f.controller.create(product())
   assert.deepEqual(created, { name: "Tratos Combo", items: [{ _id: itemId, quantity: 2 }] })
-  assert.deepEqual(f.calls.itemFind[0], { _id: { $in: [itemId] } })
+  assert.deepEqual(f.calls.itemFind[0], { _id: { $in: [itemId] }, deletedAt: null })
 
   await f.controller.update({ _id: productId, ...product(), deletedAt: null })
   assert.deepEqual(f.calls.update[0], [
@@ -72,19 +78,42 @@ test("products report duplicate names, invalid IDs and missing records", async (
   await assert.rejects(f.controller.remove("507f1f77bcf86cd799439012"), status(404))
 })
 
-test("storage quick-create accepts its legacy payload but stores only schema fields", async () => {
+test("storage item create only accepts the catalog fields and rejects inventory fields", async () => {
   const f = storage()
-  const result = await f.controller.create({
-    code: " BOX-01 ", name: " Hộp nhỏ ", quantityPerBox: 1,
-    receivedQuantity: { quantity: 0, real: 0 }, deliveredQuantity: { quantity: 0, real: 0 },
-    restQuantity: { quantity: 0, real: 0 }, note: "legacy form"
-  })
+  const result = await f.controller.create({ code: " BOX-01 ", name: " Hộp nhỏ " })
   assert.deepEqual(result, { code: "BOX-01", name: "Hộp nhỏ" })
-  for (const body of [{}, { code: "BOX", name: "", unsafe: true }]) {
+  for (const body of [
+    {},
+    { code: "BOX", name: "", unsafe: true },
+    { code: "BOX-02", name: "Hộp lớn", quantityPerBox: 1 },
+    { code: "BOX-02", name: "Hộp lớn", restQuantity: { quantity: 0, real: 0 } }
+  ]) {
     await assert.rejects(f.controller.create(body), status(400))
   }
   f.model.create = async () => { const error = new Error("duplicate"); error.code = 11000; throw error }
   await assert.rejects(f.controller.create({ code: "BOX-01", name: "Hộp nhỏ" }), status(409))
+})
+
+test("storage items can be edited, soft-deleted and restored without inventory fields", async () => {
+  const f = storage()
+  await f.controller.update({ _id: itemId, code: " BOX-02 ", name: " Hộp lớn " })
+  assert.deepEqual(f.calls.update[0], [
+    itemId,
+    { $set: { code: "BOX-02", name: "Hộp lớn" } },
+    { new: true, runValidators: true }
+  ])
+  for (const body of [
+    { _id: itemId, code: "BOX-02", name: "Hộp lớn", restQuantity: { quantity: 1, real: 1 } },
+    { _id: "invalid", code: "BOX-02", name: "Hộp lớn" }
+  ]) await assert.rejects(f.controller.update(body), status(400))
+
+  await f.controller.remove(itemId)
+  assert.equal(f.calls.update[1][0], itemId)
+  assert.ok(f.calls.update[1][1].$set.deletedAt instanceof Date)
+  await f.controller.restore(itemId)
+  assert.deepEqual(f.calls.update[2], [itemId, { $set: { deletedAt: null } }, { new: true }])
+  await assert.rejects(f.controller.remove("invalid"), status(400))
+  await assert.rejects(f.controller.restore("507f1f77bcf86cd799439012"), status(404))
 })
 
 test("product and storage searches use literal text and strict deleted flags", async () => {

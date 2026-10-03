@@ -118,7 +118,7 @@ export class ProductsController {
 
   private async ensureItemsExist(items: ProductInput["items"]) {
     if (!items.length) return
-    const stored = await this.items.find({ _id: { $in: items.map((item) => item._id) } }).select("_id").lean()
+    const stored = await this.items.find({ _id: { $in: items.map((item) => item._id) }, deletedAt: null }).select("_id").lean()
     if (stored.length !== items.length) throw new NotFoundException("Có mặt hàng không tồn tại")
   }
 }

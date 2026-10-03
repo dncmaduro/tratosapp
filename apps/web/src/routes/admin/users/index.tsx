@@ -42,7 +42,7 @@ const PERMISSION_GROUP_LABELS: Record<string, string> = {
   "api.livestreammonthgoals": "Mục tiêu livestream",
   "api.packingrules": "Quy tắc đóng gói",
   "api.livestreamchannels": "Kênh livestream",
-  "api.storageitems": "Kho hàng"
+  "api.storageitems": "Storage Items"
 }
 
 const PERMISSION_LABELS: Record<string, string> = {
@@ -65,7 +65,11 @@ const PERMISSION_LABELS: Record<string, string> = {
   "api.livestreamchannels.create-livestream-channel": "Tạo kênh livestream",
   "api.livestreamchannels.update-livestream-channel": "Chỉnh sửa kênh livestream",
   "api.livestreamchannels.delete-livestream-channel": "Xóa kênh livestream",
-  "api.storageitems.create-item": "Tạo mặt hàng kho"
+  "api.storageitems.search-items": "Xem Storage Items",
+  "api.storageitems.create-item": "Tạo Storage Item",
+  "api.storageitems.update-item": "Chỉnh sửa Storage Item",
+  "api.storageitems.delete-item": "Xóa Storage Item",
+  "api.storageitems.restore-item": "Khôi phục Storage Item"
 }
 
 const groupPermissions = (permissions: PermissionResponse[]) => {

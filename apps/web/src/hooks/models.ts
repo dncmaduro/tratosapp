@@ -10,18 +10,9 @@ export interface CreateStorageItemRequest {
   code: string
   name: string
   quantityPerBox: number
-  receivedQuantity: {
-    quantity: number
-    real: number
-  }
-  deliveredQuantity: {
-    quantity: number
-    real: number
-  }
-  restQuantity: {
-    quantity: number
-    real: number
-  }
+  receivedQuantity: { quantity: number; real: number }
+  deliveredQuantity: { quantity: number; real: number }
+  restQuantity: { quantity: number; real: number }
   note?: string
 }
 
@@ -44,18 +35,9 @@ export interface SearchStorageItemResponse {
   _id: string
   name: string
   quantityPerBox: number
-  receivedQuantity: {
-    quantity: number
-    real: number
-  }
-  deliveredQuantity: {
-    quantity: number
-    real: number
-  }
-  restQuantity: {
-    quantity: number
-    real: number
-  }
+  receivedQuantity: { quantity: number; real: number }
+  deliveredQuantity: { quantity: number; real: number }
+  restQuantity: { quantity: number; real: number }
   deletedAt?: string
   code: string
   note?: string
