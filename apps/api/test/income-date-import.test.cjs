@@ -38,6 +38,11 @@ test("income import accepts TikTok day-first and timezone-qualified ISO created 
   assert.equal(localIso.date.toISOString(), "2026-09-26T03:15:30.123Z")
 })
 
-test("income import rejects invalid calendar dates instead of silently assigning a different day", async () => {
-  await assert.rejects(importRows([baseRow("invalid", "31/02/2026 10:00:00")]), error => error.getStatus?.() === 400)
+test("income import skips rows with invalid calendar dates instead of failing the whole file", async () => {
+  const incomes = await importRows([
+    baseRow("invalid", "31/02/2026 10:00:00"),
+    baseRow("valid", "26/09/2026 10:00:00")
+  ])
+  assert.equal(incomes.length, 1)
+  assert.equal(incomes[0].orderId, "valid")
 })

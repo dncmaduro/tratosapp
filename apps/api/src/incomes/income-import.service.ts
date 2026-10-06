@@ -132,22 +132,21 @@ export class IncomeImportService {
 
   async importTotal(file: Express.Multer.File, channelId: string) {
     const rows = this.totalRows(file)
-    const groups = new Map<string, Record<string, unknown>[]>()
+    const groups = new Map<string, { row: Record<string, unknown>; createdAt: Date }[]>()
 
     for (const row of rows) {
+      const createdAt = date(valueAt(row, "Created Time"))
+      if (!createdAt) continue
+
       const orderId = text(valueAt(row, "Order ID"))
       if (!orderId) continue
       const cancellation = text(valueAt(row, "Cancelation/Return Type", "Cancellation/Return Type"))
       if (cancellation.toLowerCase() === "cancel") continue
-      groups.set(orderId, [...(groups.get(orderId) ?? []), row])
+      groups.set(orderId, [...(groups.get(orderId) ?? []), { row, createdAt }])
     }
 
     const operations = [...groups].map(([orderId, lines]) => {
-      const first = lines[0]
-      const createdAt = date(valueAt(first, "Created Time"))
-      if (!createdAt) {
-        throw new BadRequestException("File tổng doanh thu thiếu cột Created Time hợp lệ")
-      }
+      const first = lines[0].row
       const income = {
         orderId,
         customer: text(valueAt(first, "Buyer Username")),
@@ -156,8 +155,8 @@ export class IncomeImportService {
         orderStatus: text(valueAt(first, "Order Status")),
         cancelationOrReturnType: text(valueAt(first, "Cancelation/Return Type", "Cancellation/Return Type")),
         channel: new Types.ObjectId(channelId),
-        date: createdAt,
-        products: lines.map((line) => ({
+        date: lines[0].createdAt,
+        products: lines.map(({ row: line }) => ({
           code: text(valueAt(line, "Seller SKU")),
           name: text(valueAt(line, "Product Name")),
           source: "other",
