@@ -55,7 +55,6 @@ const buildInitialData = (
   roiProtect: row.roiProtect,
   tinRefundAmount: row.tinRefundAmount,
   gmvAds: row.gmvAds,
-  affiliateCost: row.affiliateCost,
   totalRevenue: row.totalRevenue,
   refundCancelRate: row.refundCancelRate
 })
@@ -172,6 +171,7 @@ export function DailyAdsMetricsManager() {
           initialChannelId={selectedChannelId}
           initialDate={new Date(row.date)}
           initialData={buildInitialData(row)}
+          initialAffiliateCost={row.affiliateCost}
           refetch={() => void refetch()}
         />
       ),

@@ -2141,7 +2141,6 @@ export interface UpsertDailyAdsMetricsRequest {
   roiProtect: number
   tinRefundAmount: number
   gmvAds: number
-  affiliateCost: number
   totalRevenue: number
   refundCancelRate: number
 }

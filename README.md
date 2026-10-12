@@ -62,8 +62,9 @@ và `status-only` là 1 file. API xác thực kênh tồn tại và kiểm tra t
 trước khi đọc file; điều này giữ tương thích với luồng import chunk ở web.
 
 DailyAdsMetrics lưu ngày theo `Asia/Ho_Chi_Minh` thay vì timezone của server;
-sáu trường nhập là bắt buộc và phải là số không âm. Công thức metrics được giữ
-nguyên từ ứng dụng nguồn.
+năm trường nhập thủ công là bắt buộc và phải là số không âm. `affiliateCost`
+được tự động tính từ cột X và AA của file tách nguồn khi import doanh số.
+Công thức metrics được giữ nguyên từ ứng dụng nguồn.
 
 `SKU Subtotal Before/After Discount` của file TikTok Shop là tổng tiền của từng
 dòng SKU, đã bao gồm `Quantity`. Dashboard cộng subtotal một lần; quantity chỉ

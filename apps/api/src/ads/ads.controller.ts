@@ -6,9 +6,10 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard"
 import { PermissionsGuard } from "../auth/permissions.guard"
 import { RequirePermissions } from "../auth/require-permissions.decorator"
 import { DailyAdsMetrics, DailyAdsMetricsDocument } from "./daily-ads-metrics.schema"
+import { calculateAdsMetrics } from "./ads-metrics"
 import { inputBusinessDay, inputId, inputNonNegativeNumber, inputObject } from "../common/input-validation"
 
-const inputFields = ["roiProtect", "tinRefundAmount", "gmvAds", "affiliateCost", "totalRevenue", "refundCancelRate"] as const
+const inputFields = ["roiProtect", "tinRefundAmount", "gmvAds", "totalRevenue", "refundCancelRate"] as const
 
 type AdsMetricsInput = Record<(typeof inputFields)[number], number> & {
   date: Date
@@ -32,29 +33,23 @@ export class AdsController {
   @Post("metrics") @RequirePermissions("api.dailyads.upsert-daily-ads-metrics")
   async upsert(@Body() body: unknown) {
     const input = adsMetricsInput(body)
-    const rawRate = input.refundCancelRate
-    const refundRate = Math.min(Math.max(rawRate >= 1 ? rawRate / 100 : rawRate, 0), 1)
-    const { roiProtect, tinRefundAmount, gmvAds, affiliateCost, totalRevenue, date, channelId } = input
-    const actualAdsCost = Math.max(0, gmvAds - tinRefundAmount - roiProtect)
-    const affiliateRefundAmount = Math.max(0, actualAdsCost * refundRate)
-    const totalCost = Math.max(0, actualAdsCost + affiliateCost)
-    const adjustedRevenue = Math.max(0, totalRevenue * (1 - refundRate))
-    const costAfterRefund = Math.max(0, totalCost - affiliateRefundAmount)
-    const percentage = (value: number, base: number) => base > 0 ? (value / base) * 100 : 0
+    const { roiProtect, tinRefundAmount, gmvAds, totalRevenue, refundCancelRate, date, channelId } = input
     const channel = new Types.ObjectId(channelId)
+    const existing = await this.metrics.findOne({ channel, date }).lean()
+    const affiliateCost = Number(existing?.affiliateCost ?? 0)
     const data = await this.metrics.findOneAndUpdate(
       { channel, date },
       { $set: {
         channel, date, roiProtect,
-        refundCancelRate: Math.round(refundRate * 10_000) / 100,
-        fullRefundGmv: 0, tinRefundAmount, adsTax: 0, gmvAds, affiliateCost,
-        affiliateRefundAmount, totalRevenue, adjustedRevenue,
-        incomeBeforeDiscount: totalRevenue, incomeAfterDiscount: totalRevenue,
-        actualAdsCost, totalCost, costAfterRefund,
-        adsRatioOnBeforeDiscountRevenue: percentage(actualAdsCost, totalRevenue),
-        totalCostRatioOnBeforeDiscountRevenue: percentage(totalCost, totalRevenue),
-        costAfterRefundRatioOnBeforeDiscountRevenue: percentage(totalCost, adjustedRevenue),
-        affiliateRatioOnBeforeDiscountRevenue: 0
+        tinRefundAmount, gmvAds,
+        ...calculateAdsMetrics({
+          roiProtect,
+          tinRefundAmount,
+          gmvAds,
+          affiliateCost,
+          totalRevenue,
+          refundCancelRate
+        })
       } },
       { upsert: true, new: true }
     )

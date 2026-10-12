@@ -1,7 +1,10 @@
-import { BadRequestException, Injectable } from "@nestjs/common"
+import { BadRequestException, Injectable, Optional } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
 import * as XLSX from "xlsx"
 import { Model, Types } from "mongoose"
+import { inputBusinessDay } from "../common/input-validation"
+import { DailyAdsMetrics, DailyAdsMetricsDocument } from "../ads/daily-ads-metrics.schema"
+import { calculateAdsMetrics } from "../ads/ads-metrics"
 import { Channel, ChannelDocument } from "../channels/channel.schema"
 import { Income, IncomeDocument } from "./income.schema"
 
@@ -31,6 +34,12 @@ const parsedNumber = (value: unknown): number | undefined => {
 
 const number = (value: unknown) => parsedNumber(value) ?? 0
 
+const numberAt = (row: Record<string, unknown>, key?: string) =>
+  key ? number(row[header(key)]) : 0
+
+// Excel X and AA are zero-based indexes 23 and 26.
+const affiliateCostColumnIndexes = [23, 26] as const
+
 const requiredNumber = (value: unknown, field: string, positive = false) => {
   const result = parsedNumber(value)
   if (result === undefined || result < 0 || (positive && result <= 0)) {
@@ -40,6 +49,14 @@ const requiredNumber = (value: unknown, field: string, positive = false) => {
 }
 
 const hasValue = (value: unknown) => value !== undefined && value !== null && text(value) !== ""
+
+const normalized = (value: unknown) => text(value)
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+
+const isCancelledValue = (value: unknown) =>
+  new Set(["cancel", "cancelled", "canceled", "huy", "da huy"]).has(normalized(value))
 
 const vietnamDate = (
   year: number,
@@ -84,7 +101,8 @@ const date = (value: unknown) => {
 export class IncomeImportService {
   constructor(
     @InjectModel(Income.name) private readonly incomes: Model<IncomeDocument>,
-    @InjectModel(Channel.name) private readonly channels: Model<ChannelDocument>
+    @InjectModel(Channel.name) private readonly channels: Model<ChannelDocument>,
+    @Optional() @InjectModel(DailyAdsMetrics.name) private readonly metrics?: Model<DailyAdsMetricsDocument>
   ) {}
 
   private rows(file: Express.Multer.File) {
@@ -96,7 +114,8 @@ export class IncomeImportService {
     const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: "" })
       .map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [header(key), value])))
     const [rawHeaders = []] = XLSX.utils.sheet_to_json<unknown[]>(worksheet, { header: 1, defval: "" })
-    return { rows, headers: new Set(rawHeaders.map(header).filter(Boolean)) }
+    const headerRow = rawHeaders.map(header)
+    return { rows, headers: new Set(headerRow.filter(Boolean)), headerRow }
   }
 
   private requireHeaders(headers: Set<string>, required: string[][], type: string) {
@@ -120,7 +139,13 @@ export class IncomeImportService {
     const sheet = this.rows(file)
     this.requireHeaders(sheet.headers, [["ID đơn hàng", "Order ID"], ["Sku người bán", "SKU người bán", "Seller SKU"], ["Số lượng", "Quantity"]], "affiliate")
     if (!sheet.rows.length) throw new BadRequestException("File affiliate không có dòng dữ liệu")
-    return sheet.rows
+    return {
+      rows: sheet.rows,
+      costColumns: [
+        sheet.headerRow[affiliateCostColumnIndexes[0]],
+        sheet.headerRow[affiliateCostColumnIndexes[1]]
+      ] as [string | undefined, string | undefined]
+    }
   }
 
   private statusRows(file: Express.Multer.File) {
@@ -188,7 +213,7 @@ export class IncomeImportService {
   }
 
   async importAffiliate(file: Express.Multer.File, channelId: string) {
-    const rows = this.affiliateRows(file)
+    const { rows, costColumns } = this.affiliateRows(file)
     const channel = await this.channels.findById(channelId).lean()
     const aliases = new Set(
       [channel?.username, ...(channel?.usernames ?? [])]
@@ -196,6 +221,7 @@ export class IncomeImportService {
         .filter(Boolean)
     )
     let updated = 0
+    const affectedDates = new Set<number>()
 
     for (const row of rows) {
       const orderId = text(valueAt(row, "ID đơn hàng", "Order ID"))
@@ -203,11 +229,31 @@ export class IncomeImportService {
       const quantity = number(valueAt(row, "Số lượng", "Quantity"))
       if (!orderId || !code || quantity <= 0) continue
 
+      const existingIncome = typeof (this.incomes as any).findOne === "function"
+        ? await this.incomes.findOne({ orderId, channel: new Types.ObjectId(channelId) }).lean()
+        : undefined
+      if (this.isCancelled(row, existingIncome)) continue
+      if (existingIncome?.date) affectedDates.add(inputBusinessDay(existingIncome.date).valueOf())
+
       const creator = text(valueAt(row, "Tên người dùng nhà sáng tạo", "Creator Username"))
       const adsRaw = valueAt(row, "Tỷ lệ hoa hồng Quảng cáo cửa hàng", "Tỷ lệ hoa hồng quảng cáo cửa hàng")
       const standardRaw = valueAt(row, "Tỷ lệ hoa hồng tiêu chuẩn")
-      const affiliateAdsAmount = number(valueAt(row, "Hoa hồng Quảng cáo cửa hàng", "Số tiền hoa hồng Quảng cáo cửa hàng"))
-      const standardAffAmount = number(valueAt(row, "Hoa hồng tiêu chuẩn", "Số tiền hoa hồng tiêu chuẩn"))
+      const affiliateAdsAmountValue = valueAt(row, "Hoa hồng Quảng cáo cửa hàng", "Số tiền hoa hồng Quảng cáo cửa hàng")
+      const standardAffAmountValue = valueAt(row, "Hoa hồng tiêu chuẩn", "Số tiền hoa hồng tiêu chuẩn")
+      const affiliateAdsAmount = number(affiliateAdsAmountValue)
+      const standardAffAmount = number(standardAffAmountValue)
+      const costColumnValues = costColumns.map((column) => numberAt(row, column))
+      const hasPositionalCostColumns = costColumns.some(Boolean)
+      const storedAffiliateAdsAmount = hasPositionalCostColumns
+        ? costColumnValues[0]
+        : hasValue(affiliateAdsAmountValue)
+        ? affiliateAdsAmount
+        : costColumnValues[0]
+      const storedStandardAffAmount = hasPositionalCostColumns
+        ? costColumnValues[1]
+        : hasValue(standardAffAmountValue)
+        ? standardAffAmount
+        : costColumnValues[1]
       const ads = number(adsRaw)
       const standard = number(standardRaw)
       const source = aliases.has(creator.toLowerCase())
@@ -231,16 +277,68 @@ export class IncomeImportService {
             "products.$[product].content": text(valueAt(row, "Loại nội dung", "Content Type")),
             "products.$[product].source": source,
             "products.$[product].affiliateAdsPercentage": ads,
-            "products.$[product].affiliateAdsAmount": affiliateAdsAmount,
+            "products.$[product].affiliateAdsAmount": storedAffiliateAdsAmount,
             "products.$[product].standardAffPercentage": standard,
-            "products.$[product].standardAffAmount": standardAffAmount
+            "products.$[product].standardAffAmount": storedStandardAffAmount
           }
         },
         { arrayFilters: [{ "product.code": code, "product.quantity": quantity, "product.sourceChecked": false }] }
       )
       updated += result.modifiedCount
     }
+    await this.updateAffiliateMetrics(channelId, affectedDates)
     return { updated }
+  }
+
+  private isCancelled(row: Record<string, unknown>, income?: Partial<Income> | null) {
+    return [
+      valueAt(row, "Order Status", "Trạng thái đơn hàng", "Trạng thái đơn"),
+      valueAt(row, "Cancelation/Return Type", "Cancellation/Return Type"),
+      income?.orderStatus,
+      income?.cancelationOrReturnType
+    ].some(isCancelledValue)
+  }
+
+  private async updateAffiliateMetrics(channelId: string, affectedDates: Set<number>) {
+    if (!this.metrics || affectedDates.size === 0) return
+
+    const channel = new Types.ObjectId(channelId)
+    for (const timestamp of affectedDates) {
+      const date = new Date(timestamp)
+      const nextDate = new Date(timestamp + 86_400_000)
+      const incomes = await this.incomes
+        .find({ channel, date: { $gte: date, $lt: nextDate } })
+        .lean()
+      const affiliateCost = incomes
+        .filter((income) => !this.isCancelled({}, income))
+        .reduce((sum, income) => sum + income.products.reduce(
+          (productSum, product) => productSum + number(product.affiliateAdsAmount) + number(product.standardAffAmount),
+          0
+        ), 0)
+      const existing = await this.metrics.findOne({ channel, date }).lean()
+      const calculated = calculateAdsMetrics({
+        roiProtect: Number(existing?.roiProtect ?? 0),
+        tinRefundAmount: Number(existing?.tinRefundAmount ?? 0),
+        gmvAds: Number(existing?.gmvAds ?? 0),
+        affiliateCost,
+        totalRevenue: Number(existing?.totalRevenue ?? 0),
+        refundCancelRate: Number(existing?.refundCancelRate ?? 0)
+      })
+      await this.metrics.findOneAndUpdate(
+        { channel, date },
+        {
+          $set: {
+            channel,
+            date,
+            roiProtect: Number(existing?.roiProtect ?? 0),
+            tinRefundAmount: Number(existing?.tinRefundAmount ?? 0),
+            gmvAds: Number(existing?.gmvAds ?? 0),
+            ...calculated
+          }
+        },
+        { upsert: true, new: true }
+      )
+    }
   }
 
   async updateStatuses(file: Express.Multer.File, channelId: string) {

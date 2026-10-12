@@ -21,7 +21,6 @@ type FormState = {
   roiProtect: number
   tinRefundAmount: number
   gmvAds: number
-  affiliateCost: number
   totalRevenue: number
   refundCancelRate: number
 }
@@ -30,7 +29,6 @@ const EMPTY_FORM: FormState = {
   roiProtect: 0,
   tinRefundAmount: 0,
   gmvAds: 0,
-  affiliateCost: 0,
   totalRevenue: 0,
   refundCancelRate: 0
 }
@@ -51,6 +49,7 @@ interface DailyAdsMetricsModalProps {
   initialChannelId?: string | null
   initialDate?: Date | null
   initialData?: Partial<FormState> | null
+  initialAffiliateCost?: number
   refetch?: () => void
 }
 
@@ -58,6 +57,7 @@ export function DailyAdsMetricsModal({
   initialChannelId = null,
   initialDate,
   initialData,
+  initialAffiliateCost = 0,
   refetch
 }: DailyAdsMetricsModalProps) {
   const queryClient = useQueryClient()
@@ -95,7 +95,7 @@ export function DailyAdsMetricsModal({
       form.gmvAds - form.tinRefundAmount - form.roiProtect
     )
     const affiliateRefundAmount = Math.max(0, actualAdsCost * normalizedRate)
-    const totalCost = Math.max(0, actualAdsCost + form.affiliateCost)
+    const totalCost = Math.max(0, actualAdsCost + initialAffiliateCost)
     const adjustedRevenue = Math.max(
       0,
       form.totalRevenue * (1 - normalizedRate)
@@ -124,7 +124,7 @@ export function DailyAdsMetricsModal({
         )
       }
     }
-  }, [form])
+  }, [form, initialAffiliateCost])
 
   const { mutateAsync: saveMetrics, isPending } = useMutation({
     mutationFn: async () => {
@@ -138,7 +138,6 @@ export function DailyAdsMetricsModal({
         roiProtect: form.roiProtect,
         tinRefundAmount: form.tinRefundAmount,
         gmvAds: form.gmvAds,
-        affiliateCost: form.affiliateCost,
         totalRevenue: form.totalRevenue,
         refundCancelRate: form.refundCancelRate
       })
@@ -243,17 +242,6 @@ export function DailyAdsMetricsModal({
               }}
             />
             <NumberInput
-              label="Chi phí Aff"
-              value={form.affiliateCost}
-              onChange={(value) => updateField("affiliateCost", value)}
-              thousandSeparator="."
-              min={0}
-              styles={{
-                label: fieldLabelStyles,
-                input: fieldInputStyles
-              }}
-            />
-            <NumberInput
               label="Doanh thu tổng"
               value={form.totalRevenue}
               onChange={(value) => updateField("totalRevenue", value)}
@@ -306,7 +294,7 @@ export function DailyAdsMetricsModal({
             roiProtect: form.roiProtect,
             tinRefundAmount: form.tinRefundAmount,
             gmvAds: form.gmvAds,
-            affiliateCost: form.affiliateCost,
+            affiliateCost: initialAffiliateCost,
             affiliateRefundAmount: preview.affiliateRefundAmount,
             totalRevenue: form.totalRevenue,
             adjustedRevenue: preview.adjustedRevenue,

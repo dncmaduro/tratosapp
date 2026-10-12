@@ -78,12 +78,12 @@ Trang chi tiết đơn: `/tiktokshop/incomes/$incomeId`; hiển thị khách hà
 - `roiProtect`
 - `tinRefundAmount`
 - `gmvAds`
-- `affiliateCost`
 - `totalRevenue`
 - `refundCancelRate`
 
 ### Dữ liệu API tự tính/lưu
 
+- `affiliateCost` được tự động tính từ tổng chi phí affiliate ở cột X và AA của file tách nguồn khi import doanh số.
 - `actualAdsCost`, `affiliateRefundAmount`, `totalCost`, `adjustedRevenue`, `costAfterRefund`
 - `incomeBeforeDiscount`, `incomeAfterDiscount`
 - Các tỉ lệ chi phí/doanh thu và `updatedAt`
