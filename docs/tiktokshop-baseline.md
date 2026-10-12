@@ -105,7 +105,7 @@ Không port collection, API hay giao diện `DailyAds` cũ:
 - `GET /v1/dailyads/before4pm`
 - `POST /v1/dailyads/simpledailyads`
 
-Lưu ý: UI `Incomes` nguồn hiện còn nút mở `DailyAdsModal` cũ. Khi tách Tratos, nút này phải bị gỡ; đây là khác biệt được chủ dự án duyệt, không phải lỗi sót tính năng.
+Luồng upload `DailyAds` cũ đã được gỡ khỏi frontend; Tratos chỉ giữ `DailyAdsMetrics`.
 
 ## API/module backend cần port
 

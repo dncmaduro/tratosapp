@@ -2135,22 +2135,6 @@ export interface GetAdsCostSplitByMonthResponse {
 }
 
 /** @interface */
-export interface CreateDailyAdsRequest {
-  date: Date
-  currency: "vnd" | "usd"
-  channel: string
-}
-
-/** @interface */
-export interface CreateSimpleDailyAdsRequest {
-  date: Date
-  liveAdsCost: number
-  shopAdsCost: number
-  currency: "vnd" | "usd"
-  channel: string
-}
-
-/** @interface */
 export interface UpsertDailyAdsMetricsRequest {
   date: Date
   channelId: string
@@ -2205,26 +2189,6 @@ export interface GetTotalCountIncomeByMonthRequest {
 /** @interface */
 export interface GetTotalCountIncomeByMonthResponse {
   totalCount: number
-}
-
-// -------------------- INCOME AND SOURCE --------------------
-
-/** @interface */
-export interface CreateDailyAdsWithSavedAdsCostRequest {
-  date: Date
-}
-
-/** @interface */
-export interface GetPreviousDailyAdsBefore4pmRequest {
-  date: Date
-}
-
-/** @interface */
-export interface GetPreviousDailyAdsBefore4pmResponse {
-  date: string
-  before4pmLiveAdsCost: number
-  before4pmShopAdsCost: number
-  totalBefore4pmCost: number
 }
 
 /** @interface */
