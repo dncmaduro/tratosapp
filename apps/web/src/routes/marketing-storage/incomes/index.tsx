@@ -24,6 +24,7 @@ import { MonthGoals } from "../../../components/incomes/MonthGoals"
 import { PackingRules } from "../../../components/incomes/PackingRules"
 import { RangeStats } from "../../../components/incomes/RangeStats"
 import { DailyAdsMetricsManager } from "../../../components/incomes/DailyAdsMetricsManager"
+import { BookingMetricsManager } from "../../../components/incomes/BookingMetricsManager"
 import { useLivestreamChannels } from "../../../hooks/useLivestreamChannels"
 import { LivestreamChannelProvider } from "../../../context/LivestreamChannelContext"
 import { ShopeeDashboard } from "../../../components/incomes/ShopeeDashboard"
@@ -91,6 +92,7 @@ export function StorageIncomesPage({
       ["tiktokshop", "tiktok"].includes(platform)
     )
   )
+  const shouldShowBookingMetricsTab = shouldShowDailyAdsMetricsTab
   const channelHeaderTitle = hasSinglePlatform
     ? allowedPlatforms[0] === "shopee"
       ? "Các shop Shopee"
@@ -111,6 +113,14 @@ export function StorageIncomesPage({
           {
             label: "Chỉ số ads",
             value: "ads-metrics"
+          }
+        ]
+      : []),
+    ...(shouldShowBookingMetricsTab
+      ? [
+          {
+            label: "Chỉ số booking",
+            value: "booking-metrics"
           }
         ]
       : []),
@@ -207,7 +217,7 @@ export function StorageIncomesPage({
   return (
     <>
       <Helmet>
-        <title>{`TikTok Shop - ${tab === "dashboard" ? "Dashboard" : tab === "kpi" ? "KPI Tháng" : tab === "packing-rules" ? "Quy cách đóng hộp" : "Doanh thu"} | Tratosapp`}</title>
+        <title>{`TikTok Shop - ${tab === "dashboard" ? "Dashboard" : tab === "kpi" ? "KPI Tháng" : tab === "packing-rules" ? "Quy cách đóng hộp" : tab === "ads-metrics" ? "Chỉ số ads" : tab === "booking-metrics" ? "Chỉ số booking" : "Doanh thu"} | Tratosapp`}</title>
       </Helmet>
       <AppLayout navs={navs}>
         <LivestreamChannelProvider
@@ -292,7 +302,8 @@ export function StorageIncomesPage({
             <Stack gap="md" mt={16}>
               {tab !== "dashboard" &&
                 tab !== "daily-stats" &&
-                tab !== "ads-metrics" && (
+                tab !== "ads-metrics" &&
+                tab !== "booking-metrics" && (
                   <Paper
                     shadow="sm"
                     p="lg"
@@ -375,6 +386,10 @@ export function StorageIncomesPage({
 
                   <Tabs.Panel value="ads-metrics">
                     <DailyAdsMetricsManager />
+                  </Tabs.Panel>
+
+                  <Tabs.Panel value="booking-metrics">
+                    <BookingMetricsManager />
                   </Tabs.Panel>
 
                   <Tabs.Panel value="incomes">

@@ -2178,6 +2178,49 @@ export interface DeleteDailyAdsMetricsRequest {
   channelId: string
 }
 
+export type BookingMetricType = "freecast" | "paid_cast"
+
+/** @interface */
+export interface UpsertBookingMetricsRequest {
+  date: Date
+  channelId: string
+  type: BookingMetricType
+  kocCount: number
+  productShippingCost: number
+  castFee: number
+}
+
+/** @interface */
+export interface BookingMetricsResponse {
+  _id: string
+  date: string
+  channel: string
+  type: BookingMetricType
+  kocCount: number
+  productShippingCost: number
+  castFee: number
+  updatedAt: string
+}
+
+/** @interface */
+export interface GetBookingMetricsRequest {
+  channelId: string
+  fromDate: Date
+  toDate: Date
+}
+
+/** @interface */
+export interface GetBookingMetricsResponse {
+  data: BookingMetricsResponse[]
+}
+
+/** @interface */
+export interface DeleteBookingMetricsRequest {
+  date: Date
+  channelId: string
+  type: BookingMetricType
+}
+
 /** @interface */
 export interface GetTotalCountIncomeByMonthRequest {
   month: number

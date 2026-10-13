@@ -23,9 +23,11 @@ import { PackingRule, PackingRuleSchema } from "./packing-rules/packing-rule.sch
 import { PackingRulesController } from "./packing-rules/packing-rules.controller"
 import { StorageItem, StorageItemSchema } from "./storage-items/storage-item.schema"
 import { StorageItemsController } from "./storage-items/storage-items.controller"
+import { DailyBookingMetrics, DailyBookingMetricsSchema } from "./bookings/daily-booking-metrics.schema"
+import { BookingsController } from "./bookings/bookings.controller"
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), MongooseModule.forRoot(process.env.DATABASE_URL ?? "mongodb://127.0.0.1:27017/tratosapp"), MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: Channel.name, schema: ChannelSchema }, { name: Product.name, schema: ProductSchema }, { name: Income.name, schema: IncomeSchema }, { name: DailyAdsMetrics.name, schema: DailyAdsMetricsSchema }, { name: MonthGoal.name, schema: MonthGoalSchema }, { name: PackingRule.name, schema: PackingRuleSchema }, { name: StorageItem.name, schema: StorageItemSchema }]), JwtModule.register({ secret: process.env.JWT_SECRET ?? "development-only-secret" })],
-  controllers: [HealthController, AuthController, ChannelsController, ProductsController, AdsController, IncomesController, MonthGoalsController, PackingRulesController, StorageItemsController], providers: [AuthService, JwtAuthGuard, PermissionsGuard, IncomeImportService]
+  imports: [ConfigModule.forRoot({ isGlobal: true }), MongooseModule.forRoot(process.env.DATABASE_URL ?? "mongodb://127.0.0.1:27017/tratosapp"), MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: Channel.name, schema: ChannelSchema }, { name: Product.name, schema: ProductSchema }, { name: Income.name, schema: IncomeSchema }, { name: DailyAdsMetrics.name, schema: DailyAdsMetricsSchema }, { name: DailyBookingMetrics.name, schema: DailyBookingMetricsSchema }, { name: MonthGoal.name, schema: MonthGoalSchema }, { name: PackingRule.name, schema: PackingRuleSchema }, { name: StorageItem.name, schema: StorageItemSchema }]), JwtModule.register({ secret: process.env.JWT_SECRET ?? "development-only-secret" })],
+  controllers: [HealthController, AuthController, ChannelsController, ProductsController, AdsController, BookingsController, IncomesController, MonthGoalsController, PackingRulesController, StorageItemsController], providers: [AuthService, JwtAuthGuard, PermissionsGuard, IncomeImportService]
 })
 export class AppModule {}
