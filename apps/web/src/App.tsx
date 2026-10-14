@@ -40,6 +40,7 @@ const theme = createTheme({
   components: {
     Modal: Modal.extend({
       defaultProps: {
+        zIndex: 500,
         overlayProps: { backgroundOpacity: 0.6, blur: 2, color: "black" }
       }
     }),
@@ -77,6 +78,7 @@ function App() {
         <MantineProvider theme={theme}>
           <ConfirmingModalsProvider
             modalProps={{
+              zIndex: 500,
               overlayProps: {
                 backgroundOpacity: 0.6,
                 blur: 2,

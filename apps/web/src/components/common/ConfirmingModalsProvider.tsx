@@ -4,7 +4,6 @@ import {
   Group,
   Modal,
   createUseExternalEvents,
-  getDefaultZIndex,
   type ButtonProps,
   type GroupProps,
   type ModalProps
@@ -135,6 +134,7 @@ const DEFAULT_CLOSE_CONFIRM_LABELS: ConfirmLabels = {
   confirm: "Đóng",
   cancel: "Ở lại"
 }
+const APP_MODAL_Z_INDEX = 500
 
 const [useConfirmingModalsEvents] =
   createUseExternalEvents<ModalsEvents>("mantine-modals")
@@ -629,9 +629,9 @@ export const ConfirmingModalsProvider = ({
   return (
     <>
       <Modal
-        zIndex={getDefaultZIndex("modal") + 1}
         {...modalProps}
         {...currentModalProps}
+        zIndex={APP_MODAL_Z_INDEX}
         opened={state.modals.length > 0}
         onClose={() => requestCloseModal()}
       >

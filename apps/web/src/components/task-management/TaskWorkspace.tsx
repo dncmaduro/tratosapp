@@ -154,7 +154,7 @@ export const TaskWorkspace = ({ initialWeek }: TaskWorkspaceProps) => {
 
       {totalPages > 1 && <Group justify="center"><Pagination total={totalPages} value={page} onChange={setPage} /></Group>}
 
-      <Modal opened={opened} onClose={() => { setOpened(false); setEditing(null) }} title={editing ? `Sửa task: ${editing.title}` : "Tạo task mới"} centered size="lg">
+      <Modal opened={opened} onClose={() => { setOpened(false); setEditing(null) }} title={editing ? `Sửa task: ${editing.title}` : "Tạo task mới"} centered size="lg" zIndex={500}>
         <TaskForm initialValues={editing ? taskToFormValues(editing) : emptyTaskValues(format(week, "yyyy-MM-dd"), categories[0]?._id ?? "")} categories={categories} onSubmit={submit} onCancel={() => setOpened(false)} submitting={createMutation.isPending || updateMutation.isPending} />
       </Modal>
     </Stack>
