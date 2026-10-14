@@ -30,8 +30,8 @@ export const TaskWorkspace = ({ initialWeek }: TaskWorkspaceProps) => {
   const optionsQuery = useQuery({ queryKey: ["task-options"], queryFn: () => api.getOptions(), select: (response) => response.data })
   const taskQuery = useQuery({ queryKey: ["managed-tasks", query], queryFn: () => api.listTasks(query), select: (response) => response.data })
   const reportQuery = useQuery({ queryKey: ["managed-task-report", weekStart], queryFn: () => api.getWeeklyReport(weekStart), select: (response) => response.data })
-  const createMutation = useMutation({ mutationFn: api.createTask, onSuccess: () => { setOpened(false); queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); queryClient.invalidateQueries({ queryKey: ["managed-task-report"] }); CToast.success({ title: "Đã tạo task" }) }, onError: () => CToast.error({ title: "Không tạo được task" }) })
-  const updateMutation = useMutation({ mutationFn: ({ id, values }: { id: string; values: Parameters<typeof api.updateTask>[1] }) => api.updateTask(id, values), onSuccess: () => { setOpened(false); setEditing(null); queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); queryClient.invalidateQueries({ queryKey: ["managed-task-report"] }); CToast.success({ title: "Đã cập nhật task" }) }, onError: () => CToast.error({ title: "Không cập nhật được task" }) })
+  const createMutation = useMutation({ mutationFn: api.createTask, onSuccess: () => { setOpened(false); queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); queryClient.invalidateQueries({ queryKey: ["managed-task-report"] }); CToast.success({ title: "Đã tạo công việc" }) }, onError: () => CToast.error({ title: "Không tạo được công việc" }) })
+  const updateMutation = useMutation({ mutationFn: ({ id, values }: { id: string; values: Parameters<typeof api.updateTask>[1] }) => api.updateTask(id, values), onSuccess: () => { setOpened(false); setEditing(null); queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); queryClient.invalidateQueries({ queryKey: ["managed-task-report"] }); CToast.success({ title: "Đã cập nhật công việc" }) }, onError: () => CToast.error({ title: "Không cập nhật được công việc" }) })
   const statusMutation = useMutation({ mutationFn: ({ id, status }: { id: string; status: WorkTaskStatus }) => api.updateTaskStatus(id, status), onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); queryClient.invalidateQueries({ queryKey: ["managed-task-report"] }) }, onError: () => CToast.error({ title: "Không cập nhật được trạng thái" }) })
 
   const categories = optionsQuery.data?.categories ?? []
@@ -90,17 +90,17 @@ export const TaskWorkspace = ({ initialWeek }: TaskWorkspaceProps) => {
     <Stack p={12} gap={16}>
       <Group justify="space-between" align="flex-end" wrap="wrap">
         <div>
-          <Text c="dimmed" fz="sm">Task workspace</Text>
+          <Text c="dimmed" fz="sm">Quản lý công việc</Text>
           <Title order={2}>Công việc theo tuần</Title>
         </div>
         <Group>
           <DateInput label="Tuần bắt đầu" valueFormat="DD/MM/YYYY" value={week} onChange={(value) => { if (value) { setWeek(parseWeek(format(value, "yyyy-MM-dd"))); setPage(1) } }} />
-          <Button leftSection={<IconPlus size={16} />} onClick={() => resetAndOpen()}>Tạo task</Button>
+          <Button leftSection={<IconPlus size={16} />} onClick={() => resetAndOpen()}>Tạo công việc</Button>
         </Group>
       </Group>
 
       <SimpleGrid cols={{ base: 1, sm: 4 }}>
-        <SummaryCard label="Tổng task" value={String(taskQuery.data?.total ?? 0)} />
+        <SummaryCard label="Tổng công việc" value={String(taskQuery.data?.total ?? 0)} />
         <SummaryCard label="Đã hoàn thành" value={`${completed}/${reportTotals.total}`} />
         <SummaryCard label="Trọng số hoàn thành" value={`${completedWeight}%`} />
         <SummaryCard label="Tổng trọng số" value={`${totalWeight}%`} />
@@ -108,14 +108,14 @@ export const TaskWorkspace = ({ initialWeek }: TaskWorkspaceProps) => {
 
       <Paper withBorder p="md" radius="md">
         <Group align="flex-end" grow>
-          <TextInput label="Tìm task" placeholder="Tìm theo tiêu đề" leftSection={<IconSearch size={16} />} value={filters.search} onChange={(event) => { setFilters((current) => ({ ...current, search: event.currentTarget.value })); setPage(1) }} />
-          <Select label="Loại task" placeholder="Tất cả" clearable data={types.map((type) => ({ value: type._id, label: type.name }))} value={filters.typeId ?? null} onChange={(value) => { setFilters((current) => ({ ...current, typeId: value ?? undefined, categoryId: undefined })); setPage(1) }} />
+          <TextInput label="Tìm công việc" placeholder="Tìm theo tiêu đề" leftSection={<IconSearch size={16} />} value={filters.search} onChange={(event) => { setFilters((current) => ({ ...current, search: event.currentTarget.value })); setPage(1) }} />
+          <Select label="Loại công việc" placeholder="Tất cả" clearable data={types.map((type) => ({ value: type._id, label: type.name }))} value={filters.typeId ?? null} onChange={(value) => { setFilters((current) => ({ ...current, typeId: value ?? undefined, categoryId: undefined })); setPage(1) }} />
           <Select label="Phân loại" placeholder="Tất cả" clearable data={categories.filter((category) => !filters.typeId || category.taskTypeId === filters.typeId).map((category) => ({ value: category._id, label: category.name }))} value={filters.categoryId ?? null} onChange={(value) => { setFilters((current) => ({ ...current, categoryId: value ?? undefined })); setPage(1) }} />
           <Select label="Trạng thái" placeholder="Tất cả" clearable data={[{ value: "todo", label: "Cần làm" }, { value: "in_progress", label: "Đang làm" }, { value: "completed", label: "Hoàn thành" }, { value: "cancelled", label: "Đã hủy" }]} value={filters.status ?? null} onChange={(value) => { setFilters((current) => ({ ...current, status: value as TaskListQuery["status"] })); setPage(1) }} />
         </Group>
       </Paper>
 
-      {taskQuery.isLoading ? <Paper withBorder p="xl"><Text ta="center" c="dimmed">Đang tải task…</Text></Paper> : taskQuery.isError ? <Paper withBorder p="xl"><Text ta="center" c="red">Không tải được danh sách task.</Text></Paper> : groupedTasks.length === 0 ? <Paper withBorder p="xl"><Text ta="center" c="dimmed">Không có task trong tuần này.</Text></Paper> : groupedTasks.map(([typeId, group]) => {
+      {taskQuery.isLoading ? <Paper withBorder p="xl"><Text ta="center" c="dimmed">Đang tải công việc…</Text></Paper> : taskQuery.isError ? <Paper withBorder p="xl"><Text ta="center" c="red">Không tải được danh sách công việc.</Text></Paper> : groupedTasks.length === 0 ? <Paper withBorder p="xl"><Text ta="center" c="dimmed">Không có công việc trong tuần này.</Text></Paper> : groupedTasks.map(([typeId, group]) => {
         const isOpen = openGroups[typeId] ?? true
         return <Card key={typeId} withBorder radius="md" padding={0}>
           <UnstyledButton className="w-full" onClick={() => setOpenGroups((current) => ({ ...current, [typeId]: !isOpen }))}>
@@ -134,7 +134,7 @@ export const TaskWorkspace = ({ initialWeek }: TaskWorkspaceProps) => {
                 </Group>
                 <Table.ScrollContainer minWidth={900}>
                   <Table verticalSpacing="sm" highlightOnHover>
-                    <Table.Thead><Table.Tr><Table.Th><SortButton label="Task" field="title" current={filters} onClick={toggleSort} /></Table.Th><Table.Th><SortButton label="Deadline" field="deadline" current={filters} onClick={toggleSort} /></Table.Th><Table.Th><SortButton label="Trọng số" field="weight" current={filters} onClick={toggleSort} /></Table.Th><Table.Th><SortButton label="Ưu tiên" field="priority" current={filters} onClick={toggleSort} /></Table.Th><Table.Th>Độ phức tạp</Table.Th><Table.Th>Trạng thái</Table.Th><Table.Th w={90}></Table.Th></Table.Tr></Table.Thead>
+                    <Table.Thead><Table.Tr><Table.Th><SortButton label="Công việc" field="title" current={filters} onClick={toggleSort} /></Table.Th><Table.Th><SortButton label="Hạn hoàn thành" field="deadline" current={filters} onClick={toggleSort} /></Table.Th><Table.Th><SortButton label="Trọng số" field="weight" current={filters} onClick={toggleSort} /></Table.Th><Table.Th><SortButton label="Ưu tiên" field="priority" current={filters} onClick={toggleSort} /></Table.Th><Table.Th>Độ phức tạp</Table.Th><Table.Th>Trạng thái</Table.Th><Table.Th w={90}></Table.Th></Table.Tr></Table.Thead>
                     <Table.Tbody>{categoryGroup.tasks.map((task) => <Table.Tr key={task._id}>
                       <Table.Td><Button variant="subtle" px={0} onClick={() => navigate({ to: "/tasks/$taskId", params: { taskId: task._id } })}>{task.title}</Button></Table.Td>
                       <Table.Td>{displayDate(task.deadline)}</Table.Td>
@@ -154,7 +154,7 @@ export const TaskWorkspace = ({ initialWeek }: TaskWorkspaceProps) => {
 
       {totalPages > 1 && <Group justify="center"><Pagination total={totalPages} value={page} onChange={setPage} /></Group>}
 
-      <Modal opened={opened} onClose={() => { setOpened(false); setEditing(null) }} title={editing ? `Sửa task: ${editing.title}` : "Tạo task mới"} centered size="lg" zIndex={500}>
+      <Modal opened={opened} onClose={() => { setOpened(false); setEditing(null) }} title={editing ? `Sửa công việc: ${editing.title}` : "Tạo công việc mới"} centered size="lg" zIndex={500}>
         <TaskForm initialValues={editing ? taskToFormValues(editing) : emptyTaskValues(format(week, "yyyy-MM-dd"), categories[0]?._id ?? "")} categories={categories} onSubmit={submit} onCancel={() => setOpened(false)} submitting={createMutation.isPending || updateMutation.isPending} />
       </Modal>
     </Stack>

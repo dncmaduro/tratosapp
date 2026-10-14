@@ -59,8 +59,8 @@ export const TaskForm = ({
     initialValues,
     validate: {
       title: (value) => (value.trim() ? null : "Vui lòng nhập tiêu đề"),
-      categoryId: (value) => (value ? null : "Vui lòng chọn loại task"),
-      deadline: (value) => (value ? null : "Vui lòng chọn deadline"),
+      categoryId: (value) => (value ? null : "Vui lòng chọn phân loại công việc"),
+      deadline: (value) => (value ? null : "Vui lòng chọn hạn hoàn thành"),
       weight: (value) => (value >= 0 ? null : "Trọng số không được âm"),
       estimatedHours: (value) => (value >= 0 ? null : "Số giờ không được âm")
     }
@@ -74,11 +74,11 @@ export const TaskForm = ({
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
       <Stack gap="sm">
-        <TextInput label="Tên task" withAsterisk {...form.getInputProps("title")} />
+        <TextInput label="Tên công việc" withAsterisk {...form.getInputProps("title")} />
         <Textarea label="Mô tả" minRows={3} autosize {...form.getInputProps("description")} />
         <Select label="Phân loại" withAsterisk data={categoryOptions(categories)} searchable {...form.getInputProps("categoryId")} />
         <Group grow align="flex-start">
-          <DateInput label="Deadline" valueFormat="DD/MM/YYYY" withAsterisk value={form.values.deadline ? new Date(`${form.values.deadline}T00:00:00`) : null} onChange={(value) => form.setFieldValue("deadline", value ? format(value, "yyyy-MM-dd") : "")} error={form.errors.deadline} />
+          <DateInput label="Hạn hoàn thành" valueFormat="DD/MM/YYYY" withAsterisk value={form.values.deadline ? new Date(`${form.values.deadline}T00:00:00`) : null} onChange={(value) => form.setFieldValue("deadline", value ? format(value, "yyyy-MM-dd") : "")} error={form.errors.deadline} />
           <NumberInput label="Trọng số (%)" min={0} decimalScale={2} {...form.getInputProps("weight")} />
         </Group>
         <Group grow align="flex-start">
@@ -91,7 +91,7 @@ export const TaskForm = ({
         </Group>
         <Group justify="flex-end" mt="sm">
           {onCancel && <Button variant="default" onClick={onCancel}>Hủy</Button>}
-          <Button type="submit" loading={submitting}>Lưu task</Button>
+          <Button type="submit" loading={submitting}>Lưu công việc</Button>
         </Group>
       </Stack>
     </form>

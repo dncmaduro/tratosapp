@@ -12,10 +12,10 @@ export const TaskEditPage = () => {
   const queryClient = useQueryClient()
   const taskQuery = useQuery({ queryKey: ["managed-task", taskId], queryFn: () => api.getTask(taskId), select: (response) => response.data.data })
   const optionsQuery = useQuery({ queryKey: ["task-options"], queryFn: () => api.getOptions(), select: (response) => response.data })
-  const updateMutation = useMutation({ mutationFn: (values: Parameters<typeof api.updateTask>[1]) => api.updateTask(taskId, values), onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["managed-task", taskId] }); queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); CToast.success({ title: "Đã cập nhật task" }); navigate({ to: "/tasks/$taskId", params: { taskId } }) }, onError: () => CToast.error({ title: "Không cập nhật được task" }) })
+  const updateMutation = useMutation({ mutationFn: (values: Parameters<typeof api.updateTask>[1]) => api.updateTask(taskId, values), onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["managed-task", taskId] }); queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); CToast.success({ title: "Đã cập nhật công việc" }); navigate({ to: "/tasks/$taskId", params: { taskId } }) }, onError: () => CToast.error({ title: "Không cập nhật được công việc" }) })
 
   if (taskQuery.isLoading || optionsQuery.isLoading) return <Paper p="xl"><Loader /></Paper>
-  if (taskQuery.isError || optionsQuery.isError || !taskQuery.data) return <Paper p="xl"><Text c="red">Không tải được dữ liệu task.</Text></Paper>
+  if (taskQuery.isError || optionsQuery.isError || !taskQuery.data) return <Paper p="xl"><Text c="red">Không tải được dữ liệu công việc.</Text></Paper>
 
-  return <Paper withBorder m={12} p="lg" radius="md"><Text fw={700} fz="lg" mb="md">Chỉnh sửa task</Text><TaskForm initialValues={taskToFormValues(taskQuery.data)} categories={optionsQuery.data?.categories ?? []} onSubmit={(values) => updateMutation.mutate(normalizeTaskForm(values))} onCancel={() => navigate({ to: "/tasks/$taskId", params: { taskId } })} submitting={updateMutation.isPending} /></Paper>
+  return <Paper withBorder m={12} p="lg" radius="md"><Text fw={700} fz="lg" mb="md">Chỉnh sửa công việc</Text><TaskForm initialValues={taskToFormValues(taskQuery.data)} categories={optionsQuery.data?.categories ?? []} onSubmit={(values) => updateMutation.mutate(normalizeTaskForm(values))} onCancel={() => navigate({ to: "/tasks/$taskId", params: { taskId } })} submitting={updateMutation.isPending} /></Paper>
 }

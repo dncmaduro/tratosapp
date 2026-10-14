@@ -39,7 +39,7 @@ export const TaskSidebar = ({
       <div className="border-b border-gray-100 px-4 pb-4">
         {!collapsed && (
           <>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Task workspace</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Quản lý công việc</p>
             <p className="mt-1 text-sm font-semibold text-gray-800">Quản lý công việc</p>
           </>
         )}

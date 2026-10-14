@@ -13,12 +13,12 @@ export const TaskDetailPage = () => {
   const api = useTaskManagement()
   const queryClient = useQueryClient()
   const query = useQuery({ queryKey: ["managed-task", taskId], queryFn: () => api.getTask(taskId), select: (response) => response.data.data })
-  const deleteMutation = useMutation({ mutationFn: api.deleteTask, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); CToast.success({ title: "Đã xóa task" }); navigate({ to: "/tasks" }) }, onError: () => CToast.error({ title: "Không xóa được task" }) })
+  const deleteMutation = useMutation({ mutationFn: api.deleteTask, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["managed-tasks"] }); CToast.success({ title: "Đã xóa công việc" }); navigate({ to: "/tasks" }) }, onError: () => CToast.error({ title: "Không xóa được công việc" }) })
   const task = query.data
   const category = task ? getCategory(task) : undefined
 
   if (query.isLoading) return <Paper p="xl"><Group justify="center"><Loader /></Group></Paper>
-  if (query.isError || !task) return <Paper p="xl"><Text c="red" ta="center">Không tải được task.</Text></Paper>
+  if (query.isError || !task) return <Paper p="xl"><Text c="red" ta="center">Không tải được công việc.</Text></Paper>
 
   return <Stack p={12} gap={16}>
     <Group justify="space-between" align="flex-start">
@@ -29,15 +29,15 @@ export const TaskDetailPage = () => {
       </div>
       <Group>
         <Button variant="light" leftSection={<IconEdit size={16} />} onClick={() => navigate({ to: "/tasks/$taskId/edit", params: { taskId } })}>Chỉnh sửa</Button>
-        <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={() => modals.openConfirmModal({ title: "Xóa task?", children: <Text size="sm">Task này sẽ bị xóa khỏi danh sách.</Text>, labels: { confirm: "Xóa", cancel: "Hủy" }, confirmProps: { color: "red" }, onConfirm: () => deleteMutation.mutate(taskId) })}>Xóa</Button>
+        <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={() => modals.openConfirmModal({ title: "Xóa công việc?", children: <Text size="sm">Công việc này sẽ bị xóa khỏi danh sách.</Text>, labels: { confirm: "Xóa", cancel: "Hủy" }, confirmProps: { color: "red" }, onConfirm: () => deleteMutation.mutate(taskId) })}>Xóa</Button>
       </Group>
     </Group>
     <Card withBorder radius="md">
       <Stack gap="md">
-        <Text>{task.description || "Task chưa có mô tả."}</Text>
+        <Text>{task.description || "Công việc chưa có mô tả."}</Text>
         <Group gap="xs"><Badge color={statusMeta[task.status].color}>{statusMeta[task.status].label}</Badge><Badge color={priorityMeta[task.priority].color}>{priorityMeta[task.priority].label}</Badge><Badge color={complexityMeta[task.complexity].color}>{complexityMeta[task.complexity].label}</Badge></Group>
         <Group grow>
-          <Info label="Deadline" value={displayDate(task.deadline)} />
+          <Info label="Hạn hoàn thành" value={displayDate(task.deadline)} />
           <Info label="Trọng số" value={`${task.weight}%`} />
           <Info label="Giờ dự kiến" value={`${task.estimatedHours} giờ`} />
         </Group>
