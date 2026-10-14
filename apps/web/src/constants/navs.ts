@@ -21,6 +21,14 @@ export const TIKTOKSHOP_APP_ACCESS_PERMISSIONS = [
   ...CHANNEL_MANAGEMENT_PERMISSIONS
 ]
 
+export const TASK_APP_ACCESS_PERMISSIONS = ["tasks.view"]
+
+export const TASK_NAVS: NavigationItem[] = [
+  { to: "/tasks", label: "Công việc", icon: "IconChecklist", permissions: ["tasks.view"] },
+  { to: "/tasks/reports", label: "Báo cáo tuần", icon: "IconChartBar", permissions: ["tasks.reports.view"] },
+  { to: "/tasks/admin", label: "Quản trị", icon: "IconAdjustments", permissions: ["tasks.taxonomy.manage"] }
+]
+
 export const TIKTOKSHOP_NAVS: NavigationItem[] = [
   { to: `${TIKTOKSHOP_NAVS_URL}/sku`, label: "SKU", icon: "IconBox", permissions: ["api.products.search-products"] },
   { to: `${TIKTOKSHOP_NAVS_URL}/storage-items`, label: "Mặt hàng", icon: "IconBox", permissions: ["api.products.search-products", "api.storageitems.search-items"] },

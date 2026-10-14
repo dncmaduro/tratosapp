@@ -11,6 +11,11 @@ import { Route as skuRoute } from "./routes/tiktokshop/sku/index"
 import { Route as incomesRoute } from "./routes/tiktokshop/incomes/index"
 import { Route as incomeDetailRoute } from "./routes/tiktokshop/incomes/$incomeId"
 import { Route as adminUsersRoute } from "./routes/admin/users/index"
+import { Route as tasksRoute } from "./routes/tasks/index"
+import { Route as taskReportsRoute } from "./routes/tasks/reports"
+import { Route as taskAdminRoute } from "./routes/tasks/admin"
+import { Route as taskDetailRoute } from "./routes/tasks/$taskId"
+import { Route as taskEditRoute } from "./routes/tasks/$taskId/edit"
 
 const login = loginRoute.update({
   id: "/",
@@ -66,6 +71,36 @@ const adminUsers = adminUsersRoute.update({
   getParentRoute: () => rootRoute
 } as never)
 
+const tasks = tasksRoute.update({
+  id: "/tasks/",
+  path: "/tasks/",
+  getParentRoute: () => rootRoute
+} as never)
+
+const taskReports = taskReportsRoute.update({
+  id: "/tasks/reports",
+  path: "/tasks/reports",
+  getParentRoute: () => rootRoute
+} as never)
+
+const taskAdmin = taskAdminRoute.update({
+  id: "/tasks/admin",
+  path: "/tasks/admin",
+  getParentRoute: () => rootRoute
+} as never)
+
+const taskDetail = taskDetailRoute.update({
+  id: "/tasks/$taskId",
+  path: "/tasks/$taskId",
+  getParentRoute: () => rootRoute
+} as never)
+
+const taskEdit = taskEditRoute.update({
+  id: "/tasks/$taskId/edit",
+  path: "/tasks/$taskId/edit",
+  getParentRoute: () => rootRoute
+} as never)
+
 export const routeTree = rootRoute.addChildren([
   login,
   accessDenied,
@@ -75,7 +110,12 @@ export const routeTree = rootRoute.addChildren([
   storageItems,
   incomes,
   incomeDetail,
-  adminUsers
+  adminUsers,
+  tasks,
+  taskReports,
+  taskAdmin,
+  taskDetail,
+  taskEdit
 ])
 
 declare module "@tanstack/react-router" {
@@ -89,6 +129,11 @@ declare module "@tanstack/react-router" {
     "/tiktokshop/incomes/": { id: "/tiktokshop/incomes/"; path: "/tiktokshop/incomes"; fullPath: "/tiktokshop/incomes"; preLoaderRoute: typeof incomesRoute; parentRoute: typeof rootRoute }
     "/tiktokshop/incomes/$incomeId": { id: "/tiktokshop/incomes/$incomeId"; path: "/tiktokshop/incomes/$incomeId"; fullPath: "/tiktokshop/incomes/$incomeId"; preLoaderRoute: typeof incomeDetailRoute; parentRoute: typeof rootRoute }
     "/admin/users/": { id: "/admin/users/"; path: "/admin/users"; fullPath: "/admin/users"; preLoaderRoute: typeof adminUsersRoute; parentRoute: typeof rootRoute }
+    "/tasks/": { id: "/tasks/"; path: "/tasks"; fullPath: "/tasks"; preLoaderRoute: typeof tasksRoute; parentRoute: typeof rootRoute }
+    "/tasks/reports": { id: "/tasks/reports"; path: "/tasks/reports"; fullPath: "/tasks/reports"; preLoaderRoute: typeof taskReportsRoute; parentRoute: typeof rootRoute }
+    "/tasks/admin": { id: "/tasks/admin"; path: "/tasks/admin"; fullPath: "/tasks/admin"; preLoaderRoute: typeof taskAdminRoute; parentRoute: typeof rootRoute }
+    "/tasks/$taskId": { id: "/tasks/$taskId"; path: "/tasks/$taskId"; fullPath: "/tasks/$taskId"; preLoaderRoute: typeof taskDetailRoute; parentRoute: typeof rootRoute }
+    "/tasks/$taskId/edit": { id: "/tasks/$taskId/edit"; path: "/tasks/$taskId/edit"; fullPath: "/tasks/$taskId/edit"; preLoaderRoute: typeof taskEditRoute; parentRoute: typeof rootRoute }
     "/marketing-storage/incomes/": { id: "/marketing-storage/incomes/"; path: "/marketing-storage/incomes"; fullPath: "/marketing-storage/incomes"; preLoaderRoute: typeof incomesRoute; parentRoute: typeof rootRoute }
     "/marketing-storage/incomes/$incomeId": { id: "/marketing-storage/incomes/$incomeId"; path: "/marketing-storage/incomes/$incomeId"; fullPath: "/marketing-storage/incomes/$incomeId"; preLoaderRoute: typeof incomeDetailRoute; parentRoute: typeof rootRoute }
   }

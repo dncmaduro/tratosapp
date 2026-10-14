@@ -36,6 +36,7 @@ const navs = ADMIN_NAVS
 
 const PERMISSION_GROUP_LABELS: Record<string, string> = {
   admin: "Quản trị tài khoản",
+  tasks: "Quản lý công việc",
   "api.products": "SKU",
   "api.incomes": "Doanh thu",
   "api.dailyads": "Quảng cáo",
@@ -48,6 +49,13 @@ const PERMISSION_GROUP_LABELS: Record<string, string> = {
 
 const PERMISSION_LABELS: Record<string, string> = {
   "admin.users.manage": "Quản lý tài khoản",
+  "tasks.view": "Xem task",
+  "tasks.create": "Tạo task",
+  "tasks.update": "Chỉnh sửa task",
+  "tasks.status.update": "Cập nhật trạng thái task",
+  "tasks.delete": "Xóa task",
+  "tasks.reports.view": "Xem báo cáo task",
+  "tasks.taxonomy.manage": "Quản lý taxonomy task",
   "api.products.search-products": "Xem SKU",
   "api.products.create-product": "Tạo SKU",
   "api.products.update-product": "Chỉnh sửa SKU",

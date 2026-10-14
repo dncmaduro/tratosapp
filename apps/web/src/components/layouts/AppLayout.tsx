@@ -11,13 +11,16 @@ import { CToast } from "../common/CToast"
 import { Sidebar } from "./Sidebar"
 import { useUIStore } from "../../store/uiStore"
 import { NAVS } from "../../constants/navs.ts"
+import { TaskSidebar } from "./TaskSidebar"
 
 export const AppLayout = ({
   children,
-  navs
+  navs,
+  sidebarVariant = "default"
 }: {
   children: ReactNode
   navs?: typeof NAVS
+  sidebarVariant?: "default" | "tasks"
 }) => {
   const { accessToken, setUser, clearUser } = useUserStore()
   const { checkToken, getNewToken, getMe } = useUsers()
@@ -84,12 +87,11 @@ export const AppLayout = ({
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f8fafc" }}>
-      <Sidebar
-        meData={meData}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        navs={resolvedNavs}
-      />
+      {sidebarVariant === "tasks" ? (
+        <TaskSidebar meData={meData} collapsed={collapsed} setCollapsed={setCollapsed} />
+      ) : (
+        <Sidebar meData={meData} collapsed={collapsed} setCollapsed={setCollapsed} navs={resolvedNavs} />
+      )}
       <div
         style={{
           flex: 1,

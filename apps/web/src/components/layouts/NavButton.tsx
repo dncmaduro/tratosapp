@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { IconBox, IconCoin, IconSquareRounded, IconUsers } from "@tabler/icons-react"
+import { IconAdjustments, IconBox, IconChartBar, IconChecklist, IconCoin, IconSquareRounded, IconUsers } from "@tabler/icons-react"
 import { ReactNode } from "react"
 import { useMediaQuery } from "@mantine/hooks"
 import { modals } from "@mantine/modals"
@@ -30,7 +30,10 @@ export const NavButton = ({
   // Tratos has a deliberately small navigation; static imports keep Tabler
   // tree-shakeable instead of bundling every icon for dynamic lookup.
   const iconMap: Record<string, typeof IconBox> = {
+    IconAdjustments,
     IconBox,
+    IconChartBar,
+    IconChecklist,
     IconCoin,
     IconSquareRounded,
     IconUsers

@@ -2043,6 +2043,86 @@ export interface GetUserTasksResponse {
   }
 }
 
+export type WorkTaskStatus = "todo" | "in_progress" | "completed" | "cancelled"
+export type WorkTaskPriority = "low" | "medium" | "high" | "urgent"
+export type WorkTaskComplexity = "low" | "medium" | "high"
+
+export interface TaskTypeResponse {
+  _id: string
+  name: string
+  description: string
+  active: boolean
+  sortOrder: number
+}
+
+export interface TaskCategoryResponse {
+  _id: string
+  taskTypeId: string
+  name: string
+  description: string
+  active: boolean
+  sortOrder: number
+  target: number
+  unit: string
+}
+
+export interface WorkTaskResponse {
+  _id: string
+  title: string
+  description: string
+  categoryId: string | TaskCategoryResponse
+  deadline: string
+  weight: number
+  complexity: WorkTaskComplexity
+  priority: WorkTaskPriority
+  estimatedHours: number
+  status: WorkTaskStatus
+  assignee: null
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TaskTaxonomyResponse {
+  types: TaskTypeResponse[]
+  categories: TaskCategoryResponse[]
+}
+
+export interface TaskListResponse {
+  data: WorkTaskResponse[]
+  total: number
+  page: number
+  limit: number
+  weekStart: string
+  weekEnd: string
+}
+
+export interface TaskReportCategory {
+  categoryId: string
+  name: string
+  target: number
+  unit: string
+  total: number
+  completed: number
+  progress: number
+  totalWeight: number
+  completedWeight: number
+}
+
+export interface TaskReportGroup {
+  typeId: string
+  name: string
+  rows: TaskReportCategory[]
+  totalWeight: number
+  completedWeight: number
+}
+
+export interface TaskWeeklyReportResponse {
+  weekStart: string
+  weekEnd: string
+  groups: TaskReportGroup[]
+}
+
 /** @interface */
 export interface SystemLogsOptionsResponse {
   data: {

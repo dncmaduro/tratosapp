@@ -2,6 +2,7 @@ import { Avatar, Box, Group, Menu, Stack, Text } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import {
   IconBrandTiktok,
+  IconChecklist,
   IconPower,
   IconSettings,
   IconUser
@@ -14,7 +15,8 @@ import {
   ADMIN_NAVS,
   hasAnyPermission,
   TIKTOKSHOP_APP_ACCESS_PERMISSIONS,
-  TIKTOKSHOP_NAVS
+  TIKTOKSHOP_NAVS,
+  TASK_APP_ACCESS_PERMISSIONS
 } from "../../constants/navs"
 import { resetSessionCache } from "../../utils/authSession"
 
@@ -31,6 +33,7 @@ export const UserMenu = () => {
   })
   const permissions = meData?.permissions ?? []
   const canOpenTikTokShop = hasAnyPermission(permissions, TIKTOKSHOP_APP_ACCESS_PERMISSIONS)
+  const canOpenTasks = hasAnyPermission(permissions, TASK_APP_ACCESS_PERMISSIONS)
   const canOpenAdmin = hasAnyPermission(permissions, ["admin.users.manage"])
   const firstTikTokShopPage = TIKTOKSHOP_NAVS.find((nav) =>
     hasAnyPermission(permissions, nav.permissions)
@@ -90,6 +93,15 @@ export const UserMenu = () => {
           hidden={!canOpenTikTokShop}
         >
           TikTok Shop
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<IconChecklist size={isMobile ? 14 : 18} />}
+          fz={isMobile ? "xs" : "sm"}
+          component={Link}
+          to="/tasks"
+          hidden={!canOpenTasks}
+        >
+          Quản lý công việc
         </Menu.Item>
         <Menu.Item
           leftSection={<IconSettings size={isMobile ? 14 : 18} />}
