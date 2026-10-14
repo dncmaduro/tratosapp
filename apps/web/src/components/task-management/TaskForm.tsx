@@ -76,18 +76,18 @@ export const TaskForm = ({
       <Stack gap="sm">
         <TextInput label="Tên công việc" withAsterisk {...form.getInputProps("title")} />
         <Textarea label="Mô tả" minRows={3} autosize {...form.getInputProps("description")} />
-        <Select label="Phân loại" withAsterisk data={categoryOptions(categories)} searchable {...form.getInputProps("categoryId")} />
+        <Select label="Phân loại" withAsterisk comboboxProps={{ withinPortal: false }} data={categoryOptions(categories)} searchable {...form.getInputProps("categoryId")} />
         <Group grow align="flex-start">
           <DateInput label="Hạn hoàn thành" valueFormat="DD/MM/YYYY" withAsterisk value={form.values.deadline ? new Date(`${form.values.deadline}T00:00:00`) : null} onChange={(value) => form.setFieldValue("deadline", value ? format(value, "yyyy-MM-dd") : "")} error={form.errors.deadline} />
           <NumberInput label="Trọng số (%)" min={0} decimalScale={2} {...form.getInputProps("weight")} />
         </Group>
         <Group grow align="flex-start">
-          <Select label="Độ ưu tiên" data={[{ value: "low", label: "Thấp" }, { value: "medium", label: "Trung bình" }, { value: "high", label: "Cao" }, { value: "urgent", label: "Khẩn" }]} {...form.getInputProps("priority")} />
-          <Select label="Độ phức tạp" data={[{ value: "low", label: "Thấp" }, { value: "medium", label: "Trung bình" }, { value: "high", label: "Cao" }]} {...form.getInputProps("complexity")} />
+          <Select label="Độ ưu tiên" comboboxProps={{ withinPortal: false }} data={[{ value: "low", label: "Thấp" }, { value: "medium", label: "Trung bình" }, { value: "high", label: "Cao" }, { value: "urgent", label: "Khẩn" }]} {...form.getInputProps("priority")} />
+          <Select label="Độ phức tạp" comboboxProps={{ withinPortal: false }} data={[{ value: "low", label: "Thấp" }, { value: "medium", label: "Trung bình" }, { value: "high", label: "Cao" }]} {...form.getInputProps("complexity")} />
         </Group>
         <Group grow align="flex-start">
           <NumberInput label="Số giờ dự kiến" min={0} decimalScale={2} {...form.getInputProps("estimatedHours")} />
-          <Select label="Trạng thái" data={statusOptions} {...form.getInputProps("status")} />
+          <Select label="Trạng thái" comboboxProps={{ withinPortal: false }} data={statusOptions} {...form.getInputProps("status")} />
         </Group>
         <Group justify="flex-end" mt="sm">
           {onCancel && <Button variant="default" onClick={onCancel}>Hủy</Button>}
