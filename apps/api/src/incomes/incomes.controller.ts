@@ -293,6 +293,7 @@ export class IncomesController {
         tinRefundAmount: total("tinRefundAmount"),
         adsTax: total("adsTax"),
         gmvAds: total("gmvAds"),
+        adsManual: total("adsManual"),
         affiliateCost: total("affiliateCost"),
         affiliateRefundAmount: total("affiliateRefundAmount"),
         totalRevenue: total("totalRevenue"),

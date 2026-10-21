@@ -2,6 +2,7 @@ export type AdsMetricsCalculationInput = {
   roiProtect: number
   tinRefundAmount: number
   gmvAds: number
+  adsManual: number
   affiliateCost: number
   totalRevenue: number
   refundCancelRate: number
@@ -11,12 +12,13 @@ export function calculateAdsMetrics({
   roiProtect,
   tinRefundAmount,
   gmvAds,
+  adsManual,
   affiliateCost,
   totalRevenue,
   refundCancelRate: rawRate
 }: AdsMetricsCalculationInput) {
   const refundRate = Math.min(Math.max(rawRate >= 1 ? rawRate / 100 : rawRate, 0), 1)
-  const actualAdsCost = Math.max(0, gmvAds - tinRefundAmount - roiProtect)
+  const actualAdsCost = Math.max(0, gmvAds - tinRefundAmount - roiProtect + adsManual)
   const affiliateRefundAmount = Math.max(0, actualAdsCost * refundRate)
   const totalCost = Math.max(0, actualAdsCost + affiliateCost)
   const adjustedRevenue = Math.max(0, totalRevenue * (1 - refundRate))

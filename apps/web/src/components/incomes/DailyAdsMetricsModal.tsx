@@ -11,7 +11,7 @@ import {
   Text
 } from "@mantine/core"
 import { DatePickerInput } from "@mantine/dates"
-import { IconDeviceFloppy, IconInfoCircle } from "@tabler/icons-react"
+import { IconCalendar, IconDeviceFloppy, IconInfoCircle } from "@tabler/icons-react"
 import { modals } from "@mantine/modals"
 import { useDailyAds } from "../../hooks/useDailyAds"
 import { CToast } from "../common/CToast"
@@ -21,6 +21,7 @@ type FormState = {
   roiProtect: number
   tinRefundAmount: number
   gmvAds: number
+  adsManual: number
   totalRevenue: number
   refundCancelRate: number
 }
@@ -29,6 +30,7 @@ const EMPTY_FORM: FormState = {
   roiProtect: 0,
   tinRefundAmount: 0,
   gmvAds: 0,
+  adsManual: 0,
   totalRevenue: 0,
   refundCancelRate: 0
 }
@@ -92,7 +94,7 @@ export function DailyAdsMetricsModal({
         : form.refundCancelRate
     const actualAdsCost = Math.max(
       0,
-      form.gmvAds - form.tinRefundAmount - form.roiProtect
+      form.gmvAds - form.tinRefundAmount - form.roiProtect + form.adsManual
     )
     const affiliateRefundAmount = Math.max(0, actualAdsCost * normalizedRate)
     const totalCost = Math.max(0, actualAdsCost + initialAffiliateCost)
@@ -138,6 +140,7 @@ export function DailyAdsMetricsModal({
         roiProtect: form.roiProtect,
         tinRefundAmount: form.tinRefundAmount,
         gmvAds: form.gmvAds,
+        adsManual: form.adsManual,
         totalRevenue: form.totalRevenue,
         refundCancelRate: form.refundCancelRate
       })
@@ -188,6 +191,9 @@ export function DailyAdsMetricsModal({
               valueFormat="DD/MM/YYYY"
               clearable={false}
               maxDate={new Date()}
+              pointer
+              rightSection={<IconCalendar size={16} />}
+              popoverProps={{ zIndex: 700 }}
               w={180}
               styles={{
                 label: fieldLabelStyles,
@@ -234,6 +240,17 @@ export function DailyAdsMetricsModal({
               label="GMV ADS"
               value={form.gmvAds}
               onChange={(value) => updateField("gmvAds", value)}
+              thousandSeparator="."
+              min={0}
+              styles={{
+                label: fieldLabelStyles,
+                input: fieldInputStyles
+              }}
+            />
+            <NumberInput
+              label="Ads manual"
+              value={form.adsManual}
+              onChange={(value) => updateField("adsManual", value)}
               thousandSeparator="."
               min={0}
               styles={{
@@ -294,6 +311,7 @@ export function DailyAdsMetricsModal({
             roiProtect: form.roiProtect,
             tinRefundAmount: form.tinRefundAmount,
             gmvAds: form.gmvAds,
+            adsManual: form.adsManual,
             affiliateCost: initialAffiliateCost,
             affiliateRefundAmount: preview.affiliateRefundAmount,
             totalRevenue: form.totalRevenue,

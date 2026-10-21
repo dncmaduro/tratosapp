@@ -55,6 +55,7 @@ const buildInitialData = (
   roiProtect: row.roiProtect,
   tinRefundAmount: row.tinRefundAmount,
   gmvAds: row.gmvAds,
+  adsManual: row.adsManual ?? 0,
   totalRevenue: row.totalRevenue,
   refundCancelRate: row.refundCancelRate
 })
@@ -217,6 +218,14 @@ export function DailyAdsMetricsManager() {
         size: 150,
         cell: ({ row }) => (
           <Text size="sm">{formatCurrency(row.original.gmvAds)}</Text>
+        )
+      },
+      {
+        accessorKey: "adsManual",
+        header: "Ads manual",
+        size: 150,
+        cell: ({ row }) => (
+          <Text size="sm">{formatCurrency(row.original.adsManual)}</Text>
         )
       },
       {

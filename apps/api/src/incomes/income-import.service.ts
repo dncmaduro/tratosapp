@@ -320,6 +320,7 @@ export class IncomeImportService {
         roiProtect: Number(existing?.roiProtect ?? 0),
         tinRefundAmount: Number(existing?.tinRefundAmount ?? 0),
         gmvAds: Number(existing?.gmvAds ?? 0),
+        adsManual: Number(existing?.adsManual ?? 0),
         affiliateCost,
         totalRevenue: Number(existing?.totalRevenue ?? 0),
         refundCancelRate: Number(existing?.refundCancelRate ?? 0)
@@ -333,6 +334,7 @@ export class IncomeImportService {
             roiProtect: Number(existing?.roiProtect ?? 0),
             tinRefundAmount: Number(existing?.tinRefundAmount ?? 0),
             gmvAds: Number(existing?.gmvAds ?? 0),
+            adsManual: Number(existing?.adsManual ?? 0),
             ...calculated
           }
         },

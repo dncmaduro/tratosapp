@@ -9,7 +9,7 @@ import { DailyAdsMetrics, DailyAdsMetricsDocument } from "./daily-ads-metrics.sc
 import { calculateAdsMetrics } from "./ads-metrics"
 import { inputBusinessDay, inputId, inputNonNegativeNumber, inputObject } from "../common/input-validation"
 
-const inputFields = ["roiProtect", "tinRefundAmount", "gmvAds", "totalRevenue", "refundCancelRate"] as const
+const inputFields = ["roiProtect", "tinRefundAmount", "gmvAds", "adsManual", "totalRevenue", "refundCancelRate"] as const
 
 type AdsMetricsInput = Record<(typeof inputFields)[number], number> & {
   date: Date
@@ -22,7 +22,11 @@ function adsMetricsInput(value: unknown): AdsMetricsInput {
     date: inputBusinessDay(body.date),
     channelId: inputId(body.channelId)
   } as AdsMetricsInput
-  for (const field of inputFields) result[field] = inputNonNegativeNumber(body[field], field)
+  for (const field of inputFields) {
+    result[field] = field === "adsManual" && body[field] === undefined
+      ? 0
+      : inputNonNegativeNumber(body[field], field)
+  }
   return result
 }
 
@@ -33,7 +37,7 @@ export class AdsController {
   @Post("metrics") @RequirePermissions("api.dailyads.upsert-daily-ads-metrics")
   async upsert(@Body() body: unknown) {
     const input = adsMetricsInput(body)
-    const { roiProtect, tinRefundAmount, gmvAds, totalRevenue, refundCancelRate, date, channelId } = input
+    const { roiProtect, tinRefundAmount, gmvAds, adsManual, totalRevenue, refundCancelRate, date, channelId } = input
     const channel = new Types.ObjectId(channelId)
     const existing = await this.metrics.findOne({ channel, date }).lean()
     const affiliateCost = Number(existing?.affiliateCost ?? 0)
@@ -41,11 +45,12 @@ export class AdsController {
       { channel, date },
       { $set: {
         channel, date, roiProtect,
-        tinRefundAmount, gmvAds,
+        tinRefundAmount, gmvAds, adsManual,
         ...calculateAdsMetrics({
           roiProtect,
           tinRefundAmount,
           gmvAds,
+          adsManual,
           affiliateCost,
           totalRevenue,
           refundCancelRate

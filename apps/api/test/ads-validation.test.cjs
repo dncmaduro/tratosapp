@@ -7,7 +7,7 @@ const channelId = "507f1f77bcf86cd799439011"
 const status = code => error => error.getStatus?.() === code
 const validInput = () => ({
   date: "2026-09-26", channelId, roiProtect: 100, tinRefundAmount: 200,
-  gmvAds: 1000, totalRevenue: 2000, refundCancelRate: 25
+  gmvAds: 1000, adsManual: 0, totalRevenue: 2000, refundCancelRate: 25
 })
 
 function setup(existing = null) {
@@ -29,6 +29,7 @@ test("ads metrics accepts the manual inputs and preserves the approved formula",
   assert.equal(filter.date.toISOString(), "2026-09-25T17:00:00.000Z")
   assert.deepEqual(options, { upsert: true, new: true })
   assert.equal(update.$set.refundCancelRate, 25)
+  assert.equal(update.$set.adsManual, 0)
   assert.equal(update.$set.actualAdsCost, 700)
   assert.equal(update.$set.affiliateRefundAmount, 175)
   assert.equal(update.$set.affiliateCost, 0)
@@ -38,6 +39,16 @@ test("ads metrics accepts the manual inputs and preserves the approved formula",
   assert.equal(update.$set.adsRatioOnBeforeDiscountRevenue, 35)
   assert.equal(update.$set.totalCostRatioOnBeforeDiscountRevenue, 35)
   assert.equal(update.$set.costAfterRefundRatioOnBeforeDiscountRevenue, 46.666666666666664)
+})
+
+test("ads manual is added to the calculated actual ads cost", async () => {
+  const f = setup()
+  await f.controller.upsert({ ...validInput(), adsManual: 50 })
+  const update = f.calls.upsert[0][1].$set
+  assert.equal(update.adsManual, 50)
+  assert.equal(update.actualAdsCost, 750)
+  assert.equal(update.affiliateRefundAmount, 187.5)
+  assert.equal(update.totalCost, 750)
 })
 
 test("manual ads updates preserve affiliate cost imported from the affiliate file", async () => {

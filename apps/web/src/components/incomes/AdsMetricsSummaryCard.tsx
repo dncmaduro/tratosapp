@@ -15,6 +15,7 @@ type AdsMetricsSummary = {
     roiProtect: number
     tinRefundAmount: number
     gmvAds: number
+    adsManual: number
     affiliateCost: number
     affiliateRefundAmount: number
     totalRevenue: number
@@ -50,6 +51,10 @@ export function AdsMetricsSummaryCard({
     {
       label: "GMV từ ads",
       value: formatCurrency(data.rawMetrics.gmvAds)
+    },
+    {
+      label: "Ads manual",
+      value: formatCurrency(data.rawMetrics.adsManual)
     },
     {
       label: "Chi phí cộng tác viên",

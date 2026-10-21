@@ -468,6 +468,7 @@ export function MonthlyRevenueDashboard({
                     roiProtect: adsData?.rawMetrics?.roiProtect ?? 0,
                     tinRefundAmount: adsData?.rawMetrics?.tinRefundAmount ?? 0,
                     gmvAds: adsData?.rawMetrics?.gmvAds ?? 0,
+                    adsManual: adsData?.rawMetrics?.adsManual ?? 0,
                     affiliateCost: adsData?.rawMetrics?.affiliateCost ?? 0,
                     affiliateRefundAmount:
                       adsData?.rawMetrics?.affiliateRefundAmount ?? 0,

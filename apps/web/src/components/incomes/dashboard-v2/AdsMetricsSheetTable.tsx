@@ -74,71 +74,78 @@ export function AdsMetricsSheetTable({
         format: "currency"
       },
       {
-        key: "actualAdsCost",
+        key: "adsManual",
         sheetColumn: "G",
+        label: "Ads manual",
+        value: rawMetrics?.adsManual ?? 0,
+        format: "currency"
+      },
+      {
+        key: "actualAdsCost",
+        sheetColumn: "H",
         label: "Chi phí ads thực tế",
         value: data?.actualAdsCost ?? 0,
         format: "currency"
       },
       {
         key: "affiliateCost",
-        sheetColumn: "H",
+        sheetColumn: "I",
         label: "Chi phí affiliate",
         value: rawMetrics?.affiliateCost ?? 0,
         format: "currency"
       },
       {
         key: "affiliateRefundAmount",
-        sheetColumn: "I",
+        sheetColumn: "J",
         label: "AFF - Hoàn huỷ",
         value: rawMetrics?.affiliateRefundAmount ?? 0,
         format: "currency"
       },
       {
         key: "totalCost",
-        sheetColumn: "J",
+        sheetColumn: "K",
         label: "Chi phí ads thực tế + aff",
         value: data?.totalCost ?? 0,
         format: "currency"
       },
       {
         key: "incomeBeforeDiscount",
-        sheetColumn: "K",
+        sheetColumn: "L",
         label: "Doanh thu tổng",
         value: rawMetrics?.incomeBeforeDiscount ?? 0,
         format: "currency"
       },
       {
         key: "adsRatio",
-        sheetColumn: "L",
+        sheetColumn: "M",
         label: "Chi phí ads thực tế / DS",
         value: data?.ratios?.adsRatioOnBeforeDiscountRevenue ?? 0,
         format: "percent"
       },
       {
         key: "totalCostRatio",
-        sheetColumn: "M",
+        sheetColumn: "N",
         label: "Chi phí ads thực tế + aff / DS",
         value: data?.ratios?.totalCostRatioOnBeforeDiscountRevenue ?? 0,
         format: "percent"
       },
       {
         key: "affiliateRatio",
-        sheetColumn: "N",
+        sheetColumn: "O",
         label: "Aff / DS",
         value: data?.ratios?.affiliateRatioOnBeforeDiscountRevenue ?? 0,
         format: "percent"
       },
       {
         key: "costAfterRefund",
-        sheetColumn: "O",
+        sheetColumn: "P",
         label: "Chi phí đã trừ hoàn huỷ",
         value: data?.costAfterRefund ?? 0,
         format: "currency"
       },
       {
         key: "costAfterRefundRatio",
-        sheetColumn: "P",
+        sheetColumn: "Q",
         label: "Chi phí đã trừ hoàn huỷ / DS",
         value: data?.ratios?.costAfterRefundRatioOnBeforeDiscountRevenue ?? 0,
         format: "percent"
@@ -163,8 +170,8 @@ export function AdsMetricsSheetTable({
               Bảng chỉ số theo mẫu sheet vận hành
             </h2>
             <p className="mt-2 text-sm text-slate-500">
-              Tổng hợp tháng {monthLabel}. Chế độ thu gọn dùng các cột G, J, L,
-              M, P như file mẫu.
+              Tổng hợp tháng {monthLabel}. Chế độ thu gọn dùng các cột H, K, M,
+              N, Q như file mẫu.
             </p>
           </div>
 

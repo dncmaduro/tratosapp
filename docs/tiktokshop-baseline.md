@@ -78,6 +78,7 @@ Trang chi tiết đơn: `/tiktokshop/incomes/$incomeId`; hiển thị khách hà
 - `roiProtect`
 - `tinRefundAmount`
 - `gmvAds`
+- `adsManual`
 - `totalRevenue`
 - `refundCancelRate`
 

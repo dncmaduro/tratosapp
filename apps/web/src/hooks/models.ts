@@ -1713,6 +1713,7 @@ export interface GetRangeStatsResponse {
         tinRefundAmount: number
         adsTax: number
         gmvAds: number
+        adsManual: number
         affiliateCost: number
         affiliateRefundAmount: number
         totalRevenue: number
@@ -2200,6 +2201,7 @@ export interface GetAdsCostSplitByMonthResponse {
     tinRefundAmount: number
     adsTax: number
     gmvAds: number
+    adsManual: number
     affiliateCost: number
     affiliateRefundAmount: number
     totalRevenue: number
@@ -2221,6 +2223,7 @@ export interface UpsertDailyAdsMetricsRequest {
   roiProtect: number
   tinRefundAmount: number
   gmvAds: number
+  adsManual: number
   totalRevenue: number
   refundCancelRate: number
 }
@@ -2236,6 +2239,7 @@ export interface DailyAdsMetricsResponse {
   tinRefundAmount: number
   adsTax: number
   gmvAds: number
+  adsManual: number
   affiliateCost: number
   affiliateRefundAmount: number
   totalRevenue: number
